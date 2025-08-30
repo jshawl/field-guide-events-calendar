@@ -1,10 +1,21 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, it, expect, vi } from "vitest";
 import {
   formatEvents,
   get,
   getCategories,
+  renderCategories,
+  renderCalendar,
   addEvent,
+  getEvents,
 } from "../../assets/js/calendar.js";
+
+vi.stubGlobal("neoncrm_calendar", {
+  rest_url: "/fake-url",
+  org_id: "abcd",
+});
 
 describe("get", () => {
   it("gets a value from a list of key value pairs", () => {
@@ -57,6 +68,22 @@ describe("getCategories", () => {
   });
 });
 
+describe("renderCategories", () => {
+  it("renders category buttons", () => {
+    const categoriesEl = document.createElement("div");
+    const opts = {
+      onChange: vi.fn(),
+    };
+    renderCategories(categoriesEl, ["Workshop", "Seminar"], opts);
+    expect(categoriesEl.children.length).toBe(3); // Including "All" button
+    expect(categoriesEl.children[0].textContent).toBe("All");
+    expect(categoriesEl.children[1].textContent).toBe("Workshop");
+    expect(categoriesEl.children[2].textContent).toBe("Seminar");
+    categoriesEl.children[1].click();
+    expect(opts.onChange).toHaveBeenCalledWith("Workshop");
+  });
+});
+
 describe("addEvent", () => {
   it("adds an event to the calendar", () => {
     const calendar = {
@@ -80,5 +107,63 @@ describe("addEvent", () => {
       endDate: "2025-08-31",
       allDay: true,
     });
+  });
+});
+
+describe("renderCalendar", () => {
+  it("initializes the calendar", () => {
+    vi.stubGlobal("open", vi.fn());
+    let onEventClick;
+    vi.stubGlobal("FullCalendar", {
+      Calendar: class {
+        constructor(_, opts) {
+          onEventClick = opts.eventClick;
+        }
+        render() {}
+      },
+    });
+    const calendarEl = document.createElement("div");
+    renderCalendar(calendarEl);
+    onEventClick({ event: { id: "1" } });
+    expect(window.open).toHaveBeenCalledWith(
+      "https://abcd.app.neoncrm.com/np/clients/abcd/eventRegistration.jsp?event=1",
+      "_blank"
+    );
+  });
+});
+
+describe("getEvents", () => {
+  it("fetches and formats events", async () => {
+    const mockResponse = {
+      listEvents: {
+        searchResults: {
+          nameValuePairs: [
+            {
+              nameValuePair: [{ name: "Event Name", value: "Sample Event" }],
+            },
+          ],
+        },
+      },
+    };
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockResponse),
+      })
+    );
+    const events = await getEvents();
+    expect(events.length).toBe(1);
+    expect(events[0].title).toBe("Sample Event");
+  });
+
+  it("handles fetch errors gracefully", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({}),
+      })
+    );
+    console.error = vi.fn();
+    const events = await getEvents();
+    expect(events).toEqual([]);
+    expect(console.error).toHaveBeenCalled();
   });
 });

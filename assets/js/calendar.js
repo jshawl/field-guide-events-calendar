@@ -24,7 +24,7 @@ export const getCategories = (events) =>
     }, {})
   ).sort((a, b) => a.localeCompare(b));
 
-const renderCalendar = (calendarEl) => {
+export const renderCalendar = (calendarEl) => {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth",
     eventClassNames: ["neoncrm-calendar-event"],
@@ -41,7 +41,7 @@ const renderCalendar = (calendarEl) => {
   return calendar;
 };
 
-const getEvents = async () => {
+export const getEvents = async () => {
   const eventsResponse = await fetch(neoncrm_calendar.rest_url);
   const eventsData = await eventsResponse.json();
   if (!eventsData.listEvents?.searchResults?.nameValuePairs) {
@@ -60,7 +60,7 @@ export const addEvent = (calendar, event) => {
 
 const renderCategory = (container, category, opts) => {
   const button = document.createElement("button");
-  button.innerText = category;
+  button.innerHTML = category;
   button.addEventListener("click", () => {
     opts.onChange(category);
   });
@@ -68,7 +68,7 @@ const renderCategory = (container, category, opts) => {
   return button;
 };
 
-const renderCategories = (categoriesEl, categories, opts) => {
+export const renderCategories = (categoriesEl, categories, opts) => {
   categoriesEl.innerHTML = "";
   const button = renderCategory(categoriesEl, "All", opts);
   button.classList.add("active");
@@ -83,7 +83,7 @@ const renderCategories = (categoriesEl, categories, opts) => {
 };
 
 export const main = async () => {
-  const calendarEl = document.getElementById("calendar");
+  const calendarEl = document.querySelector(".neoncrm-calendar #calendar");
   const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
   const calendar = renderCalendar(calendarEl);
   const events = await getEvents();
@@ -95,7 +95,7 @@ export const main = async () => {
     onChange: (category) => {
       calendarEvents.map((calendarEvent) => calendarEvent.remove());
       calendarEvents = events
-        .filter((event) => category === "All" || event.category === category)
+        .filter((event) => ["All", event.category].includes(category))
         .map((event) => addEvent(calendar, event));
     },
   });

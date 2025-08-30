@@ -19,12 +19,22 @@ function neoncrm_calendar_register_assets() {
 		file_exists( $css_file ) ? filemtime( $css_file ) : null
 	);
 
+	// Register FullCalendar first (no deps), load in footer.
+	wp_register_script(
+		'neoncrm-calendar-fullcalendar',
+		'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js',
+		array(),                         // deps
+		'6.1.19',                        // version
+		true                             // in_footer
+	);
+
+	// Register plugin script and declare it depends on FullCalendar so FullCalendar loads first.
 	wp_register_script(
 		'neoncrm-calendar',
 		$plugin_url . 'assets/js/script.js',
-		array( 'jquery' ),
-		file_exists( $js_file ) ? filemtime( $js_file ) : null,
-		true
+		array( 'neoncrm-calendar-fullcalendar' ),   // deps
+		file_exists( $js_file ) ? filemtime( $js_file ) : null, // version
+		true                                         // in_footer
 	);
 }
 add_action( 'wp_enqueue_scripts', 'neoncrm_calendar_register_assets' );
@@ -38,6 +48,7 @@ add_action( 'wp_enqueue_scripts', function() {
 			'neoncrm-calendar',
 			'neoncrm_calendar',
 			array(
+                'org_id' => get_option( 'neoncrm_calendar_options' )['neoncrm_org_id'] ?? '',
 				'rest_url' => esc_url_raw( rest_url( 'neoncrm-calendar/v1/events' ) ),
 			)
 		);
@@ -50,6 +61,7 @@ add_action( 'wp_enqueue_scripts', function() {
 function neoncrm_calendar_shortcode( $atts ) {
 	wp_enqueue_style( 'neoncrm-calendar' );
 	wp_enqueue_script( 'neoncrm-calendar' );
-	return '<div class="neoncrm-calendar">Calendar will be displayed here</div>';
+    wp_enqueue_script( 'neoncrm-calendar-fullcalendar' );
+	return '<div class="neoncrm-calendar"><div class="categories"><div class="active">All</div></div><div id="calendar"></div></div>';
 }
 add_shortcode( 'neoncrm_calendar', 'neoncrm_calendar_shortcode' );

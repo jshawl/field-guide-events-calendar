@@ -3,3 +3,42 @@
   padding: 10px;
   background-color: #f9f9f9;
 }
+
+.neoncrm-calendar .categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.neoncrm-calendar .categories div {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: #75a548;
+}
+.neoncrm-calendar .categories div:hover {
+  background: #eee;
+}
+.neoncrm-calendar .categories div.active {
+  background: #75a548;
+  color: #fff;
+}
+.neoncrm-calendar-event,
+.neoncrm-calendar-event:hover {
+  cursor: pointer;
+  white-space: normal;
+  display: block;
+  background: #3788d8;
+  color: #fff;
+  padding: 0.25rem;
+  line-height: 1;
+}
+.neoncrm-calendar-event > div {
+  display: inline-block;
+}
+.neoncrm-calendar-event .fc-event-title {
+  font-weight: normal;
+}
+.neoncrm-calendar-event .fc-daygrid-event-dot {
+  display: none;
+}

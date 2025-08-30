@@ -62,6 +62,6 @@ function neoncrm_calendar_shortcode( $atts ) {
 	wp_enqueue_style( 'neoncrm-calendar' );
 	wp_enqueue_script( 'neoncrm-calendar' );
     wp_enqueue_script( 'neoncrm-calendar-fullcalendar' );
-	return '<div class="neoncrm-calendar"><div class="categories"><div class="active">All</div></div><div id="calendar"></div></div>';
+	return '<div class="neoncrm-calendar"><div class="categories"><button class="active">All</button></div><div id="calendar"></div></div>';
 }
 add_shortcode( 'neoncrm_calendar', 'neoncrm_calendar_shortcode' );

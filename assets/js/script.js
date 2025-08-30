@@ -30,11 +30,11 @@ console.log("loaded calendar", neoncrm_calendar);
     eventsData.listEvents.searchResults.nameValuePairs
   );
   const categories = getCategories(events);
-  const categoriesEl = document.querySelector(".categories");
+  const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
   categories.forEach((cat) => {
-    const div = document.createElement("div");
-    div.innerText = cat;
-    categoriesEl.appendChild(div);
+    const button = document.createElement("button");
+    button.innerText = cat;
+    categoriesEl.appendChild(button);
   });
   var calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth",

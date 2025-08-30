@@ -2,24 +2,27 @@
   border: 1px solid #ccc;
   padding: 10px;
   background-color: #f9f9f9;
+  line-height: 1;
 }
 
 .neoncrm-calendar .categories {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
-.neoncrm-calendar .categories div {
-  padding: 0.5rem 1rem;
+.neoncrm-calendar .categories button {
+  padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
   color: #75a548;
+  border: none;
+  background: none;
 }
-.neoncrm-calendar .categories div:hover {
+.neoncrm-calendar .categories button:hover {
   background: #eee;
 }
-.neoncrm-calendar .categories div.active {
+.neoncrm-calendar .categories button.active {
   background: #75a548;
   color: #fff;
 }
@@ -31,7 +34,6 @@
   background: #3788d8;
   color: #fff;
   padding: 0.25rem;
-  line-height: 1;
 }
 .neoncrm-calendar-event > div {
   display: inline-block;

@@ -1,4 +1,3 @@
-console.log("loaded calendar", neoncrm_calendar);
 (async function () {
   const formatEvents = (events) => events.map(formatEvent);
   const formatEvent = (unformattedEvent) => {
@@ -24,18 +23,6 @@ console.log("loaded calendar", neoncrm_calendar);
     ).sort((a, b) => a.localeCompare(b));
 
   var calendarEl = document.getElementById("calendar");
-  const eventsResponse = await fetch(neoncrm_calendar.rest_url);
-  const eventsData = await eventsResponse.json();
-  const events = formatEvents(
-    eventsData.listEvents.searchResults.nameValuePairs
-  );
-  const categories = getCategories(events);
-  const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
-  categories.forEach((cat) => {
-    const button = document.createElement("button");
-    button.innerText = cat;
-    categoriesEl.appendChild(button);
-  });
   var calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth",
     eventClassNames: ["neoncrm-calendar-event"],
@@ -48,8 +35,21 @@ console.log("loaded calendar", neoncrm_calendar);
       window.open(url, "_blank");
     },
   });
-
   calendar.render();
+  const eventsResponse = await fetch(neoncrm_calendar.rest_url);
+  document.querySelector(".neoncrm-calendar .loading").remove();
+  const eventsData = await eventsResponse.json();
+  const events = formatEvents(
+    eventsData.listEvents.searchResults.nameValuePairs
+  );
+  const categories = getCategories(events);
+  const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
+  categories.forEach((cat) => {
+    const button = document.createElement("button");
+    button.innerText = cat;
+    categoriesEl.appendChild(button);
+  });
+
   let calendarEvents = events.map((event) =>
     calendar.addEvent({
       ...event,

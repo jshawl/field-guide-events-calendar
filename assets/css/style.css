@@ -1,6 +1,7 @@
 .neoncrm-calendar {
   padding: 10px;
   line-height: 1;
+  position: relative;
 }
 
 .neoncrm-calendar .categories {
@@ -9,6 +10,7 @@
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
+
 .neoncrm-calendar .categories button {
   padding: 0.5rem;
   border-radius: 0.5rem;
@@ -17,13 +19,16 @@
   border: none;
   background: none;
 }
+
 .neoncrm-calendar .categories button:hover {
   background: #eee;
 }
+
 .neoncrm-calendar .categories button.active {
   background: #75a548;
   color: #fff;
 }
+
 .neoncrm-calendar-event,
 .neoncrm-calendar-event:hover {
   cursor: pointer;
@@ -33,12 +38,39 @@
   color: #fff;
   padding: 0.25rem;
 }
+
 .neoncrm-calendar-event > div {
   display: inline-block;
 }
+
 .neoncrm-calendar-event .fc-event-title {
   font-weight: normal;
 }
+
 .neoncrm-calendar-event .fc-daygrid-event-dot {
   display: none;
+}
+
+.neoncrm-calendar .fc .fc-button-primary {
+  background: #eee;
+  color: #000;
+  border: none;
+  outline: none;
+}
+.neoncrm-calendar .fc .fc-button-primary:hover,
+.neoncrm-calendar .fc .fc-button-primary:active {
+  background: #ddd;
+  color: #000;
+}
+
+.neoncrm-calendar .loading {
+  height: 128px;
+  width: 128px;
+  background-image: url(../img/loader-new.gif);
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
 }

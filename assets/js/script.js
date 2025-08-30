@@ -1,1 +1,1 @@
-console.log("loaded calendar");
+console.log("loaded calendar", neoncrm_calendar);

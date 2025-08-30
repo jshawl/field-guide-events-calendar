@@ -1,5 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { formatEvents, get, getCategories } from "../../assets/js/calendar.js";
+import { describe, it, expect, vi } from "vitest";
+import {
+  formatEvents,
+  get,
+  getCategories,
+  addEvent,
+} from "../../assets/js/calendar.js";
 
 describe("get", () => {
   it("gets a value from a list of key value pairs", () => {
@@ -49,5 +54,31 @@ describe("getCategories", () => {
       {},
     ];
     expect(getCategories(events)).toEqual(["Seminar", "Workshop"]);
+  });
+});
+
+describe("addEvent", () => {
+  it("adds an event to the calendar", () => {
+    const calendar = {
+      addEvent: vi.fn(),
+    };
+    addEvent(calendar, {
+      startDate: "2025-08-30",
+      endDate: "2025-08-30",
+    });
+    expect(calendar.addEvent).toHaveBeenCalledWith({
+      startDate: "2025-08-30",
+      endDate: "2025-08-30",
+      allDay: false,
+    });
+    addEvent(calendar, {
+      startDate: "2025-08-30",
+      endDate: "2025-08-31",
+    });
+    expect(calendar.addEvent).toHaveBeenCalledWith({
+      startDate: "2025-08-30",
+      endDate: "2025-08-31",
+      allDay: true,
+    });
   });
 });

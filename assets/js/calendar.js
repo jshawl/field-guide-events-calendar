@@ -41,47 +41,62 @@ const renderCalendar = (calendarEl) => {
   return calendar;
 };
 
-export const main = async () => {
-  var calendarEl = document.getElementById("calendar");
-  const calendar = renderCalendar(calendarEl);
+const getEvents = async () => {
   const eventsResponse = await fetch(neoncrm_calendar.rest_url);
-  document.querySelector(".neoncrm-calendar .loading").remove();
   const eventsData = await eventsResponse.json();
   if (!eventsData.listEvents?.searchResults?.nameValuePairs) {
     console.error("neoncrm-calendar: error fetching events", eventsData);
-    return;
+    return [];
   }
-  const events = formatEvents(
-    eventsData.listEvents.searchResults.nameValuePairs
-  );
-  const categories = getCategories(events);
-  const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
-  categories.forEach((cat) => {
-    const button = document.createElement("button");
-    button.innerText = cat;
-    categoriesEl.appendChild(button);
-  });
+  return formatEvents(eventsData.listEvents.searchResults.nameValuePairs);
+};
 
-  let calendarEvents = events.map((event) =>
-    calendar.addEvent({
-      ...event,
-      allDay: event.startDate !== event.endDate,
-    })
-  );
+export const addEvent = (calendar, event) => {
+  return calendar.addEvent({
+    ...event,
+    allDay: event.startDate !== event.endDate,
+  });
+};
+
+const renderCategory = (container, category, opts) => {
+  const button = document.createElement("button");
+  button.innerText = category;
+  button.addEventListener("click", () => {
+    opts.onChange(category);
+  });
+  container.appendChild(button);
+  return button;
+};
+
+const renderCategories = (categoriesEl, categories, opts) => {
+  categoriesEl.innerHTML = "";
+  const button = renderCategory(categoriesEl, "All", opts);
+  button.classList.add("active");
+  categories.map((category) => {
+    renderCategory(categoriesEl, category, opts);
+  });
   categoriesEl.addEventListener("click", (e) => {
+    if (e.target.tagName !== "BUTTON") return;
     categoriesEl.querySelector(".active")?.classList.remove("active");
     e.target.classList.add("active");
-    calendarEvents.map((calendarEvent) => calendarEvent.remove());
-    calendarEvents = events
-      .filter(
-        (event) =>
-          e.target.innerText === "All" || event.category === e.target.innerText
-      )
-      .map((event) =>
-        calendar.addEvent({
-          ...event,
-          allDay: event.startDate !== event.endDate,
-        })
-      );
+  });
+};
+
+export const main = async () => {
+  const calendarEl = document.getElementById("calendar");
+  const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
+  const calendar = renderCalendar(calendarEl);
+  const events = await getEvents();
+  document.querySelector(".neoncrm-calendar .loading").remove();
+
+  let calendarEvents = events.map((event) => addEvent(calendar, event));
+
+  renderCategories(categoriesEl, getCategories(events), {
+    onChange: (category) => {
+      calendarEvents.map((calendarEvent) => calendarEvent.remove());
+      calendarEvents = events
+        .filter((event) => category === "All" || event.category === category)
+        .map((event) => addEvent(calendar, event));
+    },
   });
 };

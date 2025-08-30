@@ -33,9 +33,8 @@ function get_from_cache($cache_key, $url) {
 }
 
 function neoncrm_calendar_rest_get_events( WP_REST_Request $request ) {
-	$opts    = get_option( 'neoncrm_calendar_options', array() );
-	$api_key = isset( $opts['neoncrm_api_key'] ) ? $opts['neoncrm_api_key'] : '';
-    $org_id  = isset( $opts['neoncrm_org_id'] ) ? $opts['neoncrm_org_id'] : '';
+	$api_key = neoncrm_calendar_get_option( 'neoncrm_api_key', '' );
+	$org_id  = neoncrm_calendar_get_option( 'neoncrm_org_id', '' );
 	if ( empty( $api_key ) ) {
 		return new WP_Error( 'no_api_key', 'API key not configured', array( 'status' => 500 ) );
 	}

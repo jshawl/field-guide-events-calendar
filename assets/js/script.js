@@ -1,3 +1,5 @@
+import { fn } from "./fn.js";
+fn();
 (async function () {
   const formatEvents = (events) => events.map(formatEvent);
   const formatEvent = (unformattedEvent) => {
@@ -39,6 +41,10 @@
   const eventsResponse = await fetch(neoncrm_calendar.rest_url);
   document.querySelector(".neoncrm-calendar .loading").remove();
   const eventsData = await eventsResponse.json();
+  if (!eventsData.listEvents?.searchResults?.nameValuePairs) {
+    console.error("neoncrm-calendar: error fetching events", eventsData);
+    return;
+  }
   const events = formatEvents(
     eventsData.listEvents.searchResults.nameValuePairs
   );

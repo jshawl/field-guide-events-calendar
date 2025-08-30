@@ -19,6 +19,7 @@ if ( ! defined( 'NEONCRM_CALENDAR_URL' ) ) {
 }
 
 // Load core components.
+require_once NEONCRM_CALENDAR_DIR . 'includes/options.php';
 require_once NEONCRM_CALENDAR_DIR . 'includes/enqueue.php';
 require_once NEONCRM_CALENDAR_DIR . 'includes/admin.php';
 require_once NEONCRM_CALENDAR_DIR . 'includes/rest.php';

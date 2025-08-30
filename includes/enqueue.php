@@ -27,6 +27,15 @@ function neoncrm_calendar_register_assets() {
 		'6.1.19',                        // version
 		true                             // in_footer
 	);
+	
+	$data = array(
+		'org_id'   => neoncrm_calendar_get_option( 'neoncrm_org_id', '' ),
+		'rest_url' => esc_url_raw( rest_url( 'neoncrm-calendar/v1/events' ) ),
+	);
+	// Ensure the module can read the data via the global window object.
+	$js = 'window.neoncrm_calendar = ' . wp_json_encode( $data ) . ';';
+	wp_add_inline_script( 'neoncrm-calendar-fullcalendar', $js, 'after' );
+
 
 	// Register plugin script and declare it depends on FullCalendar so FullCalendar loads first.
 	wp_register_script(
@@ -39,29 +48,40 @@ function neoncrm_calendar_register_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'neoncrm_calendar_register_assets' );
 
-/**
- * Localize the script after registration so REST URL is available to the frontend.
- */
-add_action( 'wp_enqueue_scripts', function() {
-	if ( wp_script_is( 'neoncrm-calendar', 'registered' ) ) {
-		wp_localize_script(
-			'neoncrm-calendar',
-			'neoncrm_calendar',
-			array(
-                'org_id' => get_option( 'neoncrm_calendar_options' )['neoncrm_org_id'] ?? '',
-				'rest_url' => esc_url_raw( rest_url( 'neoncrm-calendar/v1/events' ) ),
-			)
-		);
+function neoncrm_calendar_render_template( $template_name ) {
+	$template_path = NEONCRM_CALENDAR_DIR . $template_name;
+	if ( file_exists( $template_path ) ) {
+		ob_start();
+		include $template_path;
+		return ob_get_clean();
 	}
-}, 11 );
+}
 
 /**
  * Shortcode that enqueues the assets and prints a container for the calendar.
  */
 function neoncrm_calendar_shortcode( $atts ) {
+	$api_key = neoncrm_calendar_get_option( 'neoncrm_api_key', '' );
+	$org_id  = neoncrm_calendar_get_option( 'neoncrm_org_id', '' );
+	if( empty( $api_key ) || empty( $org_id ) ) {
+		return neoncrm_calendar_render_template('templates/configuration-error.php');
+	}
 	wp_enqueue_style( 'neoncrm-calendar' );
 	wp_enqueue_script( 'neoncrm-calendar' );
-    wp_enqueue_script( 'neoncrm-calendar-fullcalendar' );
-	return '<div class="neoncrm-calendar"><div class="loading"></div><div class="categories"><button class="active">All</button></div><div id="calendar"></div></div>';
+
+	wp_enqueue_script( 'neoncrm-calendar-fullcalendar' );	
+
+	return neoncrm_calendar_render_template('templates/calendar.php');
 }
 add_shortcode( 'neoncrm_calendar', 'neoncrm_calendar_shortcode' );
+
+function add_type_attribute($tag, $handle, $src) {
+    // if not your script, do nothing and return original $tag
+    if ( 'neoncrm-calendar' !== $handle ) {
+        return $tag;
+    }
+    // change the script tag by adding type="module" and return it.
+    $tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
+    return $tag;
+}
+add_filter('script_loader_tag', 'add_type_attribute' , 10, 3);

@@ -65,9 +65,6 @@ function neoncrm_calendar_sanitize_options( $input ) {
 		} elseif ( isset( $options['neoncrm_api_key'] ) ) {
 			$output['neoncrm_api_key'] = $options['neoncrm_api_key'];
 		}
-	} elseif ( isset( $options['neoncrm_api_key'] ) ) {
-		// no key submitted at all — keep existing
-		$output['neoncrm_api_key'] = $options['neoncrm_api_key'];
 	}
 	return $output;
 }

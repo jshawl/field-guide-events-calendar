@@ -47,4 +47,19 @@ class EnqueueTest extends WP_UnitTestCase {
         $output = do_shortcode('[neoncrm_calendar]');
         $this->assertStringContainsString('Error: Neon CRM Calendar is not configured properly.', $output);
     }
+
+    public function test_filter_categories_atts() {
+        $this->assertStringNotContainsString(
+            '<div class="categories"></div>',
+            do_shortcode('[neoncrm_calendar]')
+        );
+        $this->assertStringNotContainsString(
+            '<div class="categories"></div>',
+            do_shortcode('[neoncrm_calendar filter_categories="false"]')
+        );
+        $this->assertStringContainsString(
+            '<div class="categories"></div>',
+            do_shortcode('[neoncrm_calendar filter_categories="true"]')
+        );
+    }
 }

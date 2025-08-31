@@ -69,6 +69,7 @@ const renderCategory = (container, category, opts) => {
 };
 
 export const renderCategories = (categoriesEl, categories, opts) => {
+  if (!categoriesEl) return;
   categoriesEl.innerHTML = "";
   const button = renderCategory(categoriesEl, "All", opts);
   button.classList.add("active");

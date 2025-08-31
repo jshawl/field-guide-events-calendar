@@ -48,7 +48,7 @@ function neoncrm_calendar_register_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'neoncrm_calendar_register_assets' );
 
-function neoncrm_calendar_render_template( $template_name ) {
+function neoncrm_calendar_render_template( $template_name, $atts = array() ) {
 	$template_path = NEONCRM_CALENDAR_DIR . $template_name;
 	if ( file_exists( $template_path ) ) {
 		ob_start();
@@ -66,12 +66,16 @@ function neoncrm_calendar_shortcode( $atts ) {
 	if( empty( $api_key ) || empty( $org_id ) ) {
 		return neoncrm_calendar_render_template('templates/configuration-error.php');
 	}
+
+	$default_atts = array(
+		'filter_categories' => 'false'
+	);
+	$atts = shortcode_atts($default_atts, $atts, 'neoncrm_calendar');
 	wp_enqueue_style( 'neoncrm-calendar' );
 	wp_enqueue_script( 'neoncrm-calendar' );
-
 	wp_enqueue_script( 'neoncrm-calendar-fullcalendar' );	
 
-	return neoncrm_calendar_render_template('templates/calendar.php');
+	return neoncrm_calendar_render_template('templates/calendar.php', $atts );
 }
 add_shortcode( 'neoncrm_calendar', 'neoncrm_calendar_shortcode' );
 

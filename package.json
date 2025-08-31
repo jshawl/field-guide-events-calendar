@@ -1,17 +1,21 @@
 {
   "name": "neoncrm-calendar",
   "version": "1.0.0",
-  "description": "",
+  "description": "neoncrm calendar wordpress plugin",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test": "npm run test:js && npm run test:php",
+    "test:js": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "wp-env": "wp-env",
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neoncrm-calendar /var/www/html/vendor/bin/phpunit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@vitest/coverage-v8": "^3.2.4",
+    "@wordpress/env": "^10.29.0",
     "jsdom": "^26.1.0",
     "vitest": "^3.2.4"
   }

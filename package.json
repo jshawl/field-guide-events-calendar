@@ -7,7 +7,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "wp-env": "wp-env",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neoncrm-calendar ../../../vendor/bin/phpunit"
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neoncrm-calendar /var/www/html/vendor/bin/phpunit"
   },
   "keywords": [],
   "author": "",

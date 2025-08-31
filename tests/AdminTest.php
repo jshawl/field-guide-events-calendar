@@ -24,6 +24,11 @@ class AdminTest extends WP_UnitTestCase {
 			'neoncrm_api_key' => '')
 		);
 		$this->assertStringContainsString( $options['neoncrm_api_key'], 'secret' );
+		$other_options = neoncrm_calendar_sanitize_options( array(
+			'neoncrm_org_id'  => 'org123',
+			'neoncrm_api_key' => 'newkey')
+		);
+		$this->assertStringContainsString( $other_options['neoncrm_api_key'], 'newkey' );
 	}
 
 	public function test_text_input_does_not_expose_api_key() {
@@ -31,9 +36,9 @@ class AdminTest extends WP_UnitTestCase {
 		neoncrm_calendar_text_input( array(
 			'label_for'   => 'neoncrm_api_key',
 			'type'        => 'password',
-			'description' => 'Enter your Neon CRM API key. Leave blank to keep the current key.',
 		) );
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'value=""', $output );
+		$this->assertStringContainsString('**cret', $output);
 	}
 }

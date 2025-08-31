@@ -52,7 +52,6 @@ add_action( 'admin_init', 'neoncrm_calendar_settings_init' );
 function neoncrm_calendar_sanitize_options( $input ) {
 	$options = get_option( 'neoncrm_calendar_options', array() );
 	$output  = $options;
-	var_dump($options);
 
 	if ( isset( $input['neoncrm_org_id'] ) ) {
 		$output['neoncrm_org_id'] = sanitize_text_field( $input['neoncrm_org_id'] );

@@ -52,3 +52,11 @@ jobs:
         run: npm ci
       - name: Run JavaScript tests
         run: npm run test:js
+  check_versions:
+    name: Check versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+      - name: Check versions
+        run: scripts/check-versions.sh

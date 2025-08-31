@@ -47,8 +47,8 @@ function neoncrm_calendar_rest_get_events( WP_REST_Request $request ) {
     if ( empty( $user_session_id ) ) {
         return new WP_Error( 'no_session', 'Could not get user session ID from Neon CRM', array( 'status' => 500 ) );
     }   
-    $start_date = date('Y-m-d', strtotime('-1 month'));
-    $end_date = date('Y-m-d', strtotime('+3 month'));
+    $start_date = gmdate('Y-m-d', strtotime('-1 month'));
+    $end_date = gmdate('Y-m-d', strtotime('+3 month'));
     $base = 'https://api.neoncrm.com/neonws/services/api/event/listEvents';
     $params = array(
         'responseType=json',

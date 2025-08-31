@@ -22,7 +22,7 @@ function neoncrm_calendar_register_assets() {
 	// Register FullCalendar first (no deps), load in footer.
 	wp_register_script(
 		'neoncrm-calendar-fullcalendar',
-		'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js',
+		$plugin_url . 'assets/js/full-calendar.min.js',
 		array(),                         // deps
 		'6.1.19',                        // version
 		true                             // in_footer

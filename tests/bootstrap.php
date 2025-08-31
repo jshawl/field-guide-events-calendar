@@ -5,11 +5,6 @@
  * @package Neoncrm_Calendar
  */
 
-$polyfill = dirname( dirname( __FILE__ ) ) . '/../../../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
-if ( file_exists( $polyfill ) ) {
-	require_once $polyfill;
-}
-
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {

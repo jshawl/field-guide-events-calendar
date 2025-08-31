@@ -8,7 +8,8 @@
     "test:js": "vitest run",
     "test:coverage": "vitest run --coverage",
     "wp-env": "wp-env",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neoncrm-calendar /var/www/html/vendor/bin/phpunit"
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neoncrm-calendar /var/www/html/vendor/bin/phpunit",
+    "plugin:check": "wp-env run cli --env-cwd=wp-content/plugins/neoncrm-calendar -- wp plugin"
   },
   "keywords": [],
   "author": "",

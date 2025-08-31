@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Sample test case.
- */
-
 class AdminTest extends WP_UnitTestCase {
  	public function setUp(): void {
         parent::setUp();

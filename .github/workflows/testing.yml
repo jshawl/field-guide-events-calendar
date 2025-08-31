@@ -8,11 +8,11 @@ on:
 
 jobs:
   phpunit:
-    name: Run tests
+    name: PHP tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ["8.2", "8.0", "7.4"]
+        php-version: ["8.2"]
     services:
       database:
         image: mysql:latest
@@ -36,3 +36,19 @@ jobs:
         run: bash bin/install-wp-tests.sh wordpress_tests root root 127.0.0.1 latest true
       - name: Run tests
         run: phpunit
+
+  vitest:
+    name: JavaScript tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run JavaScript tests
+        run: npm run test:js

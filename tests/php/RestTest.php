@@ -14,7 +14,7 @@ class RestTest extends WP_UnitTestCase {
         parent::tearDown();
     }
 
-    public function test_happy_path() {
+    public function test_happy_path_events() {
         add_filter('pre_http_request', function($response, $args, $url) {
             if (strpos($url, 'events') !== false) {
                 return array(
@@ -28,6 +28,22 @@ class RestTest extends WP_UnitTestCase {
         $response = neoncrm_calendar_rest_get_events( new WP_REST_Request() );
         $this->assertIsArray( $response->data['searchResults'] );
         $this->assertCount( 1, $response->data['searchResults'] );
+    }
+
+    public function test_happy_path_categories() {
+        add_filter('pre_http_request', function($response, $args, $url) {
+            if (strpos($url, 'categories') !== false) {
+                return array(
+                    'response' => array( 'code' => 200 ),
+                    'body' => json_encode(array(
+                        array( 'id' => 1, 'name' => 'Category 1' ),
+                    ) ) );
+            }
+            return new WP_Error('unexpected_url', 'Unexpected URL: ' . $url);
+        }, 10, 3 );
+        $response = neoncrm_calendar_rest_get_categories( new WP_REST_Request() );
+        $this->assertIsArray( $response->data );
+        $this->assertCount( 1, $response->data );
     }
 
 	public function test_api_key_error() {

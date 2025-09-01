@@ -2,22 +2,22 @@
 defined("ABSPATH") || exit();
 
 add_action("rest_api_init", function () {
-    register_rest_route("neoncrm-calendar/v1", "/listEvents", [
+    register_rest_route("neon-crm-calendar/v1", "/listEvents", [
         "methods" => "GET",
-        "callback" => "neoncrm_calendar_rest_list_events",
+        "callback" => "neon_crm_calendar_rest_list_events",
     ]);
 });
 
 add_action("rest_api_init", function () {
-    register_rest_route("neoncrm-calendar/v1", "/events", [
+    register_rest_route("neon-crm-calendar/v1", "/events", [
         "methods" => "GET",
-        "callback" => "neoncrm_calendar_rest_get_events",
+        "callback" => "neon_crm_calendar_rest_get_events",
     ]);
 });
 
-function neoncrm_calendar_get_from_cache($cache_key, $url, $args)
+function neon_crm_calendar_get_from_cache($cache_key, $url, $args)
 {
-    $key = "neoncrm_" . $cache_key . "_" . md5(json_encode($args));
+    $key = "neon_crm_" . $cache_key . "_" . md5(json_encode($args));
     $cached = get_transient($key);
     $ttl = 60 * 60; // 1 hour
     if (false !== $cached) {
@@ -46,11 +46,11 @@ function neoncrm_calendar_get_from_cache($cache_key, $url, $args)
     return new WP_Error("neon_error", $decoded, ["status" => $code]);
 }
 
-function neoncrm_calendar_rest_list_events(WP_REST_Request $request)
+function neon_crm_calendar_rest_list_events(WP_REST_Request $request)
 {
     // todo before action validate keys in both routes
-    $api_key = neoncrm_calendar_get_option("neoncrm_api_key", "");
-    $org_id = neoncrm_calendar_get_option("neoncrm_org_id", "");
+    $api_key = neon_crm_calendar_get_option("neon_crm_api_key", "");
+    $org_id = neon_crm_calendar_get_option("neon_crm_org_id", "");
     if (empty($api_key)) {
         return new WP_Error("no_api_key", "API key not configured", [
             "status" => 500,
@@ -78,7 +78,7 @@ function neoncrm_calendar_rest_list_events(WP_REST_Request $request)
         "pageSize=200",
     ];
     $neon_events_url = $base . "?" . implode("&", $params);
-    $events = neoncrm_calendar_get_from_cache(
+    $events = neon_crm_calendar_get_from_cache(
         "listEvents",
         $neon_events_url,
         $args,
@@ -91,11 +91,11 @@ function neoncrm_calendar_rest_list_events(WP_REST_Request $request)
     return rest_ensure_response($events);
 }
 
-function neoncrm_calendar_rest_get_events(WP_REST_Request $request)
+function neon_crm_calendar_rest_get_events(WP_REST_Request $request)
 {
     // todo before action validate keys in both routes
-    $api_key = neoncrm_calendar_get_option("neoncrm_api_key", "");
-    $org_id = neoncrm_calendar_get_option("neoncrm_org_id", "");
+    $api_key = neon_crm_calendar_get_option("neon_crm_api_key", "");
+    $org_id = neon_crm_calendar_get_option("neon_crm_org_id", "");
     if (empty($api_key)) {
         return new WP_Error("no_api_key", "API key not configured", [
             "status" => 500,
@@ -153,7 +153,7 @@ function neoncrm_calendar_rest_get_events(WP_REST_Request $request)
         "body" => json_encode($data),
         "timeout" => 30,
     ];
-    $events = neoncrm_calendar_get_from_cache(
+    $events = neon_crm_calendar_get_from_cache(
         "search",
         "https://api.neoncrm.com/v2/events/search",
         $args,

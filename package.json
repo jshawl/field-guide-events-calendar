@@ -1,7 +1,7 @@
 {
-  "name": "neoncrm-calendar",
+  "name": "neon-crm-calendar",
   "version": "1.0.0",
-  "description": "neoncrm calendar wordpress plugin",
+  "description": "neon crm calendar wordpress plugin",
   "main": "index.js",
   "scripts": {
     "format": "prettier --write .",
@@ -10,8 +10,8 @@
     "test:js": "vitest run",
     "test:coverage": "vitest run --coverage",
     "wp-env": "wp-env",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neoncrm-calendar /var/www/html/vendor/bin/phpunit",
-    "plugin:check": "wp-env run cli --env-cwd=wp-content/plugins/neoncrm-calendar -- wp plugin"
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neon-crm-calendar /var/www/html/vendor/bin/phpunit",
+    "plugin:check": "wp-env run cli --env-cwd=wp-content/plugins/neon-crm-calendar -- wp plugin"
   },
   "keywords": [],
   "author": "",

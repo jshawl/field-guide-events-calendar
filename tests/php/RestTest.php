@@ -5,15 +5,15 @@ class RestTest extends WP_UnitTestCase
     public function setUp(): void
     {
         parent::setUp();
-        update_option("neoncrm_calendar_options", [
-            "neoncrm_api_key" => "secret",
-            "neoncrm_org_id" => "org123",
+        update_option("neon_crm_calendar_options", [
+            "neon_crm_api_key" => "secret",
+            "neon_crm_org_id" => "org123",
         ]);
     }
 
     public function tearDown(): void
     {
-        delete_option("neoncrm_calendar_options");
+        delete_option("neon_crm_calendar_options");
         parent::tearDown();
     }
 
@@ -45,7 +45,7 @@ class RestTest extends WP_UnitTestCase
             10,
             3,
         );
-        $response = neoncrm_calendar_rest_list_events(new WP_REST_Request());
+        $response = neon_crm_calendar_rest_list_events(new WP_REST_Request());
         $this->assertIsArray($response->data["events"]);
         $this->assertCount(1, $response->data["events"]);
     }
@@ -78,29 +78,29 @@ class RestTest extends WP_UnitTestCase
             10,
             3,
         );
-        $response = neoncrm_calendar_rest_get_events(new WP_REST_Request());
+        $response = neon_crm_calendar_rest_get_events(new WP_REST_Request());
         $this->assertIsArray($response->data["searchResults"]);
         $this->assertCount(1, $response->data["searchResults"]);
     }
 
     public function test_api_key_error()
     {
-        $options = update_option("neoncrm_calendar_options", [
-            "neoncrm_api_key" => "",
-            "neoncrm_org_id" => "org123",
+        $options = update_option("neon_crm_calendar_options", [
+            "neon_crm_api_key" => "",
+            "neon_crm_org_id" => "org123",
         ]);
-        $response = neoncrm_calendar_rest_get_events(new WP_REST_Request());
+        $response = neon_crm_calendar_rest_get_events(new WP_REST_Request());
         $this->assertWPError($response);
         $this->assertEquals("no_api_key", $response->get_error_code());
     }
 
     public function test_org_id_error()
     {
-        $options = update_option("neoncrm_calendar_options", [
-            "neoncrm_api_key" => "secret",
-            "neoncrm_org_id" => "",
+        $options = update_option("neon_crm_calendar_options", [
+            "neon_crm_api_key" => "secret",
+            "neon_crm_org_id" => "",
         ]);
-        $response = neoncrm_calendar_rest_get_events(new WP_REST_Request());
+        $response = neon_crm_calendar_rest_get_events(new WP_REST_Request());
         $this->assertWPError($response);
         $this->assertEquals("no_org_id", $response->get_error_code());
     }

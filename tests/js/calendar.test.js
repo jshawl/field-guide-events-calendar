@@ -1,46 +1,46 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  formatEvents,
-  getCategories,
-  renderCategories,
-  renderCalendar,
   addEvent,
+  formatEvents,
+  getCalendarEvents,
+  getCategories,
   getEvents,
   getEventsWithCategories,
+  renderCalendar,
+  renderCategories,
   renderEventsWithoutCategories,
   setCalendarEvents,
-  getCalendarEvents,
 } from "../../assets/js/calendar.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.stubGlobal("neoncrm_calendar", {
-  rest_url: "/fake-url",
   org_id: "abcd",
+  rest_url: "/fake-url",
 });
 
 describe("formatEvents", () => {
   it("formats an event correctly", () => {
     const unformattedEvents = [
       {
-        "Event Name": "Sample Event",
-        "Event ID": "123",
-        "Event Start Date": "2023-10-01",
-        "Event Start Time": "10:00:00",
+        "Event Category Name": "Workshop",
         "Event End Date": "2023-10-01",
         "Event End Time": "12:00:00",
-        "Event Category Name": "Workshop",
+        "Event ID": "123",
+        "Event Name": "Sample Event",
+        "Event Start Date": "2023-10-01",
+        "Event Start Time": "10:00:00",
       },
     ];
     expect(formatEvents(unformattedEvents)[0]).toEqual({
-      id: "123",
-      title: "Sample Event",
-      start: new Date("2023-10-01T10:00:00"),
-      end: new Date("2023-10-01T12:00:00"),
-      startDate: "2023-10-01",
-      endDate: "2023-10-01",
       category: "Workshop",
+      end: new Date("2023-10-01T12:00:00"),
+      endDate: "2023-10-01",
+      id: "123",
+      start: new Date("2023-10-01T10:00:00"),
+      startDate: "2023-10-01",
+      title: "Sample Event",
     });
   });
 });
@@ -51,7 +51,7 @@ describe("getCategories", () => {
       { category: "Workshop" },
       { category: "Seminar" },
       { category: "Workshop" },
-      { category: null },
+      { category: undefined },
       {},
     ];
     expect(getCategories(events)).toEqual(["Seminar", "Workshop"]);
@@ -60,9 +60,9 @@ describe("getCategories", () => {
 
 describe("renderCategories", () => {
   it("returns early if categories are not enabled via shortcode", () => {
-    global.fetch = vi.fn();
-    renderCategories(null, {});
-    expect(global.fetch).not.toHaveBeenCalled();
+    globalThis.fetch = vi.fn();
+    renderCategories(undefined, {});
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
   it("renders category buttons", async () => {
     const categoriesEl = document.createElement("div");
@@ -72,7 +72,7 @@ describe("renderCategories", () => {
         { "Event Category Name": "Seminar" },
       ],
     };
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse),
       })
@@ -130,33 +130,33 @@ describe("addEvent", () => {
       addEvent: vi.fn(),
     };
     addEvent(calendar, {
-      startDate: "2025-08-30",
       endDate: "2025-08-30",
+      startDate: "2025-08-30",
     });
     expect(calendar.addEvent).toHaveBeenCalledWith({
-      startDate: "2025-08-30",
-      endDate: "2025-08-30",
       allDay: false,
+      endDate: "2025-08-30",
+      startDate: "2025-08-30",
     });
     addEvent(calendar, {
-      startDate: "2025-08-30",
       endDate: "2025-08-31",
+      startDate: "2025-08-30",
     });
     expect(calendar.addEvent).toHaveBeenCalledWith({
-      startDate: "2025-08-30",
-      endDate: "2025-08-31",
       allDay: true,
+      endDate: "2025-08-31",
+      startDate: "2025-08-30",
     });
   });
 });
 
+let onEventClick = () => {};
 describe("renderCalendar", () => {
   it("initializes the calendar", () => {
     vi.stubGlobal("open", vi.fn());
-    let onEventClick;
     vi.stubGlobal("FullCalendar", {
       Calendar: class {
-        constructor(_, opts) {
+        constructor(_element, opts) {
           onEventClick = opts.eventClick;
         }
         render() {}
@@ -177,7 +177,7 @@ describe("getEvents", () => {
     const mockResponse = {
       events: [{ "Event Name": "Sample Event" }],
     };
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse),
       })
@@ -188,7 +188,7 @@ describe("getEvents", () => {
   });
 
   it("handles fetch errors gracefully", async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({}),
       })
@@ -205,7 +205,7 @@ describe("getEventsWithCategories", () => {
     const mockResponse = {
       searchResults: [{ name: "Sample Event" }],
     };
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse),
       })
@@ -216,7 +216,7 @@ describe("getEventsWithCategories", () => {
   });
 
   it("handles fetch errors gracefully", async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({}),
       })

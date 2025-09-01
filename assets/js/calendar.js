@@ -20,45 +20,49 @@ export const formatEvents = (unformattedEvents) =>
       unformattedEvent["Event End Time"] || unformattedEvent.endTime;
     const end = new Date(`${endDate}T${endTime}`);
     return {
-      id: unformattedEvent["Event ID"] || unformattedEvent.id,
-      title: unformattedEvent["Event Name"] || unformattedEvent.name,
-      start,
-      end,
-      startDate,
-      endDate,
       category: unformattedEvent["Event Category Name"],
+      end,
+      endDate,
+      id: unformattedEvent["Event ID"] || unformattedEvent.id,
+      start,
+      startDate,
+      title: unformattedEvent["Event Name"] || unformattedEvent.name,
     };
   });
 
 export const getCategories = (events) =>
   Object.keys(
     events.reduce((cats, ev) => {
-      return { ...cats, ...(ev.category ? { [ev.category]: true } : {}) };
+      if (ev.category) {
+        cats[ev.category] = true;
+      }
+      return cats; // 😸
     }, {})
-  ).sort((a, b) => a.localeCompare(b));
+  ).sort();
 
 export const renderCalendar = (calendarEl) => {
   const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: "dayGridMonth",
     eventClassNames: ["neoncrm-calendar-event"],
-    headerToolbar: {
-      right: "prev,next today",
-      left: "title",
-    },
-    height: "auto",
     eventClick: (info) => {
       const url = `https://${neoncrm_calendar.org_id}.app.neoncrm.com/np/clients/${neoncrm_calendar.org_id}/eventRegistration.jsp?event=${info.event.id}`;
       window.open(url, "_blank");
     },
+    headerToolbar: {
+      left: "title",
+      right: "prev,next today",
+    },
+    height: "auto",
+    initialView: "dayGridMonth",
   });
   calendar.render();
   return calendar;
 };
 
 export const getEvents = async () => {
-  const eventsResponse = await fetch(neoncrm_calendar.rest_url + "/listEvents");
+  const eventsResponse = await fetch(`${neoncrm_calendar.rest_url}/listEvents`);
   const eventsData = await eventsResponse.json();
   if (!eventsData.events) {
+    // oxlint-disable-next-line no-console
     console.error("neoncrm-calendar: error fetching events", eventsData);
     return [];
   }
@@ -66,38 +70,42 @@ export const getEvents = async () => {
 };
 
 export const getEventsWithCategories = async () => {
-  const eventsResponse = await fetch(neoncrm_calendar.rest_url + "/events");
+  const eventsResponse = await fetch(`${neoncrm_calendar.rest_url}/events`);
   const eventsData = await eventsResponse.json();
   if (!eventsData.searchResults) {
+    // oxlint-disable-next-line no-console
     console.error("neoncrm-calendar: error fetching events", eventsData);
     return [];
   }
   return formatEvents(eventsData.searchResults);
 };
 
-export const addEvent = (calendar, event) => {
-  return calendar.addEvent({
+export const addEvent = (calendar, event) =>
+  calendar.addEvent({
     ...event,
     allDay: event.startDate !== event.endDate,
   });
-};
 
 const renderCategory = (container, category) => {
   const div = document.createElement("div");
+  let checkedAttribute = "";
+  if (category === "All") {
+    checkedAttribute = "checked='true'";
+  }
   div.innerHTML = `
-    <input id="neoncrm_calendar_category_${category}" type="radio" name="neoncrm_calendar_category" value="${category}" ${
-    category === "All" ? "checked" : ""
-  }/>
+    <input id="neoncrm_calendar_category_${category}" type="radio" name="neoncrm_calendar_category" value="${category}" ${checkedAttribute}/>
     <label for="neoncrm_calendar_category_${category}">
       ${category}
     </label>
   `;
-  container.appendChild(div);
+  container.append(div);
   return div;
 };
 
 export const renderCategories = async (categoriesEl, calendar) => {
-  if (!categoriesEl) return;
+  if (!categoriesEl) {
+    return;
+  }
   const eventsWithCategories = await getEventsWithCategories();
   setFetchedEvents(eventsWithCategories);
   getCalendarEvents().map((calendarEvent) => calendarEvent.remove());
@@ -106,12 +114,10 @@ export const renderCategories = async (categoriesEl, calendar) => {
   );
   const categories = getCategories(getFetchedEvents());
   categoriesEl.innerHTML = "";
-  const button = renderCategory(categoriesEl, "All");
-  categories.map((category) => {
-    renderCategory(categoriesEl, category);
-  });
-  categoriesEl.addEventListener("change", (e) => {
-    const category = e.target.value;
+  renderCategory(categoriesEl, "All");
+  categories.map((category) => renderCategory(categoriesEl, category));
+  categoriesEl.addEventListener("change", (event) => {
+    const category = event.target.value;
 
     getCalendarEvents().map((calendarEvent) => calendarEvent.remove());
     setCalendarEvents(
@@ -134,7 +140,7 @@ setCalendarEvents([]);
 
 export const renderEventsWithoutCategories = (events, calendar) => {
   document.querySelector(".neoncrm-calendar .loading").remove();
-  if (getCalendarEvents().length) {
+  if (getCalendarEvents().length > 0) {
     // if the events with categories already rendered, don't overwrite
     return;
   }

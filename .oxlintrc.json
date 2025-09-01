@@ -1,0 +1,20 @@
+{
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "style": "error",
+    "pedantic": "error"
+  },
+  "rules": {
+    "no-magic-numbers": ["off"],
+    "no-console": ["error"]
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.js"],
+      "rules": {
+        "no-console": ["off"]
+      }
+    }
+  ]
+}

@@ -1,3 +1,5 @@
 coverage
 node_modules
 *.cache
+release/*
+!release/.gitkeep

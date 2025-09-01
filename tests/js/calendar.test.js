@@ -41,6 +41,19 @@ describe("formatEvents", () => {
   });
 });
 
+describe("getCategories", () => {
+  it("extracts unique categories from events", () => {
+    const events = [
+      { category: "Workshop" },
+      { category: "Seminar" },
+      { category: "Workshop" },
+      { category: null },
+      {},
+    ];
+    expect(getCategories(events)).toEqual(["Seminar", "Workshop"]);
+  });
+});
+
 describe("renderCategories", () => {
   it("renders category buttons", () => {
     const categoriesEl = document.createElement("div");
@@ -118,7 +131,7 @@ describe("renderCalendar", () => {
 describe("getEvents", () => {
   it("fetches and formats events", async () => {
     const mockResponse = {
-      searchResults: [{ "Event Name": "Sample Event" }],
+      events: [{ "Event Name": "Sample Event" }],
     };
     global.fetch = vi.fn(() =>
       Promise.resolve({

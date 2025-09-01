@@ -102,23 +102,32 @@ export const main = async () => {
   const calendarEl = document.querySelector(".neoncrm-calendar #calendar");
   const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
   const calendar = renderCalendar(calendarEl);
-  let events = await getEvents();
-  document.querySelector(".neoncrm-calendar .loading").remove();
-
-  let calendarEvents = events.map((event) => addEvent(calendar, event));
+  let calendarEvents = [];
+  let events = [];
+  getEvents().then((evs) => {
+    document.querySelector(".neoncrm-calendar .loading").remove();
+    if (calendarEvents.length) {
+      // if the events with categories already rendered, don't overwrite
+      return;
+    }
+    events = evs;
+    calendarEvents = events.map((event) => addEvent(calendar, event));
+  });
 
   if (categoriesEl) {
-    events = await getEventsWithCategories();
-    calendarEvents.map((calendarEvent) => calendarEvent.remove());
-    calendarEvents = events.map((event) => addEvent(calendar, event));
-    const categoryNames = getCategories(events);
-    renderCategories(categoriesEl, categoryNames, {
-      onChange: (category) => {
-        calendarEvents.map((calendarEvent) => calendarEvent.remove());
-        calendarEvents = events
-          .filter((event) => ["All", event.category].includes(category))
-          .map((event) => addEvent(calendar, event));
-      },
+    getEventsWithCategories().then((evs) => {
+      events = evs;
+      calendarEvents.map((calendarEvent) => calendarEvent.remove());
+      calendarEvents = events.map((event) => addEvent(calendar, event));
+      const categoryNames = getCategories(events);
+      renderCategories(categoriesEl, categoryNames, {
+        onChange: (category) => {
+          calendarEvents.map((calendarEvent) => calendarEvent.remove());
+          calendarEvents = events
+            .filter((event) => ["All", event.category].includes(category))
+            .map((event) => addEvent(calendar, event));
+        },
+      });
     });
   }
 };

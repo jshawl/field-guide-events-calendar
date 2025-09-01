@@ -50,15 +50,15 @@ class EnqueueTest extends WP_UnitTestCase {
 
     public function test_filter_categories_atts() {
         $this->assertStringNotContainsString(
-            '<div class="categories"></div>',
+            '<div class="categories">',
             do_shortcode('[neoncrm_calendar]')
         );
         $this->assertStringNotContainsString(
-            '<div class="categories"></div>',
+            '<div class="categories">',
             do_shortcode('[neoncrm_calendar filter_categories="false"]')
         );
         $this->assertStringContainsString(
-            '<div class="categories"></div>',
+            '<div class="categories">',
             do_shortcode('[neoncrm_calendar filter_categories="true"]')
         );
     }

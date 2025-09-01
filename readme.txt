@@ -15,12 +15,12 @@ Displays a calendar of events from Neon CRM.
 
 Add a short code to any page or post to display a calendar of upcoming events:
 
-`[neoncrm_calendar]`
+`[neon_crm_calendar]`
 
 To allow users to filter events by event category, add the 
 `filter_categories="true"` attribute:
 
-`[neoncrm_calendar filter_categories="true"]`
+`[neon_crm_calendar filter_categories="true"]`
 
 == Installation ==
 

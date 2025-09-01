@@ -15,7 +15,7 @@ import {
 } from "../../assets/js/calendar.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.stubGlobal("neoncrm_calendar", {
+vi.stubGlobal("neon_crm_calendar", {
   org_id: "abcd",
   rest_url: "/fake-url",
 });
@@ -103,7 +103,7 @@ describe("renderCategories", () => {
 
 describe("renderEventsWithoutCategories", () => {
   beforeEach(() => {
-    document.body.innerHTML = `<div class='neoncrm-calendar'><div class='loading'></div></div>`;
+    document.body.innerHTML = `<div class='neon-crm-calendar'><div class='loading'></div></div>`;
   });
   it("removes loading", () => {
     renderEventsWithoutCategories();

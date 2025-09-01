@@ -36,6 +36,7 @@ export const renderCalendar = (calendarEl) => {
       right: "prev,next today",
       left: "title",
     },
+    height: "auto",
     eventClick: (info) => {
       const url = `https://${neoncrm_calendar.org_id}.app.neoncrm.com/np/clients/${neoncrm_calendar.org_id}/eventRegistration.jsp?event=${info.event.id}`;
       window.open(url, "_blank");

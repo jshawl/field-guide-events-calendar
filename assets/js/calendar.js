@@ -1,3 +1,12 @@
+let store = {};
+
+const set = (key, value) => {
+  store[key] = value;
+  return store[key];
+};
+
+const get = (key) => store[key];
+
 export const formatEvents = (unformattedEvents) =>
   unformattedEvents.map((unformattedEvent) => {
     const startDate =
@@ -87,48 +96,57 @@ const renderCategory = (container, category) => {
   return div;
 };
 
-export const renderCategories = (categoriesEl, categories, opts) => {
+export const renderCategories = async (categoriesEl, calendar) => {
   if (!categoriesEl) return;
+  const eventsWithCategories = await getEventsWithCategories();
+  setFetchedEvents(eventsWithCategories);
+  getCalendarEvents().map((calendarEvent) => calendarEvent.remove());
+  setCalendarEvents(
+    getFetchedEvents().map((event) => addEvent(calendar, event))
+  );
+  const categories = getCategories(getFetchedEvents());
   categoriesEl.innerHTML = "";
   const button = renderCategory(categoriesEl, "All");
   categories.map((category) => {
-    renderCategory(categoriesEl, category, opts);
+    renderCategory(categoriesEl, category);
   });
   categoriesEl.addEventListener("change", (e) => {
-    opts.onChange(e.target.value);
+    const category = e.target.value;
+
+    getCalendarEvents().map((calendarEvent) => calendarEvent.remove());
+    setCalendarEvents(
+      getFetchedEvents()
+        .filter((event) => ["All", event.category].includes(category))
+        .map((event) => addEvent(calendar, event))
+    );
   });
 };
 
-export const main = async () => {
+export const setFetchedEvents = (events) => set("fetchedEvents", events);
+const getFetchedEvents = () => get("fetchedEvents");
+
+export const setCalendarEvents = (calendarEvents) =>
+  set("calendarEvents", calendarEvents);
+export const getCalendarEvents = () => get("calendarEvents");
+
+setFetchedEvents([]);
+setCalendarEvents([]);
+
+export const renderEventsWithoutCategories = (events, calendar) => {
+  document.querySelector(".neoncrm-calendar .loading").remove();
+  if (getCalendarEvents().length) {
+    // if the events with categories already rendered, don't overwrite
+    return;
+  }
+  setFetchedEvents(events);
+  setCalendarEvents(events.map((event) => addEvent(calendar, event)));
+};
+
+export const main = () => {
   const calendarEl = document.querySelector(".neoncrm-calendar #calendar");
   const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
   const calendar = renderCalendar(calendarEl);
-  let calendarEvents = [];
-  let events = [];
-  getEvents().then((evs) => {
-    document.querySelector(".neoncrm-calendar .loading").remove();
-    if (calendarEvents.length) {
-      // if the events with categories already rendered, don't overwrite
-      return;
-    }
-    events = evs;
-    calendarEvents = events.map((event) => addEvent(calendar, event));
-  });
-
-  if (categoriesEl) {
-    getEventsWithCategories().then((evs) => {
-      events = evs;
-      calendarEvents.map((calendarEvent) => calendarEvent.remove());
-      calendarEvents = events.map((event) => addEvent(calendar, event));
-      const categoryNames = getCategories(events);
-      renderCategories(categoriesEl, categoryNames, {
-        onChange: (category) => {
-          calendarEvents.map((calendarEvent) => calendarEvent.remove());
-          calendarEvents = events
-            .filter((event) => ["All", event.category].includes(category))
-            .map((event) => addEvent(calendar, event));
-        },
-      });
-    });
-  }
+  // not awaited, so categories can start fetching
+  getEvents().then((events) => renderEventsWithoutCategories(events, calendar));
+  renderCategories(categoriesEl, calendar);
 };

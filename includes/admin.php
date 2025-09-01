@@ -127,9 +127,9 @@ function neoncrm_calendar_text_input($args)
          $masked = str_repeat("*", $len);
      }
 
-     /* translators: %s is the masked API key (asterisks + last 4 chars) */
      echo '<p class="description">' .
          sprintf(
+             /* translators: %s is the masked API key (asterisks + last 4 chars) */
              esc_html__(
                  "Current key: %s — leave blank to keep existing key.",
                  "neoncrm-calendar",

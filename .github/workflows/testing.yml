@@ -65,6 +65,6 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v4
       - name: Check versions
-        run: scripts/check-versions.sh
+        run: bin/check-versions.sh
       - name: Zip
-        run: scripts/zip.sh
+        run: bin/zip.sh

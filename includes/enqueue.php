@@ -30,7 +30,7 @@ function neoncrm_calendar_register_assets() {
 	
 	$data = array(
 		'org_id'   => neoncrm_calendar_get_option( 'neoncrm_org_id', '' ),
-		'rest_url' => esc_url_raw( rest_url( 'neoncrm-calendar/v1/events' ) ),
+		'rest_url' => esc_url_raw( rest_url( 'neoncrm-calendar/v1' ) ),
 	);
 	// Ensure the module can read the data via the global window object.
 	$js = 'window.neoncrm_calendar = ' . wp_json_encode( $data ) . ';';

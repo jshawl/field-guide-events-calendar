@@ -17,13 +17,6 @@ export const formatEvents = (unformattedEvents) =>
     };
   });
 
-export const getCategories = (events) =>
-  Object.keys(
-    events.reduce((cats, ev) => {
-      return { ...cats, ...(ev.category ? { [ev.category]: true } : {}) };
-    }, {})
-  ).sort((a, b) => a.localeCompare(b));
-
 export const renderCalendar = (calendarEl) => {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth",
@@ -42,7 +35,7 @@ export const renderCalendar = (calendarEl) => {
 };
 
 export const getEvents = async () => {
-  const eventsResponse = await fetch(neoncrm_calendar.rest_url);
+  const eventsResponse = await fetch(neoncrm_calendar.rest_url + "/events");
   const eventsData = await eventsResponse.json();
   if (!eventsData.searchResults) {
     console.error("neoncrm-calendar: error fetching events", eventsData);
@@ -58,28 +51,29 @@ export const addEvent = (calendar, event) => {
   });
 };
 
-const renderCategory = (container, category, opts) => {
-  const button = document.createElement("button");
-  button.innerHTML = category;
-  button.addEventListener("click", () => {
-    opts.onChange(category);
-  });
-  container.appendChild(button);
-  return button;
+const renderCategory = (container, category) => {
+  const div = document.createElement("div");
+  div.innerHTML = `
+    <input id="neoncrm_calendar_category_${category}" type="radio" name="neoncrm_calendar_category" value="${category}" ${
+    category === "All" ? "checked" : ""
+  }/>
+    <label for="neoncrm_calendar_category_${category}">
+      ${category}
+    </label>
+  `;
+  container.appendChild(div);
+  return div;
 };
 
 export const renderCategories = (categoriesEl, categories, opts) => {
   if (!categoriesEl) return;
   categoriesEl.innerHTML = "";
-  const button = renderCategory(categoriesEl, "All", opts);
-  button.classList.add("active");
+  const button = renderCategory(categoriesEl, "All");
   categories.map((category) => {
     renderCategory(categoriesEl, category, opts);
   });
-  categoriesEl.addEventListener("click", (e) => {
-    if (e.target.tagName !== "BUTTON") return;
-    categoriesEl.querySelector(".active")?.classList.remove("active");
-    e.target.classList.add("active");
+  categoriesEl.addEventListener("change", (e) => {
+    opts.onChange(e.target.value);
   });
 };
 
@@ -92,12 +86,19 @@ export const main = async () => {
 
   let calendarEvents = events.map((event) => addEvent(calendar, event));
 
-  renderCategories(categoriesEl, getCategories(events), {
-    onChange: (category) => {
-      calendarEvents.map((calendarEvent) => calendarEvent.remove());
-      calendarEvents = events
-        .filter((event) => ["All", event.category].includes(category))
-        .map((event) => addEvent(calendar, event));
-    },
-  });
+  if (categoriesEl) {
+    const categoriesResponse = await fetch(
+      neoncrm_calendar.rest_url + "/categories"
+    );
+    const categories = await categoriesResponse.json();
+    const categoryNames = categories.map(({ name }) => name);
+    renderCategories(categoriesEl, categoryNames, {
+      onChange: (category) => {
+        calendarEvents.map((calendarEvent) => calendarEvent.remove());
+        calendarEvents = events
+          .filter((event) => ["All", event.category].includes(category))
+          .map((event) => addEvent(calendar, event));
+      },
+    });
+  }
 };

@@ -41,19 +41,6 @@ describe("formatEvents", () => {
   });
 });
 
-describe("getCategories", () => {
-  it("extracts unique categories from events", () => {
-    const events = [
-      { category: "Workshop" },
-      { category: "Seminar" },
-      { category: "Workshop" },
-      { category: null },
-      {},
-    ];
-    expect(getCategories(events)).toEqual(["Seminar", "Workshop"]);
-  });
-});
-
 describe("renderCategories", () => {
   it("renders category buttons", () => {
     const categoriesEl = document.createElement("div");
@@ -62,10 +49,20 @@ describe("renderCategories", () => {
     };
     renderCategories(categoriesEl, ["Workshop", "Seminar"], opts);
     expect(categoriesEl.children.length).toBe(3); // Including "All" button
-    expect(categoriesEl.children[0].textContent).toBe("All");
-    expect(categoriesEl.children[1].textContent).toBe("Workshop");
-    expect(categoriesEl.children[2].textContent).toBe("Seminar");
-    categoriesEl.children[1].click();
+    expect(categoriesEl.children[0].querySelector("label").textContent).toMatch(
+      "All"
+    );
+    expect(categoriesEl.children[1].querySelector("label").textContent).toMatch(
+      "Workshop"
+    );
+    expect(categoriesEl.children[2].querySelector("label").textContent).toMatch(
+      "Seminar"
+    );
+    categoriesEl.children[1].querySelector("input").dispatchEvent(
+      new Event("change", {
+        bubbles: true,
+      })
+    );
     expect(opts.onChange).toHaveBeenCalledWith("Workshop");
   });
 });

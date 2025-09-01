@@ -8,23 +8,28 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-.neoncrm-calendar .categories button {
+.neoncrm-calendar .categories label {
   padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
   color: #75a548;
   border: none;
   background: none;
+  display: inline-block;
 }
 
-.neoncrm-calendar .categories button:hover {
+.neoncrm-calendar .categories label:hover {
   background: #eee;
 }
 
-.neoncrm-calendar .categories button.active {
+.neoncrm-calendar .categories input[type="radio"] {
+  display: none;
+}
+
+.neoncrm-calendar .categories :checked + label {
   background: #75a548;
   color: #fff;
 }

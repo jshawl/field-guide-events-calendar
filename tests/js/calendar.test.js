@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   formatEvents,
   getCategories,
@@ -9,6 +9,10 @@ import {
   renderCalendar,
   addEvent,
   getEvents,
+  getEventsWithCategories,
+  renderEventsWithoutCategories,
+  setCalendarEvents,
+  getCalendarEvents,
 } from "../../assets/js/calendar.js";
 
 vi.stubGlobal("neoncrm_calendar", {
@@ -55,28 +59,68 @@ describe("getCategories", () => {
 });
 
 describe("renderCategories", () => {
-  it("renders category buttons", () => {
+  it("returns early if categories are not enabled via shortcode", () => {
+    global.fetch = vi.fn();
+    renderCategories(null, {});
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+  it("renders category buttons", async () => {
     const categoriesEl = document.createElement("div");
-    const opts = {
-      onChange: vi.fn(),
+    const mockResponse = {
+      searchResults: [
+        { "Event Category Name": "Workshop" },
+        { "Event Category Name": "Seminar" },
+      ],
     };
-    renderCategories(categoriesEl, ["Workshop", "Seminar"], opts);
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockResponse),
+      })
+    );
+    const calendar = {
+      addEvent: vi.fn().mockReturnThis(),
+      remove: vi.fn(),
+    };
+    await renderCategories(categoriesEl, calendar);
     expect(categoriesEl.children.length).toBe(3); // Including "All" button
     expect(categoriesEl.children[0].querySelector("label").textContent).toMatch(
       "All"
     );
+    // alphabetized
     expect(categoriesEl.children[1].querySelector("label").textContent).toMatch(
-      "Workshop"
+      "Seminar"
     );
     expect(categoriesEl.children[2].querySelector("label").textContent).toMatch(
-      "Seminar"
+      "Workshop"
     );
     categoriesEl.children[1].querySelector("input").dispatchEvent(
       new Event("change", {
         bubbles: true,
       })
     );
-    expect(opts.onChange).toHaveBeenCalledWith("Workshop");
+  });
+});
+
+describe("renderEventsWithoutCategories", () => {
+  beforeEach(() => {
+    document.body.innerHTML = `<div class='neoncrm-calendar'><div class='loading'></div></div>`;
+  });
+  it("removes loading", () => {
+    renderEventsWithoutCategories();
+    expect(document.body.innerHTML).not.toContain("loading");
+  });
+  it("returns early if calendar events are already set", () => {
+    setCalendarEvents([{ name: "Event 1" }]);
+    renderEventsWithoutCategories([{ name: "Stale Event" }]);
+    expect(getCalendarEvents()[0].name).toBe("Event 1");
+  });
+  it("only sets calendar events if none are there already", () => {
+    setCalendarEvents([]);
+    const calendar = {
+      addEvent: (name) => name,
+    };
+    renderEventsWithoutCategories([{ name: "Event 1" }], calendar);
+    expect(getCalendarEvents()[0].name).toBe("Event 1");
   });
 });
 
@@ -151,6 +195,34 @@ describe("getEvents", () => {
     );
     console.error = vi.fn();
     const events = await getEvents();
+    expect(events).toEqual([]);
+    expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("getEventsWithCategories", () => {
+  it("fetches and formats events", async () => {
+    const mockResponse = {
+      searchResults: [{ name: "Sample Event" }],
+    };
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockResponse),
+      })
+    );
+    const events = await getEventsWithCategories();
+    expect(events.length).toBe(1);
+    expect(events[0].title).toBe("Sample Event");
+  });
+
+  it("handles fetch errors gracefully", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({}),
+      })
+    );
+    console.error = vi.fn();
+    const events = await getEventsWithCategories();
     expect(events).toEqual([]);
     expect(console.error).toHaveBeenCalled();
   });

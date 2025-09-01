@@ -41,7 +41,19 @@ export const getCategories = (events) =>
   ).sort();
 
 export const renderCalendar = (calendarEl) => {
+  const initialDate = location.hash.replace("#", "");
   const calendar = new FullCalendar.Calendar(calendarEl, {
+    datesSet: (info) => {
+      const existingHash = location.hash.replace("#", "");
+      const regexp = new RegExp(/\d{4}-\d{2}-\d{2}/);
+      if (existingHash.length > 0 && !regexp.test(existingHash)) {
+        return;
+      }
+      const date = info.start;
+      date.setDate(date.getDate() + 15);
+      location.hash = date.toISOString().slice(0, 10);
+    },
+
     eventClassNames: ["neoncrm-calendar-event"],
     eventClick: (info) => {
       const url = `https://${neoncrm_calendar.org_id}.app.neoncrm.com/np/clients/${neoncrm_calendar.org_id}/eventRegistration.jsp?event=${info.event.id}`;
@@ -52,6 +64,7 @@ export const renderCalendar = (calendarEl) => {
       right: "prev,next today",
     },
     height: "auto",
+    initialDate,
     initialView: "dayGridMonth",
   });
   calendar.render();

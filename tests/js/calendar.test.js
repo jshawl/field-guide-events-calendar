@@ -150,18 +150,40 @@ describe("addEvent", () => {
   });
 });
 
+const date = new Date("2025-09-01");
+let optsInitialDate = "";
 let onEventClick = () => {};
 describe("renderCalendar", () => {
-  it("initializes the calendar", () => {
-    vi.stubGlobal("open", vi.fn());
+  beforeEach(() => {
     vi.stubGlobal("FullCalendar", {
       Calendar: class {
         constructor(_element, opts) {
           onEventClick = opts.eventClick;
+          opts.datesSet({ start: date });
+          optsInitialDate = opts.initialDate;
         }
         render() {}
       },
     });
+  });
+  it("saves state in the URL for deeplinks", () => {
+    const calendarEl = document.createElement("div");
+    renderCalendar(calendarEl);
+    // adds 15 days to start date so the month is correct
+    expect(globalThis.location.hash).toBe(`#2025-09-16`);
+    renderCalendar(calendarEl);
+    expect(optsInitialDate).toBe("2025-09-16");
+  });
+
+  it("does not overwrite a pre-existing hash", () => {
+    location.hash = "something-important";
+    const calendarEl = document.createElement("div");
+    renderCalendar(calendarEl);
+    expect(location.hash).toBe("#something-important");
+  });
+
+  it("initializes the calendar", () => {
+    vi.stubGlobal("open", vi.fn());
     const calendarEl = document.createElement("div");
     renderCalendar(calendarEl);
     onEventClick({ event: { id: "1" } });

@@ -16,23 +16,18 @@ class RestTest extends WP_UnitTestCase {
 
     public function test_happy_path() {
         add_filter('pre_http_request', function($response, $args, $url) {
-            if (strpos($url, 'login') !== false) {
+            if (strpos($url, 'events') !== false) {
                 return array(
                     'response' => array( 'code' => 200 ),
-                    'body'     => json_encode( array( 'loginResponse' => array( 'userSessionId' => 'session123' ) ) ),
-                );
-            } elseif (strpos($url, 'listEvents') !== false) {
-                return array(
-                    'response' => array( 'code' => 200 ),
-                    'body'     => json_encode( array( 'listEvents' => array( 'searchResults' => array(
+                    'body' => json_encode( array( 'searchResults' => array(
                         array( 'id' => 1, 'name' => 'Event 1', 'startDate' => '2024-06-01', 'endDate' => '2024-06-01' ),
-                    ) ) ) ) );
+                    ) ) ) );
             }
             return new WP_Error('unexpected_url', 'Unexpected URL: ' . $url);
         }, 10, 3 );
         $response = neoncrm_calendar_rest_get_events( new WP_REST_Request() );
-        $this->assertIsArray( $response->data['listEvents']['searchResults'] );
-        $this->assertCount( 1, $response->data['listEvents']['searchResults'] );
+        $this->assertIsArray( $response->data['searchResults'] );
+        $this->assertCount( 1, $response->data['searchResults'] );
     }
 
 	public function test_api_key_error() {

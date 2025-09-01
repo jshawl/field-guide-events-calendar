@@ -1,21 +1,32 @@
 export const formatEvents = (unformattedEvents) =>
   unformattedEvents.map((unformattedEvent) => {
-    const start = new Date(
-      `${unformattedEvent["Event Start Date"]}T${unformattedEvent["Event Start Time"]}`
-    );
-    const end = new Date(
-      `${unformattedEvent["Event End Date"]}T${unformattedEvent["Event End Time"]}`
-    );
+    const startDate =
+      unformattedEvent["Event Start Date"] || unformattedEvent.startDate;
+    const startTime =
+      unformattedEvent["Event Start Time"] || unformattedEvent.startTime;
+    const start = new Date(`${startDate}T${startTime}`);
+    const endDate =
+      unformattedEvent["Event End Date"] || unformattedEvent.endDate;
+    const endTime =
+      unformattedEvent["Event End Time"] || unformattedEvent.endTime;
+    const end = new Date(`${endDate}T${endTime}`);
     return {
-      id: unformattedEvent["Event ID"],
-      title: unformattedEvent["Event Name"],
+      id: unformattedEvent["Event ID"] || unformattedEvent.id,
+      title: unformattedEvent["Event Name"] || unformattedEvent.name,
       start,
       end,
-      startDate: unformattedEvent["Event Start Date"],
-      endDate: unformattedEvent["Event End Date"],
+      startDate,
+      endDate,
       category: unformattedEvent["Event Category Name"],
     };
   });
+
+export const getCategories = (events) =>
+  Object.keys(
+    events.reduce((cats, ev) => {
+      return { ...cats, ...(ev.category ? { [ev.category]: true } : {}) };
+    }, {})
+  ).sort((a, b) => a.localeCompare(b));
 
 export const renderCalendar = (calendarEl) => {
   const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -35,6 +46,16 @@ export const renderCalendar = (calendarEl) => {
 };
 
 export const getEvents = async () => {
+  const eventsResponse = await fetch(neoncrm_calendar.rest_url + "/listEvents");
+  const eventsData = await eventsResponse.json();
+  if (!eventsData.events) {
+    console.error("neoncrm-calendar: error fetching events", eventsData);
+    return [];
+  }
+  return formatEvents(eventsData.events);
+};
+
+export const getEventsWithCategories = async () => {
   const eventsResponse = await fetch(neoncrm_calendar.rest_url + "/events");
   const eventsData = await eventsResponse.json();
   if (!eventsData.searchResults) {
@@ -81,17 +102,16 @@ export const main = async () => {
   const calendarEl = document.querySelector(".neoncrm-calendar #calendar");
   const categoriesEl = document.querySelector(".neoncrm-calendar .categories");
   const calendar = renderCalendar(calendarEl);
-  const events = await getEvents();
+  let events = await getEvents();
   document.querySelector(".neoncrm-calendar .loading").remove();
 
   let calendarEvents = events.map((event) => addEvent(calendar, event));
 
   if (categoriesEl) {
-    const categoriesResponse = await fetch(
-      neoncrm_calendar.rest_url + "/categories"
-    );
-    const categories = await categoriesResponse.json();
-    const categoryNames = categories.map(({ name }) => name);
+    events = await getEventsWithCategories();
+    calendarEvents.map((calendarEvent) => calendarEvent.remove());
+    calendarEvents = events.map((event) => addEvent(calendar, event));
+    const categoryNames = getCategories(events);
     renderCategories(categoriesEl, categoryNames, {
       onChange: (category) => {
         calendarEvents.map((calendarEvent) => calendarEvent.remove());

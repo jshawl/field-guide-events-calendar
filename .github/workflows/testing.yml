@@ -54,6 +54,8 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+      - name: Lint
+        run: npm run lint
       - name: Run JavaScript tests
         run: npm run test:js
   build:

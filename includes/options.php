@@ -1,5 +1,5 @@
 <?php
-defined( 'ABSPATH' ) || exit;
+defined("ABSPATH") || exit();
 
 /**
  * accessor for neoncrm_calendar options.
@@ -8,12 +8,13 @@ defined( 'ABSPATH' ) || exit;
  *   neoncrm_calendar_get_option( 'neoncrm_api_key', '' );
  *   neoncrm_calendar_get_option( null ); // returns full array
  */
-function neoncrm_calendar_get_option( $key = null, $default = '' ) {
-	$opts = (array) get_option( 'neoncrm_calendar_options', array() );
+function neoncrm_calendar_get_option($key = null, $default = "")
+{
+    $opts = (array) get_option("neoncrm_calendar_options", []);
 
-	if ( null === $key ) {
-		return $opts;
-	}
+    if (null === $key) {
+        return $opts;
+    }
 
-	return isset( $opts[ $key ] ) ? $opts[ $key ] : $default;
+    return isset($opts[$key]) ? $opts[$key] : $default;
 }

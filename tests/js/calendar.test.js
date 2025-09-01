@@ -4,7 +4,6 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   formatEvents,
-  get,
   getCategories,
   renderCategories,
   renderCalendar,
@@ -17,30 +16,17 @@ vi.stubGlobal("neoncrm_calendar", {
   org_id: "abcd",
 });
 
-describe("get", () => {
-  it("gets a value from a list of key value pairs", () => {
-    const kvs = [{ name: "Event Name", value: "Sample Event" }];
-    expect(get(kvs, "Event Name")).toBe("Sample Event");
-  });
-  it("doesn't throw if the key isn't found", () => {
-    const kvs = [{ name: "Event Name", value: "Sample Event" }];
-    expect(get(kvs, "Nonexistent")).toBeUndefined();
-  });
-});
-
 describe("formatEvents", () => {
   it("formats an event correctly", () => {
     const unformattedEvents = [
       {
-        nameValuePair: [
-          { name: "Event Name", value: "Sample Event" },
-          { name: "Event ID", value: "123" },
-          { name: "Event Start Date", value: "2023-10-01" },
-          { name: "Event Start Time", value: "10:00:00" },
-          { name: "Event End Date", value: "2023-10-01" },
-          { name: "Event End Time", value: "12:00:00" },
-          { name: "Event Category Name", value: "Workshop" },
-        ],
+        "Event Name": "Sample Event",
+        "Event ID": "123",
+        "Event Start Date": "2023-10-01",
+        "Event Start Time": "10:00:00",
+        "Event End Date": "2023-10-01",
+        "Event End Time": "12:00:00",
+        "Event Category Name": "Workshop",
       },
     ];
     expect(formatEvents(unformattedEvents)[0]).toEqual({
@@ -135,15 +121,7 @@ describe("renderCalendar", () => {
 describe("getEvents", () => {
   it("fetches and formats events", async () => {
     const mockResponse = {
-      listEvents: {
-        searchResults: {
-          nameValuePairs: [
-            {
-              nameValuePair: [{ name: "Event Name", value: "Sample Event" }],
-            },
-          ],
-        },
-      },
+      searchResults: [{ "Event Name": "Sample Event" }],
     };
     global.fetch = vi.fn(() =>
       Promise.resolve({

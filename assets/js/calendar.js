@@ -1,20 +1,20 @@
-export const get = (kvs, name) => {
-  return kvs.find((pair) => pair.name === name)?.value;
-};
-
 export const formatEvents = (unformattedEvents) =>
   unformattedEvents.map((unformattedEvent) => {
-    const kvs = unformattedEvent.nameValuePair;
-    const startDate = get(kvs, "Event Start Date");
-    const startTime = get(kvs, "Event Start Time");
-    const start = new Date(`${startDate}T${startTime}`);
-    const endDate = get(kvs, "Event End Date");
-    const endTime = get(kvs, "Event End Time");
-    const end = new Date(`${endDate}T${endTime}`);
-    const title = get(kvs, "Event Name");
-    const id = get(kvs, "Event ID");
-    const category = get(kvs, "Event Category Name");
-    return { id, title, start, end, startDate, endDate, category };
+    const start = new Date(
+      `${unformattedEvent["Event Start Date"]}T${unformattedEvent["Event Start Time"]}`
+    );
+    const end = new Date(
+      `${unformattedEvent["Event End Date"]}T${unformattedEvent["Event End Time"]}`
+    );
+    return {
+      id: unformattedEvent["Event ID"],
+      title: unformattedEvent["Event Name"],
+      start,
+      end,
+      startDate: unformattedEvent["Event Start Date"],
+      endDate: unformattedEvent["Event End Date"],
+      category: unformattedEvent["Event Category Name"],
+    };
   });
 
 export const getCategories = (events) =>
@@ -44,11 +44,11 @@ export const renderCalendar = (calendarEl) => {
 export const getEvents = async () => {
   const eventsResponse = await fetch(neoncrm_calendar.rest_url);
   const eventsData = await eventsResponse.json();
-  if (!eventsData.listEvents?.searchResults?.nameValuePairs) {
+  if (!eventsData.searchResults) {
     console.error("neoncrm-calendar: error fetching events", eventsData);
     return [];
   }
-  return formatEvents(eventsData.listEvents.searchResults.nameValuePairs);
+  return formatEvents(eventsData.searchResults);
 };
 
 export const addEvent = (calendar, event) => {

@@ -8,15 +8,15 @@ add_action( 'rest_api_init', function() {
 	) );
 } );
 
-function get_from_cache($cache_key, $url) {
-    $key = 'neoncrm_' . $cache_key . '_' . md5( $url );
+function neoncrm_calendar_get_from_cache($cache_key, $url, $args) {
+    $key = 'neoncrm_' . $cache_key . '_' . md5( json_encode($args) );
     $cached = get_transient( $key );
     $ttl = 300; // 5 minutes
     if ( false !== $cached ) {
         return $cached;
     }
 
-    $resp = wp_remote_get( $url, array( 'timeout' => 15 ) );
+    $resp = wp_remote_post( $url, $args );
 
 	if ( is_wp_error( $resp ) ) {
 		return new WP_Error( 'http_error', $resp->get_error_message(), array( 'status' => 500 ) );
@@ -41,39 +41,55 @@ function neoncrm_calendar_rest_get_events( WP_REST_Request $request ) {
     if ( empty( $org_id ) ) {
         return new WP_Error( 'no_org_id', 'Org ID not configured', array( 'status' => 500 ) );
     }
-	$neon_login_url = 'https://api.neoncrm.com/neonws/services/api/common/login?login.apiKey=' . $api_key . '&login.orgid=' . $org_id;
-    $login = get_from_cache("login", $neon_login_url);
-    $user_session_id = $login["loginResponse"]["userSessionId"];
-    if ( empty( $user_session_id ) ) {
-        return new WP_Error( 'no_session', 'Could not get user session ID from Neon CRM', array( 'status' => 500 ) );
-    }   
     $start_date = gmdate('Y-m-d', strtotime('-1 month'));
     $end_date = gmdate('Y-m-d', strtotime('+3 month'));
-    $base = 'https://api.neoncrm.com/neonws/services/api/event/listEvents';
-    $params = array(
-        'responseType=json',
-        'userSessionId=' . rawurlencode( $user_session_id ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Event Category Name' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Event ID' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Event Name' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Total Revenue' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Campaign ID' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Campaign Name' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Event Start Date' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Event Start Time' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Event End Date' ),
-        'outputfields.idnamepair.name=' . rawurlencode( 'Event End Time' ),
-        'searches.search.key=' . rawurlencode( 'Event Start Date' ),
-        'searches.search.searchOperator=GREATER_THAN',
-        'searches.search.value=' . rawurlencode( $start_date ),
-        'searches.search.key=' . rawurlencode( 'Event End Date' ),
-        'searches.search.searchOperator=LESS_THAN',
-        'searches.search.value=' . rawurlencode( $end_date ),
-        'page.pageSize=200',
+    $base = 'https://api.neoncrm.com/v2/events/search/outputFields';
+    $data = [
+        'searchFields' => [
+            [
+                'field' => 'Event Start Date',
+                'operator' => 'GREATER_THAN',
+                'value' => $start_date
+            ],
+            [
+                'field' => 'Event Start Date',
+                'operator' => 'LESS_THAN',
+                'value' => $end_date
+            ],
+            [
+                'field' => 'Event Archived',
+                'operator' => 'EQUAL',
+                'value' => 'No'
+            ]
+        ],
+        'outputFields' => [
+                'Event ID',
+                'Event Archive',
+                'Event Name',
+                'Event Start Date',
+                'Event Start Time',
+                'Event End Date',
+                'Event End Time',
+                'Event Category Name',
+                'Event External URL'
+        ],
+        'pagination' => [
+            'currentPage' => 0,
+            'pageSize' => 100,
+            'sortColumn' => 'Event Start Date',
+            'sortDirection' => 'ASC',
+        ]
+    ];
+    $args = array(
+        'headers' => array(
+            'Authorization' => 'Basic ' . base64_encode( $org_id . ':' . $api_key ),
+            'Content-Type' => 'application/json'
+        ),
+        'body' => json_encode($data),
+        'timeout' => 15
     );
-    $neon_events_url = $base . '?' . implode( '&', $params );
-    $events = get_from_cache("events", $neon_events_url);
-    if ( empty ($events["listEvents"]["searchResults"]) ) {
+    $events = neoncrm_calendar_get_from_cache('search', 'https://api.neoncrm.com/v2/events/search', $args);
+    if ( empty ($events["searchResults"]) ) {
         return new WP_Error( 'no_events', 'Could not get events from Neon CRM', array( 'status' => 500 ) );
     }
     return rest_ensure_response($events);

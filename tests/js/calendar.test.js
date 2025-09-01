@@ -75,7 +75,7 @@ describe("renderCategories", () => {
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse),
-      })
+      }),
     );
     const calendar = {
       addEvent: vi.fn().mockReturnThis(),
@@ -84,19 +84,19 @@ describe("renderCategories", () => {
     await renderCategories(categoriesEl, calendar);
     expect(categoriesEl.children.length).toBe(3); // Including "All" button
     expect(categoriesEl.children[0].querySelector("label").textContent).toMatch(
-      "All"
+      "All",
     );
     // alphabetized
     expect(categoriesEl.children[1].querySelector("label").textContent).toMatch(
-      "Seminar"
+      "Seminar",
     );
     expect(categoriesEl.children[2].querySelector("label").textContent).toMatch(
-      "Workshop"
+      "Workshop",
     );
     categoriesEl.children[1].querySelector("input").dispatchEvent(
       new Event("change", {
         bubbles: true,
-      })
+      }),
     );
   });
 });
@@ -167,7 +167,7 @@ describe("renderCalendar", () => {
     onEventClick({ event: { id: "1" } });
     expect(window.open).toHaveBeenCalledWith(
       "https://abcd.app.neoncrm.com/np/clients/abcd/eventRegistration.jsp?event=1",
-      "_blank"
+      "_blank",
     );
   });
 });
@@ -180,7 +180,7 @@ describe("getEvents", () => {
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse),
-      })
+      }),
     );
     const events = await getEvents();
     expect(events.length).toBe(1);
@@ -191,7 +191,7 @@ describe("getEvents", () => {
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({}),
-      })
+      }),
     );
     console.error = vi.fn();
     const events = await getEvents();
@@ -208,7 +208,7 @@ describe("getEventsWithCategories", () => {
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse),
-      })
+      }),
     );
     const events = await getEventsWithCategories();
     expect(events.length).toBe(1);
@@ -219,7 +219,7 @@ describe("getEventsWithCategories", () => {
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({}),
-      })
+      }),
     );
     console.error = vi.fn();
     const events = await getEventsWithCategories();

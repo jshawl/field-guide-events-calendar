@@ -1,68 +1,107 @@
 <?php
 
-class RestTest extends WP_UnitTestCase {
- 	public function setUp(): void {
+class RestTest extends WP_UnitTestCase
+{
+    public function setUp(): void
+    {
         parent::setUp();
-         update_option( 'neoncrm_calendar_options', array(
-            'neoncrm_api_key' => 'secret',
-            'neoncrm_org_id'  => 'org123',
-        ) );
+        update_option("neoncrm_calendar_options", [
+            "neoncrm_api_key" => "secret",
+            "neoncrm_org_id" => "org123",
+        ]);
     }
 
-    public function tearDown(): void {
-        delete_option( 'neoncrm_calendar_options' );
+    public function tearDown(): void
+    {
+        delete_option("neoncrm_calendar_options");
         parent::tearDown();
     }
 
-    public function test_happy_path_list_events() {
-        add_filter('pre_http_request', function($response, $args, $url) {
-            if (strpos($url, 'events') !== false) {
-                return array(
-                    'response' => array( 'code' => 200 ),
-                    'body' => json_encode( array( 'events' => array(
-                        array( 'id' => 1, 'name' => 'Event 1', 'startDate' => '2024-06-01', 'endDate' => '2024-06-01' ),
-                    ) ) ) );
-            }
-            return new WP_Error('unexpected_url', 'Unexpected URL: ' . $url);
-        }, 10, 3 );
-        $response = neoncrm_calendar_rest_list_events( new WP_REST_Request() );
-        $this->assertIsArray( $response->data['events'] );
-        $this->assertCount( 1, $response->data['events'] );
+    public function test_happy_path_list_events()
+    {
+        add_filter(
+            "pre_http_request",
+            function ($response, $args, $url) {
+                if (strpos($url, "events") !== false) {
+                    return [
+                        "response" => ["code" => 200],
+                        "body" => json_encode([
+                            "events" => [
+                                [
+                                    "id" => 1,
+                                    "name" => "Event 1",
+                                    "startDate" => "2024-06-01",
+                                    "endDate" => "2024-06-01",
+                                ],
+                            ],
+                        ]),
+                    ];
+                }
+                return new WP_Error(
+                    "unexpected_url",
+                    "Unexpected URL: " . $url,
+                );
+            },
+            10,
+            3,
+        );
+        $response = neoncrm_calendar_rest_list_events(new WP_REST_Request());
+        $this->assertIsArray($response->data["events"]);
+        $this->assertCount(1, $response->data["events"]);
     }
 
-    public function test_happy_path_events() {
-        add_filter('pre_http_request', function($response, $args, $url) {
-            if (strpos($url, 'events') !== false) {
-                return array(
-                    'response' => array( 'code' => 200 ),
-                    'body' => json_encode( array( 'searchResults' => array(
-                        array( 'id' => 1, 'name' => 'Event 1', 'startDate' => '2024-06-01', 'endDate' => '2024-06-01' ),
-                    ) ) ) );
-            }
-            return new WP_Error('unexpected_url', 'Unexpected URL: ' . $url);
-        }, 10, 3 );
-        $response = neoncrm_calendar_rest_get_events( new WP_REST_Request() );
-        $this->assertIsArray( $response->data['searchResults'] );
-        $this->assertCount( 1, $response->data['searchResults'] );
+    public function test_happy_path_events()
+    {
+        add_filter(
+            "pre_http_request",
+            function ($response, $args, $url) {
+                if (strpos($url, "events") !== false) {
+                    return [
+                        "response" => ["code" => 200],
+                        "body" => json_encode([
+                            "searchResults" => [
+                                [
+                                    "id" => 1,
+                                    "name" => "Event 1",
+                                    "startDate" => "2024-06-01",
+                                    "endDate" => "2024-06-01",
+                                ],
+                            ],
+                        ]),
+                    ];
+                }
+                return new WP_Error(
+                    "unexpected_url",
+                    "Unexpected URL: " . $url,
+                );
+            },
+            10,
+            3,
+        );
+        $response = neoncrm_calendar_rest_get_events(new WP_REST_Request());
+        $this->assertIsArray($response->data["searchResults"]);
+        $this->assertCount(1, $response->data["searchResults"]);
     }
 
-	public function test_api_key_error() {
-		$options = update_option( 'neoncrm_calendar_options', array(
-            'neoncrm_api_key' => '',
-            'neoncrm_org_id'  => 'org123',
-        ) );
-        $response = neoncrm_calendar_rest_get_events( new WP_REST_Request() );
-        $this->assertWPError( $response );
-        $this->assertEquals( 'no_api_key', $response->get_error_code());
-	}
+    public function test_api_key_error()
+    {
+        $options = update_option("neoncrm_calendar_options", [
+            "neoncrm_api_key" => "",
+            "neoncrm_org_id" => "org123",
+        ]);
+        $response = neoncrm_calendar_rest_get_events(new WP_REST_Request());
+        $this->assertWPError($response);
+        $this->assertEquals("no_api_key", $response->get_error_code());
+    }
 
-    public function test_org_id_error() {
-		$options = update_option( 'neoncrm_calendar_options', array(
-            'neoncrm_api_key' => 'secret',
-            'neoncrm_org_id'  => '',
-        ) );
-        $response = neoncrm_calendar_rest_get_events( new WP_REST_Request() );
-        $this->assertWPError( $response );
-        $this->assertEquals( 'no_org_id', $response->get_error_code());
-	}
+    public function test_org_id_error()
+    {
+        $options = update_option("neoncrm_calendar_options", [
+            "neoncrm_api_key" => "secret",
+            "neoncrm_org_id" => "",
+        ]);
+        $response = neoncrm_calendar_rest_get_events(new WP_REST_Request());
+        $this->assertWPError($response);
+        $this->assertEquals("no_org_id", $response->get_error_code());
+    }
 }

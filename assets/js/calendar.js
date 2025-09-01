@@ -37,7 +37,7 @@ export const getCategories = (events) =>
         cats[ev.category] = true;
       }
       return cats; // 😸
-    }, {})
+    }, {}),
   ).sort();
 
 export const renderCalendar = (calendarEl) => {
@@ -110,7 +110,7 @@ export const renderCategories = async (categoriesEl, calendar) => {
   setFetchedEvents(eventsWithCategories);
   getCalendarEvents().map((calendarEvent) => calendarEvent.remove());
   setCalendarEvents(
-    getFetchedEvents().map((event) => addEvent(calendar, event))
+    getFetchedEvents().map((event) => addEvent(calendar, event)),
   );
   const categories = getCategories(getFetchedEvents());
   categoriesEl.innerHTML = "";
@@ -123,7 +123,7 @@ export const renderCategories = async (categoriesEl, calendar) => {
     setCalendarEvents(
       getFetchedEvents()
         .filter((event) => ["All", event.category].includes(category))
-        .map((event) => addEvent(calendar, event))
+        .map((event) => addEvent(calendar, event)),
     );
   });
 };

@@ -64,9 +64,3 @@ jobs:
         run: scripts/check-versions.sh
       - name: Zip
         run: scripts/zip.sh
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: "neoncrm-calendar"
-          path: "release/*.zip"
-          compression-level: 0

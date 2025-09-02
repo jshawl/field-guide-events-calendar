@@ -1,10 +1,8 @@
 #!/bin/sh
 
-version=$(cat neon-crm-calendar.php | grep 'Version:' | sed 's/Version: //')
 slug=$(basename $(pwd))
-sha=$(git rev-parse --short HEAD)
-
-zip -r "release/$slug-$version-$sha.zip" \
+rm -rf release/*
+zip -r "release/$slug.zip" \
     assets/ \
     includes/ \
     templates/ \

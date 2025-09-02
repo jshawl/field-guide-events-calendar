@@ -44,7 +44,7 @@ export const renderCalendar = (calendarEl) => {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     eventClassNames: ["neon-crm-calendar-event"],
     eventClick: (info) => {
-      const url = `https://${neon_crm_calendar.org_id}.app.neoncrm.com/np/clients/${neon_crm_calendar.org_id}/eventRegistration.jsp?event=${info.event.id}`;
+      const url = `https://${neon_crm_calendar.org_id}.app.neoncrm.com/np/clients/${neon_crm_calendar.org_id}/event.jsp?event=${info.event.id}`;
       window.open(url, "_blank");
     },
     headerToolbar: {

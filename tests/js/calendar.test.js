@@ -166,7 +166,7 @@ describe("renderCalendar", () => {
     renderCalendar(calendarEl);
     onEventClick({ event: { id: "1" } });
     expect(window.open).toHaveBeenCalledWith(
-      "https://abcd.app.neoncrm.com/np/clients/abcd/eventRegistration.jsp?event=1",
+      "https://abcd.app.neoncrm.com/np/clients/abcd/event.jsp?event=1",
       "_blank",
     );
   });

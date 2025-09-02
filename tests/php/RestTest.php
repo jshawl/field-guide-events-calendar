@@ -45,7 +45,13 @@ class RestTest extends WP_UnitTestCase
             10,
             3,
         );
-        $response = neon_crm_calendar_rest_list_events(new WP_REST_Request());
+
+        $request = new WP_REST_Request(
+            "GET",
+            "/neon-crm-calendar/v1/listEvents",
+        );
+
+        $response = rest_do_request($request);
         $this->assertIsArray($response->data["events"]);
         $this->assertCount(1, $response->data["events"]);
     }
@@ -89,9 +95,12 @@ class RestTest extends WP_UnitTestCase
             "neon_crm_api_key" => "",
             "neon_crm_org_id" => "org123",
         ]);
-        $response = neon_crm_calendar_rest_get_events(new WP_REST_Request());
-        $this->assertWPError($response);
-        $this->assertEquals("no_api_key", $response->get_error_code());
+        $request = new WP_REST_Request(
+            "GET",
+            "/neon-crm-calendar/v1/listEvents",
+        );
+        $response = rest_do_request($request);
+        $this->assertEquals("no_api_key", $response->data["code"]);
     }
 
     public function test_org_id_error()
@@ -100,8 +109,11 @@ class RestTest extends WP_UnitTestCase
             "neon_crm_api_key" => "secret",
             "neon_crm_org_id" => "",
         ]);
-        $response = neon_crm_calendar_rest_get_events(new WP_REST_Request());
-        $this->assertWPError($response);
-        $this->assertEquals("no_org_id", $response->get_error_code());
+        $request = new WP_REST_Request(
+            "GET",
+            "/neon-crm-calendar/v1/listEvents",
+        );
+        $response = rest_do_request($request);
+        $this->assertEquals("no_org_id", $response->data["code"]);
     }
 }

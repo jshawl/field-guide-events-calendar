@@ -5,5 +5,8 @@
     "tests": {
       "phpVersion": "8.1"
     }
+  },
+  "lifecycleScripts": {
+    "afterStart": "./bin/setup-php.sh"
   }
 }

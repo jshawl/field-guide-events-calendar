@@ -9,9 +9,9 @@
     "test": "npm run test:js && npm run test:php",
     "test:js": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "start": "wp-env start",
     "wp-env": "wp-env",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neon-crm-calendar /var/www/html/vendor/bin/phpunit",
-    "plugin:check": "wp-env run cli --env-cwd=wp-content/plugins/neon-crm-calendar -- wp plugin"
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neon-crm-calendar vendor/bin/phpunit"
   },
   "keywords": [],
   "author": "",

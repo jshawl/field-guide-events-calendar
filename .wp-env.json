@@ -5,5 +5,8 @@
     "tests": {
       "phpVersion": "8.1"
     }
+  },
+  "lifecycleScripts": {
+    "afterStart": "wp-env run tests-cli bash -- -c 'cd wp-content/plugins/neon-crm-calendar && composer install'"
   }
 }

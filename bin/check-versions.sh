@@ -6,6 +6,13 @@ package_version=$(cat package.json | grep '"version":' | sed 's/.*"version": "//
 echo "🆕 Plugin version: $plugin_version"
 errors=0
 
+if ! grep "= $plugin_version =" readme.txt > /dev/null; then
+  echo "❌ Error: Plugin version not found in readme.txt changelog."
+  errors=1
+else
+  echo "✅ Plugin version found in readme."
+fi
+
 if [ "$plugin_version" != "$readme_version" ]; then
   echo "❌ Error: Plugin version and readme version do not match."
   errors=1

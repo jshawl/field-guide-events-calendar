@@ -13,4 +13,17 @@
 			<directory>./tests/php</directory>
 		</testsuite>
 	</testsuites>
+
+	<coverage>
+        <include>
+            <file>./neon-crm-calendar.php</file>
+            <directory suffix=".php">./includes/</directory>
+        </include>
+        <exclude>
+            <!-- Exclude test files -->
+            <directory>./tests/</directory>
+            <!-- Exclude vendor -->
+            <directory>./vendor/</directory>
+        </exclude>
+    </coverage>
 </phpunit>

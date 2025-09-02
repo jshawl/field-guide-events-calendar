@@ -11,7 +11,7 @@
     "test:coverage": "vitest run --coverage",
     "start": "wp-env start",
     "wp-env": "wp-env",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neon-crm-calendar vendor/bin/phpunit"
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/neon-crm-calendar vendor/bin/phpunit --coverage-html coverage/php"
   },
   "keywords": [],
   "author": "",

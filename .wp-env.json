@@ -7,6 +7,6 @@
     }
   },
   "lifecycleScripts": {
-    "afterStart": "wp-env run tests-cli bash -- -c 'cd wp-content/plugins/neon-crm-calendar && composer install'"
+    "afterStart": "./bin/setup-php.sh"
   }
 }

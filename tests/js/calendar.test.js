@@ -11,6 +11,7 @@ import {
   renderCalendar,
   renderCategories,
   renderEventsWithoutCategories,
+  set,
   setCalendarEvents,
 } from "../../assets/js/calendar.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -41,6 +42,31 @@ describe("formatEvents", () => {
       start: new Date("2023-10-01T10:00:00"),
       startDate: "2023-10-01",
       title: "Sample Event",
+    });
+  });
+  it("uses the start date and end time if multi_day_events is false", () => {
+    set("options", { multi_day_events: "false" });
+    const unformattedEvents = [
+      {
+        "Event End Date": "2023-11-02",
+        "Event End Time": "12:00:00",
+        "Event Start Date": "2023-10-01",
+        "Event Start Time": "10:00:00",
+      },
+      {
+        endDate: "2024-11-02",
+        endTime: "12:00:00",
+        startDate: "2024-10-01",
+        startTime: "10:00:00",
+      },
+    ];
+    expect(formatEvents(unformattedEvents)[0]).toMatchObject({
+      end: new Date("2023-10-01T12:00:00"),
+      endDate: "2023-10-01",
+    });
+    expect(formatEvents(unformattedEvents)[1]).toMatchObject({
+      end: new Date("2024-10-01T12:00:00"),
+      endDate: "2024-10-01",
     });
   });
 });

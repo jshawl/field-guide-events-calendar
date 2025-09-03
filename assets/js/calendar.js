@@ -1,6 +1,6 @@
 let store = {};
 
-const set = (key, value) => {
+export const set = (key, value) => {
   store[key] = value;
   return store[key];
 };
@@ -14,8 +14,12 @@ export const formatEvents = (unformattedEvents) =>
     const startTime =
       unformattedEvent["Event Start Time"] || unformattedEvent.startTime;
     const start = new Date(`${startDate}T${startTime}`);
-    const endDate =
+    const options = get("options") || {};
+    let endDate =
       unformattedEvent["Event End Date"] || unformattedEvent.endDate;
+    if (options.multi_day_events === "false") {
+      endDate = startDate;
+    }
     const endTime =
       unformattedEvent["Event End Time"] || unformattedEvent.endTime;
     const end = new Date(`${endDate}T${endTime}`);
@@ -151,10 +155,16 @@ export const renderEventsWithoutCategories = (events, calendar) => {
 };
 
 export const main = () => {
+  const container = document.querySelector(".neon-crm-calendar");
+  const options = container.dataset;
+  set("options", options);
   const calendarEl = document.querySelector(".neon-crm-calendar #calendar");
-  const categoriesEl = document.querySelector(".neon-crm-calendar .categories");
   const calendar = renderCalendar(calendarEl);
-  // not awaited, so categories can start fetching
   getEvents().then((events) => renderEventsWithoutCategories(events, calendar));
+  if (options.filter_categories !== "true") {
+    return;
+  }
+  const categoriesEl = document.querySelector(".neon-crm-calendar .categories");
+  // not awaited, so categories can start fetching
   renderCategories(categoriesEl, calendar);
 };

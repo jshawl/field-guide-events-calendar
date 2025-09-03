@@ -28,7 +28,7 @@ class EnqueueTest extends WP_UnitTestCase
         $output = do_shortcode("[neon_crm_calendar]");
         $this->assertNotEmpty($output);
         $this->assertStringContainsString(
-            '<div class="neon-crm-calendar">',
+            '<div class="neon-crm-calendar"',
             $output,
         );
     }
@@ -62,20 +62,15 @@ class EnqueueTest extends WP_UnitTestCase
             $output,
         );
     }
-
-    public function test_filter_categories_atts()
+    public function test_dom_atts()
     {
-        $this->assertStringNotContainsString(
-            '<div class="categories">',
-            do_shortcode("[neon_crm_calendar]"),
-        );
-        $this->assertStringNotContainsString(
-            '<div class="categories">',
-            do_shortcode('[neon_crm_calendar filter_categories="false"]'),
+        $this->assertStringContainsString(
+            'data-filter_categories="true"',
+            do_shortcode('[neon_crm_calendar filter_categories="true"]'),
         );
         $this->assertStringContainsString(
-            '<div class="categories">',
-            do_shortcode('[neon_crm_calendar filter_categories="true"]'),
+            'data-multi_day_events="false"',
+            do_shortcode('[neon_crm_calendar multi_day_events="false"]'),
         );
     }
 }

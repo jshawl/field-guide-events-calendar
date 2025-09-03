@@ -73,6 +73,7 @@ function neon_crm_calendar_shortcode($atts)
 
     $default_atts = [
         "filter_categories" => "false",
+        "multi_day_events" => "true",
     ];
     $atts = shortcode_atts($default_atts, $atts, "neon_crm_calendar");
     wp_enqueue_style("neon-crm-calendar");

@@ -1,7 +1,9 @@
-<div class="neon-crm-calendar">
+<div class="neon-crm-calendar"
+	<?php foreach ($atts as $key => $value): ?>
+		data-<?php echo esc_attr($key); ?>="<?php echo esc_attr($value); ?>"
+	<?php endforeach; ?>
+>
 	<div class="loading"></div>
-	<?php if ("true" === $atts["filter_categories"]): ?>
-	<div class="categories">Loading categories...</div>
-	<?php endif; ?>
+	<div class="categories"></div>
 	<div id="calendar"></div>
 </div>

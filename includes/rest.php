@@ -18,7 +18,7 @@ add_filter(
 
 function campaign_calendar_get_from_cache($cache_key, $url, $args)
 {
-    $key = "neon_crm_" . $cache_key . "_" . md5(json_encode($args));
+    $key = "campaign_calendar_" . $cache_key . "_" . md5(json_encode($args));
     $cached = get_transient($key);
     $ttl = 60 * 60; // 1 hour
     if (false !== $cached) {

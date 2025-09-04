@@ -9,14 +9,6 @@ add_action("rest_api_init", function () {
     ]);
 });
 
-add_action("rest_api_init", function () {
-    register_rest_route("neon-crm-calendar/v1", "/events", [
-        "methods" => "GET",
-        "callback" => "neon_crm_calendar_rest_get_events",
-        "permission_callback" => "__return_true",
-    ]);
-});
-
 add_filter(
     "rest_request_before_callbacks",
     "neon_crm_calendar_authorize",
@@ -104,65 +96,6 @@ function neon_crm_calendar_rest_list_events(WP_REST_Request $request)
         $args,
     );
     if (empty($events)) {
-        return new WP_Error("no_events", "Could not get events from Neon CRM", [
-            "status" => 500,
-        ]);
-    }
-    return rest_ensure_response($events);
-}
-
-function neon_crm_calendar_rest_get_events(WP_REST_Request $request)
-{
-    $headers = $request->get_param("_headers");
-    $start_date = gmdate("Y-m-d", strtotime("-1 month"));
-    $end_date = gmdate("Y-m-d", strtotime("+3 month"));
-    $data = [
-        "searchFields" => [
-            [
-                "field" => "Event Start Date",
-                "operator" => "GREATER_THAN",
-                "value" => $start_date,
-            ],
-            [
-                "field" => "Event Start Date",
-                "operator" => "LESS_THAN",
-                "value" => $end_date,
-            ],
-            [
-                "field" => "Event Archived",
-                "operator" => "EQUAL",
-                "value" => "No",
-            ],
-        ],
-        "outputFields" => [
-            "Event ID",
-            "Event Archive",
-            "Event Name",
-            "Event Start Date",
-            "Event Start Time",
-            "Event End Date",
-            "Event End Time",
-            "Event Category Name",
-            "Event External URL",
-        ],
-        "pagination" => [
-            "currentPage" => 0,
-            "pageSize" => 200,
-            "sortColumn" => "Event Start Date",
-            "sortDirection" => "ASC",
-        ],
-    ];
-    $args = [
-        "headers" => $headers,
-        "body" => json_encode($data),
-        "timeout" => 30,
-    ];
-    $events = neon_crm_calendar_get_from_cache(
-        "search",
-        "https://api.neoncrm.com/v2/events/search",
-        $args,
-    );
-    if (empty($events["searchResults"])) {
         return new WP_Error("no_events", "Could not get events from Neon CRM", [
             "status" => 500,
         ]);

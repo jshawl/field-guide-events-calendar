@@ -73,4 +73,18 @@ class EnqueueTest extends WP_UnitTestCase
             do_shortcode('[campaign_calendar multi_day_events="false"]'),
         );
     }
+
+    public function test_scripts_load_on_frontend()
+    {
+        $this->go_to(home_url());
+        do_action("wp_enqueue_scripts");
+        ob_start();
+        wp_print_scripts();
+        $output = ob_get_clean();
+        $this->assertStringContainsString(
+            "window.campaign_calendar =",
+            $output,
+        );
+        $this->assertStringContainsString('<script type="module"', $output);
+    }
 }

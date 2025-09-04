@@ -48,4 +48,26 @@ class AdminTest extends WP_UnitTestCase
         $this->assertStringContainsString('value=""', $output);
         $this->assertStringContainsString("**cret", $output);
     }
+
+    public function test_admin_init_integration()
+    {
+        wp_set_current_user(
+            $this->factory->user->create(["role" => "administrator"]),
+        );
+        $this->assertNotFalse(
+            has_action("admin_init", "campaign_calendar_settings_init"),
+        );
+        ob_start();
+        campaign_calendar_settings_init();
+        do_settings_sections("campaign_calendar");
+        $output = ob_get_clean();
+        $this->assertStringContainsString(
+            'name="campaign_calendar_options[neon_crm_api_key]"',
+            $output,
+        );
+        $this->assertStringContainsString(
+            'name="campaign_calendar_options[neon_crm_org_id]"',
+            $output,
+        );
+    }
 }

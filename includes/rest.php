@@ -25,11 +25,7 @@ function campaign_calendar_get_from_cache($cache_key, $url, $args)
         return $cached;
     }
 
-    if (empty($args["body"])) {
-        $resp = wp_remote_get($url, $args);
-    } else {
-        $resp = wp_remote_post($url, $args);
-    }
+    $resp = wp_remote_get($url, $args);
 
     if (is_wp_error($resp)) {
         return new WP_Error("http_error", $resp->get_error_message(), [

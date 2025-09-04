@@ -1,13 +1,11 @@
 export const formatEvents = ({ events, options }) =>
   events.map((event) => {
-    const startDate = event.startDate;
-    const startTime = event.startTime;
-    const start = new Date(`${startDate}T${startTime}`);
-    let endDate = event.endDate;
+    const { endTime, startDate, startTime } = event;
+    let { endDate } = event;
     if (options.multi_day_events === "false") {
       endDate = startDate;
     }
-    const endTime = event.endTime;
+    const start = new Date(`${startDate}T${startTime}`);
     const end = new Date(`${endDate}T${endTime}`);
     return {
       campaignName: event.campaignName,
@@ -83,13 +81,13 @@ export const renderCampaigns = ({ calendar, events, container, options }) => {
   }
   const campaignNames = getCampaignNames(events);
   container.innerHTML = "";
-  renderCampaignButton({ container, campaignName: "All" });
+  renderCampaignButton({ campaignName: "All", container });
   campaignNames.map((campaignName) =>
-    renderCampaignButton({ container, campaignName }),
+    renderCampaignButton({ campaignName, container }),
   );
   container.addEventListener("change", (event) => {
     const campaignName = event.target.value;
-    render({ calendar, events, campaignName });
+    render({ calendar, campaignName, events });
   });
 };
 
@@ -113,6 +111,6 @@ export const main = async () => {
   const options = container.dataset;
   const calendar = renderCalendar(calendarEl);
   const events = await getEvents({ options });
-  render({ calendar, events, campaignName: "All" });
-  renderCampaigns({ calendar, events, container: campaignsEl, options });
+  render({ calendar, campaignName: "All", events });
+  renderCampaigns({ calendar, container: campaignsEl, events, options });
 };

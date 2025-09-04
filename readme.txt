@@ -17,10 +17,11 @@ Add a short code to any page or post to display a calendar of upcoming events:
 
 `[neon_crm_calendar]`
 
-To allow users to filter events by event category, add the 
-`filter_categories="true"` attribute:
-
-`[neon_crm_calendar filter_categories="true"]`
+Additional attributes are available:
+- `filter_campaigns="true"`
+  - filters events by campaign name
+- `multi_day_events="false"`
+  - uses the start date only for dates that span multiple days
 
 == Installation ==
 

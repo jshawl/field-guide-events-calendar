@@ -56,39 +56,6 @@ class RestTest extends WP_UnitTestCase
         $this->assertCount(1, $response->data["events"]);
     }
 
-    public function test_happy_path_events()
-    {
-        add_filter(
-            "pre_http_request",
-            function ($response, $args, $url) {
-                if (strpos($url, "events") !== false) {
-                    return [
-                        "response" => ["code" => 200],
-                        "body" => json_encode([
-                            "searchResults" => [
-                                [
-                                    "id" => 1,
-                                    "name" => "Event 1",
-                                    "startDate" => "2024-06-01",
-                                    "endDate" => "2024-06-01",
-                                ],
-                            ],
-                        ]),
-                    ];
-                }
-                return new WP_Error(
-                    "unexpected_url",
-                    "Unexpected URL: " . $url,
-                );
-            },
-            10,
-            3,
-        );
-        $response = neon_crm_calendar_rest_get_events(new WP_REST_Request());
-        $this->assertIsArray($response->data["searchResults"]);
-        $this->assertCount(1, $response->data["searchResults"]);
-    }
-
     public function test_api_key_error()
     {
         $options = update_option("neon_crm_calendar_options", [

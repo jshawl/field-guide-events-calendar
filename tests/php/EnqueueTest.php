@@ -65,8 +65,8 @@ class EnqueueTest extends WP_UnitTestCase
     public function test_dom_atts()
     {
         $this->assertStringContainsString(
-            'data-filter_categories="true"',
-            do_shortcode('[neon_crm_calendar filter_categories="true"]'),
+            'data-filter_campaigns="true"',
+            do_shortcode('[neon_crm_calendar filter_campaigns="true"]'),
         );
         $this->assertStringContainsString(
             'data-multi_day_events="false"',

@@ -1,6 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   formatEvents,
   getCampaignNames,
@@ -9,7 +10,6 @@ import {
   renderCalendar,
   renderCampaigns,
 } from "../../assets/js/calendar.js";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.stubGlobal("neon_crm_calendar", {
   org_id: "abcd",
@@ -74,7 +74,7 @@ describe("render", () => {
   it("removes loading", () => {
     document.body.innerHTML = `<div class="neon-crm-calendar"><div class="loading"></div></div>`;
     const calendar = { getEvents: vi.fn().mockReturnValue([]) };
-    render({ calendar, events: [], campaignName: "All" });
+    render({ calendar, campaignName: "All", events: [] });
     expect(document.querySelector(".neon-crm-calendar .loading")).toBeNull();
   });
   it("removes existing calendar events", () => {
@@ -82,20 +82,20 @@ describe("render", () => {
     const calendar = {
       getEvents: vi.fn().mockReturnValue([{ remove: removeMock }]),
     };
-    render({ calendar, events: [], campaignName: "All" });
+    render({ calendar, campaignName: "All", events: [] });
     expect(removeMock).toHaveBeenCalled();
   });
   it("adds events matching the campaign filter", () => {
     const addMock = vi.fn();
     const calendar = {
-      getEvents: vi.fn().mockReturnValue([]),
       addEvent: addMock,
+      getEvents: vi.fn().mockReturnValue([]),
     };
     const events = [
-      { id: 1, campaignName: "A" },
-      { id: 2, campaignName: "B" },
+      { campaignName: "A", id: 1 },
+      { campaignName: "B", id: 2 },
     ];
-    render({ calendar, events, campaignName: "A" });
+    render({ calendar, campaignName: "A", events });
     expect(addMock).toHaveBeenCalledTimes(1);
     expect(addMock).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
   });
@@ -111,14 +111,14 @@ describe("renderCampaigns", () => {
     const container = document.createElement("div");
     const calendar = { getEvents: vi.fn().mockReturnValue([]) };
     const events = [];
-    const result = renderCampaigns({ calendar, events, container, options });
+    const result = renderCampaigns({ calendar, container, events, options });
     expect(result).toBeUndefined();
   });
   it("adds buttons for each campgaign", () => {
     const container = document.createElement("div");
     const calendar = { getEvents: vi.fn().mockReturnValue([]) };
     const events = [{ campaignName: "Workshop" }, { campaignName: "Seminar" }];
-    renderCampaigns({ calendar, events, container, options });
+    renderCampaigns({ calendar, container, events, options });
     expect(container.querySelectorAll("input[type='radio']").length).toBe(3); // Including "All"
   });
   it("renders calendar on campaign change", () => {
@@ -129,14 +129,14 @@ describe("renderCampaigns", () => {
       { campaignName: "Seminar" },
     ].map((event) => ({
       ...event,
-      remove: vi.fn(),
       addEvent: addMock,
+      remove: vi.fn(),
     }));
     const calendar = {
       addEvent: addMock,
       getEvents: vi.fn().mockReturnValue(events),
     };
-    renderCampaigns({ calendar, events, container, options });
+    renderCampaigns({ calendar, container, events, options });
     const seminarRadio = container.querySelector("input[value='Seminar']");
     seminarRadio.checked = true;
     seminarRadio.dispatchEvent(new Event("change", { bubbles: true }));

@@ -2,21 +2,21 @@
 defined("ABSPATH") || exit();
 
 add_action("rest_api_init", function () {
-    register_rest_route("neon-crm-calendar/v1", "/listEvents", [
+    register_rest_route("campaign_calendar/v1", "/listEvents", [
         "methods" => "GET",
-        "callback" => "neon_crm_calendar_rest_list_events",
+        "callback" => "campaign_calendar_rest_list_events",
         "permission_callback" => "__return_true",
     ]);
 });
 
 add_filter(
     "rest_request_before_callbacks",
-    "neon_crm_calendar_authorize",
+    "campaign_calendar_authorize",
     10,
     3,
 );
 
-function neon_crm_calendar_get_from_cache($cache_key, $url, $args)
+function campaign_calendar_get_from_cache($cache_key, $url, $args)
 {
     $key = "neon_crm_" . $cache_key . "_" . md5(json_encode($args));
     $cached = get_transient($key);
@@ -47,14 +47,14 @@ function neon_crm_calendar_get_from_cache($cache_key, $url, $args)
     return new WP_Error("neon_error", $decoded, ["status" => $code]);
 }
 
-function neon_crm_calendar_authorize($response, $handler, $request)
+function campaign_calendar_authorize($response, $handler, $request)
 {
     $route = $request->get_route();
-    if (strpos($route, "/neon-crm-calendar/v1/") !== 0) {
+    if (strpos($route, "/campaign_calendar/v1/") !== 0) {
         return $response;
     }
-    $api_key = neon_crm_calendar_get_option("neon_crm_api_key", "");
-    $org_id = neon_crm_calendar_get_option("neon_crm_org_id", "");
+    $api_key = campaign_calendar_get_option("neon_crm_api_key", "");
+    $org_id = campaign_calendar_get_option("neon_crm_org_id", "");
     if (empty($api_key)) {
         return new WP_Error("no_api_key", "API key not configured", [
             "status" => 500,
@@ -74,7 +74,7 @@ function neon_crm_calendar_authorize($response, $handler, $request)
     return $response;
 }
 
-function neon_crm_calendar_rest_list_events(WP_REST_Request $request)
+function campaign_calendar_rest_list_events(WP_REST_Request $request)
 {
     $headers = $request->get_param("_headers");
     $base = "https://api.neoncrm.com/v2/events";
@@ -90,7 +90,7 @@ function neon_crm_calendar_rest_list_events(WP_REST_Request $request)
         "pageSize=200",
     ];
     $neon_events_url = $base . "?" . implode("&", $params);
-    $events = neon_crm_calendar_get_from_cache(
+    $events = campaign_calendar_get_from_cache(
         "listEvents",
         $neon_events_url,
         $args,

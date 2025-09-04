@@ -6,5 +6,5 @@ zip -r "release/$slug.zip" \
     assets/ \
     includes/ \
     templates/ \
-    neon-crm-calendar.php \
+    campaign-calendar.php \
     readme.txt

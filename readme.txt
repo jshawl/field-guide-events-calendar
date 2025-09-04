@@ -1,4 +1,4 @@
-=== Neon CRM Calendar ===
+=== Campaign Calendar ===
 Contributors: jshawl
 Stable tag: 1.0.0
 Tested up to: 6.8
@@ -15,7 +15,7 @@ Displays a calendar of events from Neon CRM.
 
 Add a short code to any page or post to display a calendar of upcoming events:
 
-`[neon_crm_calendar]`
+`[campaign_calendar]`
 
 Additional attributes are available:
 - `filter_campaigns="true"`
@@ -25,7 +25,7 @@ Additional attributes are available:
 
 == Installation ==
 
-Install the plugin and configure the Org ID and Api Key in Settings > Neon CRM Calendar.
+Install the plugin and configure the Org ID and Api Key in Settings > Campaign Calendar.
 
 Information about the Org ID and Api Key are available on [Neon's developer site](https://developer.neoncrm.com/api/getting-started/api-keys/).
 

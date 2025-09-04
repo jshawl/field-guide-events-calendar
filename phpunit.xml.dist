@@ -16,7 +16,7 @@
 
 	<coverage>
         <include>
-            <file>./neon-crm-calendar.php</file>
+            <file>./campaign-calendar.php</file>
             <directory suffix=".php">./includes/</directory>
         </include>
         <exclude>

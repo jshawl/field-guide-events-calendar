@@ -30,9 +30,9 @@ export const getCampaignNames = (events) =>
 
 export const renderCalendar = (calendarEl) => {
   const calendar = new FullCalendar.Calendar(calendarEl, {
-    eventClassNames: ["neon-crm-calendar-event"],
+    eventClassNames: ["campaign_calendar-event"],
     eventClick: (info) => {
-      const url = `https://${neon_crm_calendar.org_id}.app.neoncrm.com/np/clients/${neon_crm_calendar.org_id}/event.jsp?event=${info.event.id}`;
+      const url = `https://${campaign_calendar.org_id}.app.neoncrm.com/np/clients/${campaign_calendar.org_id}/event.jsp?event=${info.event.id}`;
       window.open(url, "_blank");
     },
     headerToolbar: {
@@ -48,12 +48,12 @@ export const renderCalendar = (calendarEl) => {
 
 export const getEvents = async ({ options }) => {
   const eventsResponse = await fetch(
-    `${neon_crm_calendar.rest_url}/listEvents`,
+    `${campaign_calendar.rest_url}/listEvents`,
   );
   const eventsData = await eventsResponse.json();
   if (!eventsData.events) {
     // oxlint-disable-next-line no-console
-    console.error("neon-crm-calendar: error fetching events", eventsData);
+    console.error("campaign_calendar: error fetching events", eventsData);
     return [];
   }
   return formatEvents({ events: eventsData.events, options });
@@ -66,8 +66,8 @@ const renderCampaignButton = ({ container, campaignName }) => {
     checkedAttribute = "checked='true'";
   }
   div.innerHTML = `
-    <input id="neon_crm_calendar_campaign_name_${campaignName}" type="radio" name="neon_crm_calendar_campaign_name" value="${campaignName}" ${checkedAttribute}/>
-    <label for="neon_crm_calendar_campaign_name_${campaignName}">
+    <input id="campaign_calendar_campaign_name_${campaignName}" type="radio" name="campaign_calendar_campaign_name" value="${campaignName}" ${checkedAttribute}/>
+    <label for="campaign_calendar_campaign_name_${campaignName}">
       ${campaignName}
     </label>
   `;
@@ -92,7 +92,7 @@ export const renderCampaigns = ({ calendar, events, container, options }) => {
 };
 
 export const render = ({ calendar, events, campaignName }) => {
-  document.querySelector(".neon-crm-calendar .loading")?.remove();
+  document.querySelector(".campaign_calendar .loading")?.remove();
   calendar.getEvents().map((calendarEvent) => calendarEvent.remove());
   events
     .filter((event) => ["All", event.campaignName].includes(campaignName))
@@ -105,9 +105,9 @@ export const render = ({ calendar, events, campaignName }) => {
 };
 
 export const main = async () => {
-  const container = document.querySelector(".neon-crm-calendar");
-  const calendarEl = document.querySelector(".neon-crm-calendar #calendar");
-  const campaignsEl = document.querySelector(".neon-crm-calendar .campaigns");
+  const container = document.querySelector(".campaign_calendar");
+  const calendarEl = document.querySelector(".campaign_calendar #calendar");
+  const campaignsEl = document.querySelector(".campaign_calendar .campaigns");
   const options = container.dataset;
   const calendar = renderCalendar(calendarEl);
   const events = await getEvents({ options });

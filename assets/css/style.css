@@ -1,17 +1,17 @@
-.neon-crm-calendar {
+.campaign_calendar {
   padding: 10px;
   line-height: 1;
   position: relative;
 }
 
-.neon-crm-calendar .campaigns {
+.campaign_calendar .campaigns {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.neon-crm-calendar .campaigns label {
+.campaign_calendar .campaigns label {
   padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -22,21 +22,21 @@
   font-weight: normal;
 }
 
-.neon-crm-calendar .campaigns label:hover {
+.campaign_calendar .campaigns label:hover {
   background: #eee;
 }
 
-.neon-crm-calendar .campaigns input[type="radio"] {
+.campaign_calendar .campaigns input[type="radio"] {
   display: none;
 }
 
-.neon-crm-calendar .campaigns :checked + label {
+.campaign_calendar .campaigns :checked + label {
   background: #75a548;
   color: #fff;
 }
 
-.neon-crm-calendar-event,
-.neon-crm-calendar-event:hover {
+.campaign_calendar-event,
+.campaign_calendar-event:hover {
   cursor: pointer;
   white-space: normal;
   display: block;
@@ -45,31 +45,31 @@
   padding: 0.25rem;
 }
 
-.neon-crm-calendar-event > div {
+.campaign_calendar-event > div {
   display: inline-block;
 }
 
-.neon-crm-calendar-event .fc-event-title {
+.campaign_calendar-event .fc-event-title {
   font-weight: normal;
 }
 
-.neon-crm-calendar-event .fc-daygrid-event-dot {
+.campaign_calendar-event .fc-daygrid-event-dot {
   display: none;
 }
 
-.neon-crm-calendar .fc .fc-button-primary {
+.campaign_calendar .fc .fc-button-primary {
   background: #eee;
   color: #000;
   border: none;
   outline: none;
 }
-.neon-crm-calendar .fc .fc-button-primary:hover,
-.neon-crm-calendar .fc .fc-button-primary:active {
+.campaign_calendar .fc .fc-button-primary:hover,
+.campaign_calendar .fc .fc-button-primary:active {
   background: #ddd;
   color: #000;
 }
 
-.neon-crm-calendar .loading {
+.campaign_calendar .loading {
   height: 128px;
   width: 128px;
   background-image: url(../img/loader-new.gif);

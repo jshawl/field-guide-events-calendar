@@ -2,9 +2,9 @@
 // Only show configuration error to logged-in users (admins/editors etc.).
 if (is_user_logged_in()) { ?>
         <p style="color:red;">
-            Error: Neon CRM Calendar is not configured properly. Please set the Org ID and API Key in the 
+            Error: Campaign Calendar is not configured properly. Please set the Org ID and API Key in the 
             <a href="<?php admin_url(
-                "options-general.php?page=neon-crm-calendar-settings",
+                "options-general.php?page=campaign_calendar_settings",
             ); ?>">settings</a>.
         </p><?php }
 ?>

@@ -5,7 +5,7 @@ class AdminTest extends WP_UnitTestCase
     public function setUp(): void
     {
         parent::setUp();
-        update_option("neon_crm_calendar_options", [
+        update_option("campaign_calendar_options", [
             "neon_crm_api_key" => "secret",
             "neon_crm_org_id" => "org123",
         ]);
@@ -13,13 +13,13 @@ class AdminTest extends WP_UnitTestCase
 
     public function tearDown(): void
     {
-        delete_option("neon_crm_calendar_options");
+        delete_option("campaign_calendar_options");
         parent::tearDown();
     }
 
     public function test_sanitize_options_ignores_empty_api_key()
     {
-        $options = neon_crm_calendar_sanitize_options([
+        $options = campaign_calendar_sanitize_options([
             "neon_crm_org_id" => "org123",
             "neon_crm_api_key" => "",
         ]);
@@ -27,7 +27,7 @@ class AdminTest extends WP_UnitTestCase
             $options["neon_crm_api_key"],
             "secret",
         );
-        $other_options = neon_crm_calendar_sanitize_options([
+        $other_options = campaign_calendar_sanitize_options([
             "neon_crm_org_id" => "org123",
             "neon_crm_api_key" => "newkey",
         ]);
@@ -40,7 +40,7 @@ class AdminTest extends WP_UnitTestCase
     public function test_text_input_does_not_expose_api_key()
     {
         ob_start();
-        neon_crm_calendar_text_input([
+        campaign_calendar_text_input([
             "label_for" => "neon_crm_api_key",
             "type" => "password",
         ]);

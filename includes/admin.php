@@ -5,43 +5,43 @@ defined("ABSPATH") || exit();
  * Admin settings, sanitization and settings page.
  */
 
-function neon_crm_calendar_register_settings_link($links)
+function campaign_calendar_register_settings_link($links)
 {
     $links[] =
         '<a href="' .
-        admin_url("options-general.php?page=neon-crm-calendar-settings") .
+        admin_url("options-general.php?page=campaign_calendar-settings") .
         '">' .
-        __("Settings", "neon-crm-calendar") .
+        __("Settings", "campaign_calendar") .
         "</a>";
     return $links;
 }
 add_filter(
     "plugin_action_links_" .
-        plugin_basename(NEON_CRM_CALENDAR_DIR . "neon-crm-calendar.php"),
-    "neon_crm_calendar_register_settings_link",
+        plugin_basename(CAMPAIGN_CALENDAR_DIR . "campaign-calendar.php"),
+    "campaign_calendar_register_settings_link",
 );
 
-function neon_crm_calendar_settings_init()
+function campaign_calendar_settings_init()
 {
     register_setting(
-        "neon_crm_calendar",
-        "neon_crm_calendar_options",
-        "neon_crm_calendar_sanitize_options",
+        "campaign_calendar",
+        "campaign_calendar_options",
+        "campaign_calendar_sanitize_options",
     );
 
     add_settings_section(
-        "neon_crm_calendar_section",
+        "campaign_calendar_section",
         "",
-        "neon_crm_calendar_settings_header",
-        "neon_crm_calendar",
+        "campaign_calendar_settings_header",
+        "campaign_calendar",
     );
 
     add_settings_field(
         "neon_crm_org_id",
-        __("Org ID", "neon-crm-calendar"),
-        "neon_crm_calendar_text_input",
-        "neon_crm_calendar",
-        "neon_crm_calendar_section",
+        __("Org ID", "campaign_calendar"),
+        "campaign_calendar_text_input",
+        "campaign_calendar",
+        "campaign_calendar_section",
         [
             "label_for" => "neon_crm_org_id",
         ],
@@ -49,25 +49,25 @@ function neon_crm_calendar_settings_init()
 
     add_settings_field(
         "neon_crm_api_key",
-        __("API Key", "neon-crm-calendar"),
-        "neon_crm_calendar_text_input",
-        "neon_crm_calendar",
-        "neon_crm_calendar_section",
+        __("API Key", "campaign_calendar"),
+        "campaign_calendar_text_input",
+        "campaign_calendar",
+        "campaign_calendar_section",
         [
             "label_for" => "neon_crm_api_key",
             "type" => "password",
             "description" => __(
                 "Enter your Neon CRM API key. Leave blank to keep the current key.",
-                "neon-crm-calendar",
+                "campaign_calendar",
             ),
         ],
     );
 }
-add_action("admin_init", "neon_crm_calendar_settings_init");
+add_action("admin_init", "campaign_calendar_settings_init");
 
-function neon_crm_calendar_sanitize_options($input)
+function campaign_calendar_sanitize_options($input)
 {
-    $options = get_option("neon_crm_calendar_options", []);
+    $options = get_option("campaign_calendar_options", []);
     $output = $options;
 
     if (isset($input["neon_crm_org_id"])) {
@@ -88,21 +88,21 @@ function neon_crm_calendar_sanitize_options($input)
     return $output;
 }
 
-function neon_crm_calendar_settings_header($args)
+function campaign_calendar_settings_header($args)
 {
     ?>
 	<p id="<?php echo esc_attr($args["id"]); ?>">
 		<a href="https://developer.neoncrm.com/api/getting-started/api-keys/" target="_blank" rel="noopener noreferrer"><?php esc_html_e(
       "View Neon API Keys Documentation",
-      "neon-crm-calendar",
+      "campaign_calendar",
   ); ?></a>
 	</p>
 	<?php
 }
 
-function neon_crm_calendar_text_input($args)
+function campaign_calendar_text_input($args)
 {
-    $options = get_option("neon_crm_calendar_options", []);
+    $options = get_option("campaign_calendar_options", []);
     $value = "";
     if (isset($options[$args["label_for"]])) {
         $value = $options[$args["label_for"]];
@@ -115,7 +115,7 @@ function neon_crm_calendar_text_input($args)
     ?>
 	<input type="<?php echo esc_attr($type); ?>"
 		   id="<?php echo esc_attr($args["label_for"]); ?>"
-		   name="neon_crm_calendar_options[<?php echo esc_attr($args["label_for"]); ?>]"
+		   name="campaign_calendar_options[<?php echo esc_attr($args["label_for"]); ?>]"
 		   value="<?php echo esc_attr($value_attr); ?>" />
 	<?php if ("password" === $type && !empty($value)) {
      $len = strlen($value);
@@ -132,7 +132,7 @@ function neon_crm_calendar_text_input($args)
              /* translators: %s is the masked API key (asterisks + last 4 chars) */
              esc_html__(
                  "Current key: %s — leave blank to keep existing key.",
-                 "neon-crm-calendar",
+                 "campaign_calendar",
              ),
              esc_html($masked),
          ) .
@@ -140,7 +140,7 @@ function neon_crm_calendar_text_input($args)
  }
 }
 
-function neon_crm_calendar_settings_html()
+function campaign_calendar_settings_html()
 {
     if (!current_user_can("manage_options")) {
         return;
@@ -149,22 +149,22 @@ function neon_crm_calendar_settings_html()
 		<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 		<form action="options.php" method="post">
 			<?php
-   settings_fields("neon_crm_calendar");
-   do_settings_sections("neon_crm_calendar");
-   submit_button(__("Save Settings", "neon-crm-calendar"));?>
+   settings_fields("campaign_calendar");
+   do_settings_sections("campaign_calendar");
+   submit_button(__("Save Settings", "campaign_calendar"));?>
 		</form>
 	</div>
 	<?php
 }
 
-function neon_crm_calendar_options_page()
+function campaign_calendar_options_page()
 {
     add_options_page(
-        __("Neon CRM Calendar Settings", "neon-crm-calendar"),
-        __("Neon CRM Calendar", "neon-crm-calendar"),
+        __("Campaign Calendar Settings", "campaign_calendar"),
+        __("Campaign Calendar", "campaign_calendar"),
         "manage_options",
-        "neon-crm-calendar-settings",
-        "neon_crm_calendar_settings_html",
+        "campaign_calendar-settings",
+        "campaign_calendar_settings_html",
     );
 }
-add_action("admin_menu", "neon_crm_calendar_options_page");
+add_action("admin_menu", "campaign_calendar_options_page");

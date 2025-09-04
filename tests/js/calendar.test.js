@@ -11,7 +11,7 @@ import {
   renderCampaigns,
 } from "../../assets/js/calendar.js";
 
-vi.stubGlobal("neon_crm_calendar", {
+vi.stubGlobal("campaign_calendar", {
   org_id: "abcd",
   rest_url: "/fake-url",
 });
@@ -72,10 +72,10 @@ describe("getCampaignNames", () => {
 
 describe("render", () => {
   it("removes loading", () => {
-    document.body.innerHTML = `<div class="neon-crm-calendar"><div class="loading"></div></div>`;
+    document.body.innerHTML = `<div class="campaign_calendar"><div class="loading"></div></div>`;
     const calendar = { getEvents: vi.fn().mockReturnValue([]) };
     render({ calendar, campaignName: "All", events: [] });
-    expect(document.querySelector(".neon-crm-calendar .loading")).toBeNull();
+    expect(document.querySelector(".campaign_calendar .loading")).toBeNull();
   });
   it("removes existing calendar events", () => {
     const removeMock = vi.fn();

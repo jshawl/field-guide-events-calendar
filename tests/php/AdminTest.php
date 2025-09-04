@@ -60,7 +60,6 @@ class AdminTest extends WP_UnitTestCase
         ob_start();
         campaign_calendar_settings_init();
         do_settings_sections("campaign_calendar");
-        campaign_calendar_settings_html();
         $output = ob_get_clean();
         $this->assertStringContainsString(
             'name="campaign_calendar_options[neon_crm_api_key]"',

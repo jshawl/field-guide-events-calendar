@@ -1,44 +1,30 @@
-let store = {};
-
-export const set = (key, value) => {
-  store[key] = value;
-  return store[key];
-};
-
-const get = (key) => store[key];
-
-export const formatEvents = (unformattedEvents) =>
-  unformattedEvents.map((unformattedEvent) => {
-    const startDate =
-      unformattedEvent["Event Start Date"] || unformattedEvent.startDate;
-    const startTime =
-      unformattedEvent["Event Start Time"] || unformattedEvent.startTime;
+export const formatEvents = ({ events, options }) =>
+  events.map((event) => {
+    const startDate = event.startDate;
+    const startTime = event.startTime;
     const start = new Date(`${startDate}T${startTime}`);
-    const options = get("options") || {};
-    let endDate =
-      unformattedEvent["Event End Date"] || unformattedEvent.endDate;
+    let endDate = event.endDate;
     if (options.multi_day_events === "false") {
       endDate = startDate;
     }
-    const endTime =
-      unformattedEvent["Event End Time"] || unformattedEvent.endTime;
+    const endTime = event.endTime;
     const end = new Date(`${endDate}T${endTime}`);
     return {
-      category: unformattedEvent["Event Category Name"],
+      campaignName: event.campaignName,
       end,
       endDate,
-      id: unformattedEvent["Event ID"] || unformattedEvent.id,
+      id: event.id,
       start,
       startDate,
-      title: unformattedEvent["Event Name"] || unformattedEvent.name,
+      title: event.name,
     };
   });
 
-export const getCategories = (events) =>
+export const getCampaignNames = (events) =>
   Object.keys(
     events.reduce((cats, ev) => {
-      if (ev.category) {
-        cats[ev.category] = true;
+      if (ev.campaignName) {
+        cats[ev.campaignName] = true;
       }
       return cats; // 😸
     }, {}),
@@ -62,7 +48,7 @@ export const renderCalendar = (calendarEl) => {
   return calendar;
 };
 
-export const getEvents = async () => {
+export const getEvents = async ({ options }) => {
   const eventsResponse = await fetch(
     `${neon_crm_calendar.rest_url}/listEvents`,
   );
@@ -72,99 +58,61 @@ export const getEvents = async () => {
     console.error("neon-crm-calendar: error fetching events", eventsData);
     return [];
   }
-  return formatEvents(eventsData.events);
+  return formatEvents({ events: eventsData.events, options });
 };
 
-export const getEventsWithCategories = async () => {
-  const eventsResponse = await fetch(`${neon_crm_calendar.rest_url}/events`);
-  const eventsData = await eventsResponse.json();
-  if (!eventsData.searchResults) {
-    // oxlint-disable-next-line no-console
-    console.error("neon-crm-calendar: error fetching events", eventsData);
-    return [];
-  }
-  return formatEvents(eventsData.searchResults);
-};
-
-export const addEvent = (calendar, event) =>
-  calendar.addEvent({
-    ...event,
-    allDay: event.startDate !== event.endDate,
-  });
-
-const renderCategory = (container, category) => {
+const renderCampaignButton = ({ container, campaignName }) => {
   const div = document.createElement("div");
   let checkedAttribute = "";
-  if (category === "All") {
+  if (campaignName === "All") {
     checkedAttribute = "checked='true'";
   }
   div.innerHTML = `
-    <input id="neon_crm_calendar_category_${category}" type="radio" name="neon_crm_calendar_category" value="${category}" ${checkedAttribute}/>
-    <label for="neon_crm_calendar_category_${category}">
-      ${category}
+    <input id="neon_crm_calendar_campaign_name_${campaignName}" type="radio" name="neon_crm_calendar_campaign_name" value="${campaignName}" ${checkedAttribute}/>
+    <label for="neon_crm_calendar_campaign_name_${campaignName}">
+      ${campaignName}
     </label>
   `;
   container.append(div);
   return div;
 };
 
-export const renderCategories = async (categoriesEl, calendar) => {
-  if (!categoriesEl) {
-    return;
-  }
-  const eventsWithCategories = await getEventsWithCategories();
-  setFetchedEvents(eventsWithCategories);
-  getCalendarEvents().map((calendarEvent) => calendarEvent.remove());
-  setCalendarEvents(
-    getFetchedEvents().map((event) => addEvent(calendar, event)),
+export const renderCampaigns = async ({ calendar, events, container }) => {
+  const campaignNames = getCampaignNames(events);
+  container.innerHTML = "";
+  renderCampaignButton({ container, campaignName: "All" });
+  campaignNames.map((campaignName) =>
+    renderCampaignButton({ container, campaignName }),
   );
-  const categories = getCategories(getFetchedEvents());
-  categoriesEl.innerHTML = "";
-  renderCategory(categoriesEl, "All");
-  categories.map((category) => renderCategory(categoriesEl, category));
-  categoriesEl.addEventListener("change", (event) => {
-    const category = event.target.value;
-
-    getCalendarEvents().map((calendarEvent) => calendarEvent.remove());
-    setCalendarEvents(
-      getFetchedEvents()
-        .filter((event) => ["All", event.category].includes(category))
-        .map((event) => addEvent(calendar, event)),
-    );
+  container.addEventListener("change", (event) => {
+    const campaignName = event.target.value;
+    render({ calendar, events, campaignName });
   });
 };
 
-export const setFetchedEvents = (events) => set("fetchedEvents", events);
-const getFetchedEvents = () => get("fetchedEvents");
-
-export const setCalendarEvents = (calendarEvents) =>
-  set("calendarEvents", calendarEvents);
-export const getCalendarEvents = () => get("calendarEvents");
-
-setFetchedEvents([]);
-setCalendarEvents([]);
-
-export const renderEventsWithoutCategories = (events, calendar) => {
-  document.querySelector(".neon-crm-calendar .loading").remove();
-  if (getCalendarEvents().length > 0) {
-    // if the events with categories already rendered, don't overwrite
-    return;
-  }
-  setFetchedEvents(events);
-  setCalendarEvents(events.map((event) => addEvent(calendar, event)));
+export const render = ({ calendar, events, campaignName }) => {
+  document.querySelector(".neon-crm-calendar .loading")?.remove();
+  calendar.getEvents().map((calendarEvent) => calendarEvent.remove());
+  events
+    .filter((event) => ["All", event.campaignName].includes(campaignName))
+    .map((event) =>
+      calendar.addEvent({
+        ...event,
+        allDay: event.startDate !== event.endDate,
+      }),
+    );
 };
 
-export const main = () => {
+export const main = async () => {
   const container = document.querySelector(".neon-crm-calendar");
   const options = container.dataset;
-  set("options", options);
   const calendarEl = document.querySelector(".neon-crm-calendar #calendar");
   const calendar = renderCalendar(calendarEl);
-  getEvents().then((events) => renderEventsWithoutCategories(events, calendar));
+  const events = await getEvents({ options });
+  render({ calendar, events, campaignName: "All" });
   if (options.filter_categories !== "true") {
     return;
   }
-  const categoriesEl = document.querySelector(".neon-crm-calendar .categories");
-  // not awaited, so categories can start fetching
-  renderCategories(categoriesEl, calendar);
+  const campaignsEl = document.querySelector(".neon-crm-calendar .campaigns");
+  renderCampaigns({ calendar, events, container: campaignsEl });
 };

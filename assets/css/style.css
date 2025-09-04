@@ -4,14 +4,14 @@
   position: relative;
 }
 
-.neon-crm-calendar .categories {
+.neon-crm-calendar .campaigns {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.neon-crm-calendar .categories label {
+.neon-crm-calendar .campaigns label {
   padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -22,15 +22,15 @@
   font-weight: normal;
 }
 
-.neon-crm-calendar .categories label:hover {
+.neon-crm-calendar .campaigns label:hover {
   background: #eee;
 }
 
-.neon-crm-calendar .categories input[type="radio"] {
+.neon-crm-calendar .campaigns input[type="radio"] {
   display: none;
 }
 
-.neon-crm-calendar .categories :checked + label {
+.neon-crm-calendar .campaigns :checked + label {
   background: #75a548;
   color: #fff;
 }

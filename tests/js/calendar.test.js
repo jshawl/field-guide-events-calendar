@@ -2,19 +2,14 @@
  * @vitest-environment jsdom
  */
 import {
-  addEvent,
   formatEvents,
-  getCalendarEvents,
-  getCategories,
+  getCampaignNames,
   getEvents,
-  getEventsWithCategories,
+  render,
   renderCalendar,
-  renderCategories,
-  renderEventsWithoutCategories,
-  set,
-  setCalendarEvents,
+  renderCampaigns,
 } from "../../assets/js/calendar.js";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.stubGlobal("neon_crm_calendar", {
   org_id: "abcd",
@@ -23,36 +18,30 @@ vi.stubGlobal("neon_crm_calendar", {
 
 describe("formatEvents", () => {
   it("formats an event correctly", () => {
-    const unformattedEvents = [
+    const events = [
       {
-        "Event Category Name": "Workshop",
-        "Event End Date": "2023-10-01",
-        "Event End Time": "12:00:00",
-        "Event ID": "123",
-        "Event Name": "Sample Event",
-        "Event Start Date": "2023-10-01",
-        "Event Start Time": "10:00:00",
+        campaignName: "Workshop",
+        endDate: "2023-10-01",
+        endTime: "12:00:00",
+        id: 123,
+        name: "Sample Event",
+        startDate: "2023-10-01",
+        startTime: "10:00:00",
       },
     ];
-    expect(formatEvents(unformattedEvents)[0]).toEqual({
-      category: "Workshop",
+    const options = {};
+    expect(formatEvents({ events, options })[0]).toEqual({
+      campaignName: "Workshop",
       end: new Date("2023-10-01T12:00:00"),
       endDate: "2023-10-01",
-      id: "123",
+      id: 123,
       start: new Date("2023-10-01T10:00:00"),
       startDate: "2023-10-01",
       title: "Sample Event",
     });
   });
   it("uses the start date and end time if multi_day_events is false", () => {
-    set("options", { multi_day_events: "false" });
-    const unformattedEvents = [
-      {
-        "Event End Date": "2023-11-02",
-        "Event End Time": "12:00:00",
-        "Event Start Date": "2023-10-01",
-        "Event Start Time": "10:00:00",
-      },
+    const events = [
       {
         endDate: "2024-11-02",
         endTime: "12:00:00",
@@ -60,119 +49,89 @@ describe("formatEvents", () => {
         startTime: "10:00:00",
       },
     ];
-    expect(formatEvents(unformattedEvents)[0]).toMatchObject({
-      end: new Date("2023-10-01T12:00:00"),
-      endDate: "2023-10-01",
-    });
-    expect(formatEvents(unformattedEvents)[1]).toMatchObject({
+    const options = { multi_day_events: "false" };
+    expect(formatEvents({ events, options })[0]).toMatchObject({
       end: new Date("2024-10-01T12:00:00"),
       endDate: "2024-10-01",
     });
   });
 });
 
-describe("getCategories", () => {
-  it("extracts unique categories from events", () => {
+describe("getCampaignNames", () => {
+  it("extracts unique campaign names from events", () => {
     const events = [
-      { category: "Workshop" },
-      { category: "Seminar" },
-      { category: "Workshop" },
-      { category: undefined },
+      { campaignName: "Workshop" },
+      { campaignName: "Seminar" },
+      { campaignName: "Workshop" },
+      { campaignName: undefined },
       {},
     ];
-    expect(getCategories(events)).toEqual(["Seminar", "Workshop"]);
+    expect(getCampaignNames(events)).toEqual(["Seminar", "Workshop"]);
   });
 });
 
-describe("renderCategories", () => {
-  it("returns early if categories are not enabled via shortcode", () => {
-    globalThis.fetch = vi.fn();
-    renderCategories(undefined, {});
-    expect(globalThis.fetch).not.toHaveBeenCalled();
-  });
-  it("renders category buttons", async () => {
-    const categoriesEl = document.createElement("div");
-    const mockResponse = {
-      searchResults: [
-        { "Event Category Name": "Workshop" },
-        { "Event Category Name": "Seminar" },
-      ],
-    };
-    globalThis.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(mockResponse),
-      }),
-    );
-    const calendar = {
-      addEvent: vi.fn().mockReturnThis(),
-      remove: vi.fn(),
-    };
-    await renderCategories(categoriesEl, calendar);
-    expect(categoriesEl.children.length).toBe(3); // Including "All" button
-    expect(categoriesEl.children[0].querySelector("label").textContent).toMatch(
-      "All",
-    );
-    // alphabetized
-    expect(categoriesEl.children[1].querySelector("label").textContent).toMatch(
-      "Seminar",
-    );
-    expect(categoriesEl.children[2].querySelector("label").textContent).toMatch(
-      "Workshop",
-    );
-    categoriesEl.children[1].querySelector("input").dispatchEvent(
-      new Event("change", {
-        bubbles: true,
-      }),
-    );
-  });
-});
-
-describe("renderEventsWithoutCategories", () => {
-  beforeEach(() => {
-    document.body.innerHTML = `<div class='neon-crm-calendar'><div class='loading'></div></div>`;
-  });
+describe("render", () => {
   it("removes loading", () => {
-    renderEventsWithoutCategories();
-    expect(document.body.innerHTML).not.toContain("loading");
+    document.body.innerHTML = `<div class="neon-crm-calendar"><div class="loading"></div></div>`;
+    const calendar = { getEvents: vi.fn().mockReturnValue([]) };
+    render({ calendar, events: [], campaignName: "All" });
+    expect(document.querySelector(".neon-crm-calendar .loading")).toBeNull();
   });
-  it("returns early if calendar events are already set", () => {
-    setCalendarEvents([{ name: "Event 1" }]);
-    renderEventsWithoutCategories([{ name: "Stale Event" }]);
-    expect(getCalendarEvents()[0].name).toBe("Event 1");
-  });
-  it("only sets calendar events if none are there already", () => {
-    setCalendarEvents([]);
+  it("removes existing calendar events", () => {
+    const removeMock = vi.fn();
     const calendar = {
-      addEvent: (name) => name,
+      getEvents: vi.fn().mockReturnValue([{ remove: removeMock }]),
     };
-    renderEventsWithoutCategories([{ name: "Event 1" }], calendar);
-    expect(getCalendarEvents()[0].name).toBe("Event 1");
+    render({ calendar, events: [], campaignName: "All" });
+    expect(removeMock).toHaveBeenCalled();
+  });
+  it("adds events matching the campaign filter", () => {
+    const addMock = vi.fn();
+    const calendar = {
+      getEvents: vi.fn().mockReturnValue([]),
+      addEvent: addMock,
+    };
+    const events = [
+      { id: 1, campaignName: "A" },
+      { id: 2, campaignName: "B" },
+    ];
+    render({ calendar, events, campaignName: "A" });
+    expect(addMock).toHaveBeenCalledTimes(1);
+    expect(addMock).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
   });
 });
 
-describe("addEvent", () => {
-  it("adds an event to the calendar", () => {
+describe("renderCampaigns", () => {
+  it("adds buttons for each campgaign", () => {
+    const container = document.createElement("div");
+    const calendar = { getEvents: vi.fn().mockReturnValue([]) };
+    const events = [{ campaignName: "Workshop" }, { campaignName: "Seminar" }];
+    renderCampaigns({ calendar, events, container });
+    expect(container.querySelectorAll("input[type='radio']").length).toBe(3); // Including "All"
+  });
+  it("renders calendar on campaign change", () => {
+    const container = document.createElement("div");
+    const addMock = vi.fn();
+    const events = [
+      { campaignName: "Workshop" },
+      { campaignName: "Seminar" },
+    ].map((event) => ({
+      ...event,
+      remove: vi.fn(),
+      addEvent: addMock,
+    }));
     const calendar = {
-      addEvent: vi.fn(),
+      addEvent: addMock,
+      getEvents: vi.fn().mockReturnValue(events),
     };
-    addEvent(calendar, {
-      endDate: "2025-08-30",
-      startDate: "2025-08-30",
-    });
-    expect(calendar.addEvent).toHaveBeenCalledWith({
-      allDay: false,
-      endDate: "2025-08-30",
-      startDate: "2025-08-30",
-    });
-    addEvent(calendar, {
-      endDate: "2025-08-31",
-      startDate: "2025-08-30",
-    });
-    expect(calendar.addEvent).toHaveBeenCalledWith({
-      allDay: true,
-      endDate: "2025-08-31",
-      startDate: "2025-08-30",
-    });
+    renderCampaigns({ calendar, events, container });
+    const seminarRadio = container.querySelector("input[value='Seminar']");
+    seminarRadio.checked = true;
+    seminarRadio.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(addMock).toHaveBeenCalledTimes(1);
+    expect(addMock).toHaveBeenCalledWith(
+      expect.objectContaining({ campaignName: "Seminar" }),
+    );
   });
 });
 
@@ -201,14 +160,14 @@ describe("renderCalendar", () => {
 describe("getEvents", () => {
   it("fetches and formats events", async () => {
     const mockResponse = {
-      events: [{ "Event Name": "Sample Event" }],
+      events: [{ name: "Sample Event" }],
     };
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse),
       }),
     );
-    const events = await getEvents();
+    const events = await getEvents({ options: {} });
     expect(events.length).toBe(1);
     expect(events[0].title).toBe("Sample Event");
   });
@@ -220,35 +179,7 @@ describe("getEvents", () => {
       }),
     );
     console.error = vi.fn();
-    const events = await getEvents();
-    expect(events).toEqual([]);
-    expect(console.error).toHaveBeenCalled();
-  });
-});
-
-describe("getEventsWithCategories", () => {
-  it("fetches and formats events", async () => {
-    const mockResponse = {
-      searchResults: [{ name: "Sample Event" }],
-    };
-    globalThis.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(mockResponse),
-      }),
-    );
-    const events = await getEventsWithCategories();
-    expect(events.length).toBe(1);
-    expect(events[0].title).toBe("Sample Event");
-  });
-
-  it("handles fetch errors gracefully", async () => {
-    globalThis.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({}),
-      }),
-    );
-    console.error = vi.fn();
-    const events = await getEventsWithCategories();
+    const events = await getEvents({});
     expect(events).toEqual([]);
     expect(console.error).toHaveBeenCalled();
   });

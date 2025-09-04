@@ -4,6 +4,6 @@
 	<?php endforeach; ?>
 >
 	<div class="loading"></div>
-	<div class="categories"></div>
+	<div class="campaigns"></div>
 	<div id="calendar"></div>
 </div>

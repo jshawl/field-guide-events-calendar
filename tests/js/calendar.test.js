@@ -9,7 +9,7 @@ import {
   renderCalendar,
   renderCampaigns,
 } from "../../assets/js/calendar.js";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.stubGlobal("neon_crm_calendar", {
   org_id: "abcd",
@@ -102,11 +102,23 @@ describe("render", () => {
 });
 
 describe("renderCampaigns", () => {
+  let options = {};
+  beforeEach(() => {
+    options.filter_campaigns = "true";
+  });
+  it("returns early if filtering is disabled", () => {
+    options.filter_campaigns = "false";
+    const container = document.createElement("div");
+    const calendar = { getEvents: vi.fn().mockReturnValue([]) };
+    const events = [];
+    const result = renderCampaigns({ calendar, events, container, options });
+    expect(result).toBeUndefined();
+  });
   it("adds buttons for each campgaign", () => {
     const container = document.createElement("div");
     const calendar = { getEvents: vi.fn().mockReturnValue([]) };
     const events = [{ campaignName: "Workshop" }, { campaignName: "Seminar" }];
-    renderCampaigns({ calendar, events, container });
+    renderCampaigns({ calendar, events, container, options });
     expect(container.querySelectorAll("input[type='radio']").length).toBe(3); // Including "All"
   });
   it("renders calendar on campaign change", () => {
@@ -124,7 +136,7 @@ describe("renderCampaigns", () => {
       addEvent: addMock,
       getEvents: vi.fn().mockReturnValue(events),
     };
-    renderCampaigns({ calendar, events, container });
+    renderCampaigns({ calendar, events, container, options });
     const seminarRadio = container.querySelector("input[value='Seminar']");
     seminarRadio.checked = true;
     seminarRadio.dispatchEvent(new Event("change", { bubbles: true }));

@@ -22,11 +22,11 @@ export const formatEvents = ({ events, options }) =>
 
 export const getCampaignNames = (events) =>
   Object.keys(
-    events.reduce((cats, ev) => {
+    events.reduce((camps, ev) => {
       if (ev.campaignName) {
-        cats[ev.campaignName] = true;
+        camps[ev.campaignName] = true;
       }
-      return cats; // 😸
+      return camps; // 🏕️
     }, {}),
   ).sort();
 
@@ -77,7 +77,10 @@ const renderCampaignButton = ({ container, campaignName }) => {
   return div;
 };
 
-export const renderCampaigns = async ({ calendar, events, container }) => {
+export const renderCampaigns = ({ calendar, events, container, options }) => {
+  if (options.filter_campaigns !== "true") {
+    return;
+  }
   const campaignNames = getCampaignNames(events);
   container.innerHTML = "";
   renderCampaignButton({ container, campaignName: "All" });
@@ -105,14 +108,11 @@ export const render = ({ calendar, events, campaignName }) => {
 
 export const main = async () => {
   const container = document.querySelector(".neon-crm-calendar");
-  const options = container.dataset;
   const calendarEl = document.querySelector(".neon-crm-calendar #calendar");
+  const campaignsEl = document.querySelector(".neon-crm-calendar .campaigns");
+  const options = container.dataset;
   const calendar = renderCalendar(calendarEl);
   const events = await getEvents({ options });
   render({ calendar, events, campaignName: "All" });
-  if (options.filter_categories !== "true") {
-    return;
-  }
-  const campaignsEl = document.querySelector(".neon-crm-calendar .campaigns");
-  renderCampaigns({ calendar, events, container: campaignsEl });
+  renderCampaigns({ calendar, events, container: campaignsEl, options });
 };

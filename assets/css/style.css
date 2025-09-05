@@ -1,17 +1,17 @@
-.campaign_calendar {
+.field_guide_events_calendar {
   padding: 10px;
   line-height: 1;
   position: relative;
 }
 
-.campaign_calendar .campaigns {
+.field_guide_events_calendar .campaigns {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.campaign_calendar .campaigns label {
+.field_guide_events_calendar .campaigns label {
   padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -22,21 +22,21 @@
   font-weight: normal;
 }
 
-.campaign_calendar .campaigns label:hover {
+.field_guide_events_calendar .campaigns label:hover {
   background: #eee;
 }
 
-.campaign_calendar .campaigns input[type="radio"] {
+.field_guide_events_calendar .campaigns input[type="radio"] {
   display: none;
 }
 
-.campaign_calendar .campaigns :checked + label {
+.field_guide_events_calendar .campaigns :checked + label {
   background: #75a548;
   color: #fff;
 }
 
-.campaign_calendar-event,
-.campaign_calendar-event:hover {
+.field_guide_events_calendar-event,
+.field_guide_events_calendar-event:hover {
   cursor: pointer;
   white-space: normal;
   display: block;
@@ -45,31 +45,31 @@
   padding: 0.25rem;
 }
 
-.campaign_calendar-event > div {
+.field_guide_events_calendar-event > div {
   display: inline-block;
 }
 
-.campaign_calendar-event .fc-event-title {
+.field_guide_events_calendar-event .fc-event-title {
   font-weight: normal;
 }
 
-.campaign_calendar-event .fc-daygrid-event-dot {
+.field_guide_events_calendar-event .fc-daygrid-event-dot {
   display: none;
 }
 
-.campaign_calendar .fc .fc-button-primary {
+.field_guide_events_calendar .fc .fc-button-primary {
   background: #eee;
   color: #000;
   border: none;
   outline: none;
 }
-.campaign_calendar .fc .fc-button-primary:hover,
-.campaign_calendar .fc .fc-button-primary:active {
+.field_guide_events_calendar .fc .fc-button-primary:hover,
+.field_guide_events_calendar .fc .fc-button-primary:active {
   background: #ddd;
   color: #000;
 }
 
-.campaign_calendar .loading {
+.field_guide_events_calendar .loading {
   height: 128px;
   width: 128px;
   background-image: url(../img/loader-new.gif);

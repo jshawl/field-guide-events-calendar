@@ -5,7 +5,7 @@ class RestTest extends WP_UnitTestCase
     public function setUp(): void
     {
         parent::setUp();
-        update_option("campaign_calendar_options", [
+        update_option("field_guide_events_calendar_options", [
             "neon_crm_api_key" => "secret",
             "neon_crm_org_id" => "org123",
         ]);
@@ -13,7 +13,7 @@ class RestTest extends WP_UnitTestCase
 
     public function tearDown(): void
     {
-        delete_option("campaign_calendar_options");
+        delete_option("field_guide_events_calendar_options");
         parent::tearDown();
     }
 
@@ -52,7 +52,7 @@ class RestTest extends WP_UnitTestCase
         ]);
         $request = new WP_REST_Request(
             "GET",
-            "/campaign_calendar/v1/listEvents",
+            "/field_guide_events_calendar/v1/listEvents",
         );
 
         $response = rest_do_request($request);
@@ -77,7 +77,10 @@ class RestTest extends WP_UnitTestCase
         ]);
 
         $response = rest_do_request(
-            new WP_REST_Request("GET", "/campaign_calendar/v1/listEvents"),
+            new WP_REST_Request(
+                "GET",
+                "/field_guide_events_calendar/v1/listEvents",
+            ),
         );
         $this->assertIsArray($response->data["events"]);
         $this->assertCount(1, $response->data["events"]);
@@ -86,7 +89,10 @@ class RestTest extends WP_UnitTestCase
             "body" => json_encode([]),
         ]);
         $response2 = rest_do_request(
-            new WP_REST_Request("GET", "/campaign_calendar/v1/listEvents"),
+            new WP_REST_Request(
+                "GET",
+                "/field_guide_events_calendar/v1/listEvents",
+            ),
         );
         $this->assertIsArray($response2->data["events"]);
         $this->assertCount(1, $response2->data["events"]);
@@ -99,7 +105,7 @@ class RestTest extends WP_UnitTestCase
         );
         $request = new WP_REST_Request(
             "GET",
-            "/campaign_calendar/v1/listEvents",
+            "/field_guide_events_calendar/v1/listEvents",
         );
         $response = rest_do_request($request);
         $this->assertEquals("http_error", $response->data["code"]);
@@ -113,7 +119,7 @@ class RestTest extends WP_UnitTestCase
         ]);
         $request = new WP_REST_Request(
             "GET",
-            "/campaign_calendar/v1/listEvents",
+            "/field_guide_events_calendar/v1/listEvents",
         );
         $response = rest_do_request($request);
         $this->assertEquals("neon_error", $response->data["code"]);
@@ -121,13 +127,13 @@ class RestTest extends WP_UnitTestCase
 
     public function test_api_key_error()
     {
-        $options = update_option("campaign_calendar_options", [
+        $options = update_option("field_guide_events_calendar_options", [
             "neon_crm_api_key" => "",
             "neon_crm_org_id" => "org123",
         ]);
         $request = new WP_REST_Request(
             "GET",
-            "/campaign_calendar/v1/listEvents",
+            "/field_guide_events_calendar/v1/listEvents",
         );
         $response = rest_do_request($request);
         $this->assertEquals("no_api_key", $response->data["code"]);
@@ -135,13 +141,13 @@ class RestTest extends WP_UnitTestCase
 
     public function test_org_id_error()
     {
-        $options = update_option("campaign_calendar_options", [
+        $options = update_option("field_guide_events_calendar_options", [
             "neon_crm_api_key" => "secret",
             "neon_crm_org_id" => "",
         ]);
         $request = new WP_REST_Request(
             "GET",
-            "/campaign_calendar/v1/listEvents",
+            "/field_guide_events_calendar/v1/listEvents",
         );
         $response = rest_do_request($request);
         $this->assertEquals("no_org_id", $response->data["code"]);

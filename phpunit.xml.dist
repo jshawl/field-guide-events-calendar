@@ -16,7 +16,7 @@
 
 	<coverage>
         <include>
-            <file>./campaign-calendar.php</file>
+            <file>./field-guide-events-calendar.php</file>
             <directory suffix=".php">./includes/</directory>
         </include>
         <exclude>

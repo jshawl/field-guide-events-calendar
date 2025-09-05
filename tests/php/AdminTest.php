@@ -5,7 +5,7 @@ class AdminTest extends WP_UnitTestCase
     public function setUp(): void
     {
         parent::setUp();
-        update_option("campaign_calendar_options", [
+        update_option("field_guide_events_calendar_options", [
             "neon_crm_api_key" => "secret",
             "neon_crm_org_id" => "org123",
         ]);
@@ -13,13 +13,13 @@ class AdminTest extends WP_UnitTestCase
 
     public function tearDown(): void
     {
-        delete_option("campaign_calendar_options");
+        delete_option("field_guide_events_calendar_options");
         parent::tearDown();
     }
 
     public function test_sanitize_options_ignores_empty_api_key()
     {
-        $options = campaign_calendar_sanitize_options([
+        $options = field_guide_events_calendar_sanitize_options([
             "neon_crm_org_id" => "org123",
             "neon_crm_api_key" => "",
         ]);
@@ -27,7 +27,7 @@ class AdminTest extends WP_UnitTestCase
             $options["neon_crm_api_key"],
             "secret",
         );
-        $other_options = campaign_calendar_sanitize_options([
+        $other_options = field_guide_events_calendar_sanitize_options([
             "neon_crm_org_id" => "org123",
             "neon_crm_api_key" => "newkey",
         ]);
@@ -40,7 +40,7 @@ class AdminTest extends WP_UnitTestCase
     public function test_text_input_does_not_expose_api_key()
     {
         ob_start();
-        campaign_calendar_text_input([
+        field_guide_events_calendar_text_input([
             "label_for" => "neon_crm_api_key",
             "type" => "password",
         ]);
@@ -55,18 +55,21 @@ class AdminTest extends WP_UnitTestCase
             $this->factory->user->create(["role" => "administrator"]),
         );
         $this->assertNotFalse(
-            has_action("admin_init", "campaign_calendar_settings_init"),
+            has_action(
+                "admin_init",
+                "field_guide_events_calendar_settings_init",
+            ),
         );
         ob_start();
-        campaign_calendar_settings_init();
-        do_settings_sections("campaign_calendar");
+        field_guide_events_calendar_settings_init();
+        do_settings_sections("field_guide_events_calendar");
         $output = ob_get_clean();
         $this->assertStringContainsString(
-            'name="campaign_calendar_options[neon_crm_api_key]"',
+            'name="field_guide_events_calendar_options[neon_crm_api_key]"',
             $output,
         );
         $this->assertStringContainsString(
-            'name="campaign_calendar_options[neon_crm_org_id]"',
+            'name="field_guide_events_calendar_options[neon_crm_org_id]"',
             $output,
         );
     }

@@ -1,4 +1,5 @@
-<div class="campaign_calendar"
+<?php defined("ABSPATH") || exit(); ?>
+<div class="field_guide_events_calendar"
 	<?php foreach ($atts as $key => $value): ?>
 		data-<?php echo esc_attr($key); ?>="<?php echo esc_attr($value); ?>"
 	<?php endforeach; ?>

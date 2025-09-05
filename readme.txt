@@ -1,6 +1,6 @@
 === Field Guide Events Calendar ===
 Contributors: jshawl
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Tested up to: 6.8
 Requires at least: 6.0
 License: GPLv2 or later
@@ -29,8 +29,11 @@ Information about the Org ID and Api Key are available on [Neon's developer site
 
 == Changelog ==
 
-= 1.0.0 =
+= [1.1.0] 2025-09-04 =
 
-*Release Date - 01 September 2025*
+* Added `multi_day_events` attribute 
+* Uses campaign names for filtering instead of categories
+
+= [1.0.0] 2025-09-01 =
 
 * Initial release 

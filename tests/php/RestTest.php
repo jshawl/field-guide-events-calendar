@@ -2,7 +2,7 @@
 
 class RestTest extends WP_UnitTestCase
 {
-    private string $neon_events_path;
+    private WP_Rest_Request $neon_request;
 
     public function setUp(): void
     {
@@ -11,7 +11,14 @@ class RestTest extends WP_UnitTestCase
             "neon_crm_api_key" => "secret",
             "neon_crm_org_id" => "org123",
         ]);
-        $this->neon_events_path = "/field_guide_events_calendar/v1/neon/events";
+        $this->neon_request = new WP_REST_Request(
+            "GET",
+            "/field_guide_events_calendar/v1/neon/events",
+            [
+                "start" => "2024-01-01",
+                "end" => "2024-01-31",
+            ],
+        );
     }
 
     public function tearDown(): void
@@ -53,8 +60,7 @@ class RestTest extends WP_UnitTestCase
                 ],
             ]),
         ]);
-        $request = new WP_REST_Request("GET", $this->neon_events_path);
-        $response = rest_do_request($request);
+        $response = rest_do_request($this->neon_request);
         $this->assertIsArray($response->data["events"]);
         $this->assertCount(1, $response->data["events"]);
     }
@@ -75,18 +81,14 @@ class RestTest extends WP_UnitTestCase
             ]),
         ]);
 
-        $response = rest_do_request(
-            new WP_REST_Request("GET", $this->neon_events_path),
-        );
+        $response = rest_do_request($this->neon_request);
         $this->assertIsArray($response->data["events"]);
         $this->assertCount(1, $response->data["events"]);
         $this->mock_events_response([
             "response" => ["code" => 500],
             "body" => json_encode([]),
         ]);
-        $response2 = rest_do_request(
-            new WP_REST_Request("GET", $this->neon_events_path),
-        );
+        $response2 = rest_do_request($this->neon_request);
         $this->assertIsArray($response2->data["events"]);
         $this->assertCount(1, $response2->data["events"]);
     }
@@ -96,8 +98,7 @@ class RestTest extends WP_UnitTestCase
         $this->mock_events_response(
             new WP_Error("http_failure", "HTTP request failed"),
         );
-        $request = new WP_REST_Request("GET", $this->neon_events_path);
-        $response = rest_do_request($request);
+        $response = rest_do_request($this->neon_request);
         $this->assertEquals("http_error", $response->data["code"]);
     }
 
@@ -107,8 +108,7 @@ class RestTest extends WP_UnitTestCase
             "response" => ["code" => 400],
             "body" => json_encode([]),
         ]);
-        $request = new WP_REST_Request("GET", $this->neon_events_path);
-        $response = rest_do_request($request);
+        $response = rest_do_request($this->neon_request);
         $this->assertEquals("neon_error", $response->data["code"]);
     }
 
@@ -118,8 +118,7 @@ class RestTest extends WP_UnitTestCase
             "neon_crm_api_key" => "",
             "neon_crm_org_id" => "org123",
         ]);
-        $request = new WP_REST_Request("GET", $this->neon_events_path);
-        $response = rest_do_request($request);
+        $response = rest_do_request($this->neon_request);
         $this->assertEquals("no_api_key", $response->data["code"]);
     }
 
@@ -129,8 +128,7 @@ class RestTest extends WP_UnitTestCase
             "neon_crm_api_key" => "secret",
             "neon_crm_org_id" => "",
         ]);
-        $request = new WP_REST_Request("GET", $this->neon_events_path);
-        $response = rest_do_request($request);
+        $response = rest_do_request($this->neon_request);
         $this->assertEquals("no_org_id", $response->data["code"]);
     }
 }

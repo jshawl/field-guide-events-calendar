@@ -2,6 +2,8 @@
 
 class RestTest extends WP_UnitTestCase
 {
+    private string $neon_events_path;
+
     public function setUp(): void
     {
         parent::setUp();

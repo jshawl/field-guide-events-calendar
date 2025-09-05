@@ -1,6 +1,6 @@
 #!/bin/sh
 
-plugin_version=$(cat campaign-calendar.php | grep 'Version:' | sed 's/Version: //')
+plugin_version=$(cat field-guide-events-calendar.php | grep 'Version:' | sed 's/Version: //')
 readme_version=$(cat readme.txt | grep '^Stable tag:' | sed 's/Stable tag: //')
 package_version=$(cat package.json | grep '"version":' | sed 's/.*"version": "//;s/".*//')
 echo "🆕 Plugin version: $plugin_version"

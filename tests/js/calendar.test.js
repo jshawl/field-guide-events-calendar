@@ -12,7 +12,7 @@ import {
   renderCampaigns,
 } from "../../assets/js/calendar.js";
 
-vi.stubGlobal("campaign_calendar", {
+vi.stubGlobal("field_guide_events_calendar", {
   org_id: "abcd",
   rest_url: "/fake-url",
 });
@@ -39,7 +39,7 @@ vi.stubGlobal("FullCalendar", {
 
 describe("main", () => {
   beforeEach(() => {
-    document.body.innerHTML = `<div class="campaign_calendar">
+    document.body.innerHTML = `<div class="field_guide_events_calendar">
       <div class="loading"></div>
       <div class="calendar"></div>
     </div>`;
@@ -56,7 +56,9 @@ describe("main", () => {
     );
     await main();
     expect(calendarRenderMock).toHaveBeenCalledTimes(1);
-    expect(document.querySelector(".campaign_calendar .loading")).toBeNull();
+    expect(
+      document.querySelector(".field_guide_events_calendar .loading"),
+    ).toBeNull();
   });
 });
 
@@ -117,10 +119,12 @@ describe("getCampaignNames", () => {
 
 describe("render", () => {
   it("removes loading", () => {
-    document.body.innerHTML = `<div class="campaign_calendar"><div class="loading"></div></div>`;
+    document.body.innerHTML = `<div class="field_guide_events_calendar"><div class="loading"></div></div>`;
     const calendar = { getEvents: vi.fn().mockReturnValue([]) };
     render({ calendar, campaignName: "All", events: [] });
-    expect(document.querySelector(".campaign_calendar .loading")).toBeNull();
+    expect(
+      document.querySelector(".field_guide_events_calendar .loading"),
+    ).toBeNull();
   });
 
   it("removes existing calendar events", () => {

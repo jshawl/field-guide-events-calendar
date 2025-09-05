@@ -2,15 +2,15 @@
 defined("ABSPATH") || exit();
 
 /**
- * accessor for campaign_calendar options.
+ * accessor for field_guide_events_calendar options.
  *
  * Usage:
- *   campaign_calendar_get_option( 'neon_crm_api_key', '' );
- *   campaign_calendar_get_option( null ); // returns full array
+ *   field_guide_events_calendar_get_option( 'neon_crm_api_key', '' );
+ *   field_guide_events_calendar_get_option( null ); // returns full array
  */
-function campaign_calendar_get_option($key = null, $default = "")
+function field_guide_events_calendar_get_option($key = null, $default = "")
 {
-    $opts = (array) get_option("campaign_calendar_options", []);
+    $opts = (array) get_option("field_guide_events_calendar_options", []);
 
     if (null === $key) {
         return $opts;

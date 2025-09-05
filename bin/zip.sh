@@ -6,5 +6,5 @@ zip -r "release/$slug.zip" \
     assets/ \
     includes/ \
     templates/ \
-    campaign-calendar.php \
+    field-guide-events-calendar.php \
     readme.txt

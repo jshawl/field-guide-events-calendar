@@ -224,6 +224,9 @@ describe("getEvents", () => {
       }),
     );
     const events = await getEvents({ options: {} });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/neon/events"),
+    );
     expect(events.length).toBe(1);
     expect(events[0].title).toBe("Sample Event");
   });

@@ -48,7 +48,7 @@ export const renderCalendar = (calendarEl) => {
 
 export const getEvents = async ({ options }) => {
   const eventsResponse = await fetch(
-    `${field_guide_events_calendar.rest_url}/listEvents`,
+    `${field_guide_events_calendar.rest_url}/neon/events`,
   );
   const eventsData = await eventsResponse.json();
   if (!eventsData.events) {

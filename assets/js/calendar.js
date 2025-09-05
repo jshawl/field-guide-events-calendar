@@ -29,7 +29,20 @@ export const getCampaignNames = (events) =>
   ).sort();
 
 export const renderCalendar = (calendarEl) => {
+  const container = document.querySelector(".field_guide_events_calendar");
+  const campaignsEl = document.querySelector(
+    ".field_guide_events_calendar .campaigns",
+  );
+  const options = container.dataset;
+
   const calendar = new FullCalendar.Calendar(calendarEl, {
+    datesSet: async (info) => {
+      const start = info.startStr.slice(0, 10);
+      const end = info.endStr.slice(0, 10);
+      const events = await getEvents({ end, options, start });
+      render({ calendar, campaignName: "All", events });
+      renderCampaigns({ calendar, container: campaignsEl, events, options });
+    },
     eventClassNames: ["field_guide_events_calendar-event"],
     eventClick: (info) => {
       const url = `https://${field_guide_events_calendar.org_id}.app.neoncrm.com/np/clients/${field_guide_events_calendar.org_id}/event.jsp?event=${info.event.id}`;
@@ -46,11 +59,28 @@ export const renderCalendar = (calendarEl) => {
   return calendar;
 };
 
-export const getEvents = async ({ options }) => {
-  const eventsResponse = await fetch(
-    `${field_guide_events_calendar.rest_url}/neon/events`,
+const setIsLoading = (isLoading) => {
+  const loadingEl = document.querySelector(
+    ".field_guide_events_calendar .loading",
   );
+  if (!loadingEl) {
+    return;
+  }
+  if (isLoading) {
+    loadingEl.style.display = "block";
+  } else {
+    loadingEl.style.display = "none";
+  }
+};
+
+export const getEvents = async ({ end, options, start }) => {
+  setIsLoading(true);
+  const url = new URL(`${field_guide_events_calendar.rest_url}/neon/events`);
+  url.searchParams.append("start", start);
+  url.searchParams.append("end", end);
+  const eventsResponse = await fetch(url);
   const eventsData = await eventsResponse.json();
+  setIsLoading(false);
   if (!eventsData.events) {
     // oxlint-disable-next-line no-console
     console.error(
@@ -95,7 +125,6 @@ export const renderCampaigns = ({ calendar, events, container, options }) => {
 };
 
 export const render = ({ calendar, events, campaignName }) => {
-  document.querySelector(".field_guide_events_calendar .loading")?.remove();
   calendar.getEvents().map((calendarEvent) => calendarEvent.remove());
   events
     .filter((event) => ["All", event.campaignName].includes(campaignName))
@@ -107,17 +136,8 @@ export const render = ({ calendar, events, campaignName }) => {
     );
 };
 
-export const main = async () => {
-  const container = document.querySelector(".field_guide_events_calendar");
-  const calendarEl = document.querySelector(
-    ".field_guide_events_calendar #calendar",
+export const main = () => {
+  renderCalendar(
+    document.querySelector(".field_guide_events_calendar #calendar"),
   );
-  const campaignsEl = document.querySelector(
-    ".field_guide_events_calendar .campaigns",
-  );
-  const options = container.dataset;
-  const calendar = renderCalendar(calendarEl);
-  const events = await getEvents({ options });
-  render({ calendar, campaignName: "All", events });
-  renderCampaigns({ calendar, container: campaignsEl, events, options });
 };

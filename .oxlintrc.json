@@ -13,7 +13,8 @@
     {
       "files": ["tests/**/*.js"],
       "rules": {
-        "no-console": ["off"]
+        "no-console": ["off"],
+        "max-lines-per-function": ["off"]
       }
     }
   ]

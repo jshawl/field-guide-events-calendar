@@ -2,9 +2,9 @@
 defined("ABSPATH") || exit();
 
 add_action("rest_api_init", function () {
-    register_rest_route("field_guide_events_calendar/v1", "/listEvents", [
+    register_rest_route("field_guide_events_calendar/v1", "/neon/events", [
         "methods" => "GET",
-        "callback" => "field_guide_events_calendar_rest_list_events",
+        "callback" => "field_guide_events_calendar_rest_neon_events",
         "permission_callback" => "__return_true",
     ]);
 });
@@ -50,7 +50,7 @@ function field_guide_events_calendar_get_from_cache($cache_key, $url, $args)
 function field_guide_events_calendar_authorize($response, $handler, $request)
 {
     $route = $request->get_route();
-    if (strpos($route, "/field_guide_events_calendar/v1/") !== 0) {
+    if (strpos($route, "/field_guide_events_calendar/v1/neon") !== 0) {
         return $response;
     }
     $api_key = field_guide_events_calendar_get_option("neon_crm_api_key", "");
@@ -74,7 +74,7 @@ function field_guide_events_calendar_authorize($response, $handler, $request)
     return $response;
 }
 
-function field_guide_events_calendar_rest_list_events(WP_REST_Request $request)
+function field_guide_events_calendar_rest_neon_events(WP_REST_Request $request)
 {
     $headers = $request->get_param("_headers");
     $base = "https://api.neoncrm.com/v2/events";

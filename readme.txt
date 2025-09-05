@@ -5,11 +5,9 @@ Tested up to: 6.8
 Requires at least: 6.0
 License: GPLv2 or later
 
-A plugin to display a calendar of events from Neon CRM registrations.
-
 == Description ==
 
-Displays a calendar of events from Neon CRM.
+A plugin to display a filterable calendar of events with initial support for Neon CRM.
 
 == Usage ==
 

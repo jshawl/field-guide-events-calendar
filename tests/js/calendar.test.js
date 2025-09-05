@@ -14,7 +14,8 @@ import {
 
 vi.stubGlobal("field_guide_events_calendar", {
   org_id: "abcd",
-  rest_url: "/fake-url",
+  rest_url:
+    "http://localhost:8888/index.php?rest_route=/field_guide_events_calendar/v1",
 });
 
 const addEventMock = vi.fn();
@@ -24,6 +25,7 @@ vi.stubGlobal("FullCalendar", {
   Calendar: class {
     constructor(_element, opts) {
       onEventClick = opts.eventClick;
+      opts.datesSet({ endStr: "2024-01-31", startStr: "2024-01-01" });
     }
     addEvent(args) {
       return addEventMock(args);
@@ -56,9 +58,6 @@ describe("main", () => {
     );
     await main();
     expect(calendarRenderMock).toHaveBeenCalledTimes(1);
-    expect(
-      document.querySelector(".field_guide_events_calendar .loading"),
-    ).toBeNull();
   });
 });
 
@@ -118,15 +117,6 @@ describe("getCampaignNames", () => {
 });
 
 describe("render", () => {
-  it("removes loading", () => {
-    document.body.innerHTML = `<div class="field_guide_events_calendar"><div class="loading"></div></div>`;
-    const calendar = { getEvents: vi.fn().mockReturnValue([]) };
-    render({ calendar, campaignName: "All", events: [] });
-    expect(
-      document.querySelector(".field_guide_events_calendar .loading"),
-    ).toBeNull();
-  });
-
   it("removes existing calendar events", () => {
     const removeMock = vi.fn();
     const calendar = {
@@ -202,6 +192,7 @@ describe("renderCampaigns", () => {
 let onEventClick = () => {};
 describe("renderCalendar", () => {
   it("initializes the calendar", () => {
+    document.body.innerHTML = `<div class="field_guide_events_calendar"></div>`;
     vi.stubGlobal("open", vi.fn());
     const calendarEl = document.createElement("div");
     renderCalendar(calendarEl);
@@ -225,10 +216,37 @@ describe("getEvents", () => {
     );
     const events = await getEvents({ options: {} });
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/neon/events"),
+      expect.objectContaining({
+        href: expect.stringContaining(encodeURIComponent("/neon/events")),
+      }),
     );
     expect(events.length).toBe(1);
     expect(events[0].title).toBe("Sample Event");
+  });
+
+  it("toggles loading state", async () => {
+    document.body.innerHTML = `<div class="field_guide_events_calendar">
+      <div class="loading"></div>
+    </div>`;
+
+    let resolvePromise = vi.fn();
+    const promise = new Promise((resolve) => {
+      resolvePromise = resolve;
+    });
+    globalThis.fetch = vi.fn(() => promise);
+    getEvents({ options: {} });
+    expect(
+      document.querySelector(".field_guide_events_calendar .loading").style
+        .display,
+    ).toBe("block");
+    resolvePromise({ json: () => Promise.resolve({ events: [] }) });
+    await promise;
+    await vi.waitFor(() => {
+      expect(
+        document.querySelector(".field_guide_events_calendar .loading").style
+          .display,
+      ).toBe("none");
+    });
   });
 
   it("handles fetch errors gracefully", async () => {

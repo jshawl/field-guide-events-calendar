@@ -22,7 +22,7 @@ function field_guide_events_calendar_get_from_cache($cache_key, $url, $args)
         "field_guide_events_calendar_" .
         $cache_key .
         "_" .
-        md5(json_encode($args));
+        md5(json_encode($url) . json_encode($args));
     $cached = get_transient($key);
     $ttl = 60 * 60; // 1 hour
     if (false !== $cached) {
@@ -82,12 +82,13 @@ function field_guide_events_calendar_rest_neon_events(WP_REST_Request $request)
         "headers" => $headers,
         "timeout" => 15,
     ];
-    $start_date = gmdate("Y-m-d", strtotime("-1 month"));
-    $end_date = gmdate("Y-m-d", strtotime("+3 month"));
+    $start_date = $request->get_param("start");
+    $end_date = $request->get_param("end");
     $params = [
         "startDateAfter=" . rawurlencode($start_date),
-        "endDateBefore=" . rawurlencode($end_date),
+        "startDateBefore=" . rawurlencode($end_date),
         "pageSize=200",
+        "publishedEvent=true",
     ];
     $neon_events_url = $base . "?" . implode("&", $params);
     $events = field_guide_events_calendar_get_from_cache(

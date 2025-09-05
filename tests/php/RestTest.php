@@ -14,11 +14,11 @@ class RestTest extends WP_UnitTestCase
         $this->neon_request = new WP_REST_Request(
             "GET",
             "/field_guide_events_calendar/v1/neon/events",
-            [
-                "start" => "2024-01-01",
-                "end" => "2024-01-31",
-            ],
         );
+        $this->neon_request->set_query_params([
+            "start" => "2024-01-01",
+            "end" => "2024-01-31",
+        ]);
     }
 
     public function tearDown(): void

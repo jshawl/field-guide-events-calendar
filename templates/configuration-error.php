@@ -13,7 +13,7 @@ if (is_user_logged_in()) { ?>
                 '<a href="%s">%s</a>',
                 esc_url(
                     admin_url(
-                        "options-general.php?page=field-guide-events-calendar_settings",
+                        "options-general.php?page=field_guide_events_calendar-settings",
                     ),
                 ),
                 /* translators: Link text for the settings page */

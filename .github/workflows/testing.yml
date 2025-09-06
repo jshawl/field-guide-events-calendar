@@ -29,23 +29,6 @@ jobs:
           key: ${{ runner.os }}-wp-env-${{ hashFiles('.wp-env.json', 'package-lock.json') }}-v3
           restore-keys: |
             ${{ runner.os }}-wp-env-
-      - name: Cache Docker images
-        uses: actions/cache@v4
-        with:
-          path: /tmp/docker-images
-          key: ${{ runner.os }}-docker-${{ hashFiles('.wp-env.json') }}-v1
-          restore-keys: |
-            ${{ runner.os }}-docker-
-
-      # Restore Docker images if cached
-      - name: Load cached Docker images
-        run: |
-          if [ -d "/tmp/docker-images" ]; then
-            echo "Loading cached Docker images..."
-            find /tmp/docker-images -name "*.tar" -exec docker load -i {} \;
-          else
-            echo "No cached Docker images found"
-          fi
       - name: Install dependencies
         run: npm ci
       - name: Start wp-env
@@ -56,17 +39,6 @@ jobs:
         run: npm start -- --debug
       - name: Test
         run: npm run test:php
-      - name: Save Docker images
-        run: |
-          mkdir -p /tmp/docker-images
-          # Save WordPress-related images
-          docker images --format "table {{.Repository}}:{{.Tag}}" | grep -E "(wordpress|mysql|phpmyadmin|nginx)" | while read image; do
-            if [ "$image" != "REPOSITORY:TAG" ]; then
-              filename=$(echo $image | tr '/:' '_')
-              echo "Saving $image as $filename.tar"
-              docker save "$image" -o "/tmp/docker-images/$filename.tar"
-            fi
-          done
 
   vitest:
     name: JavaScript tests

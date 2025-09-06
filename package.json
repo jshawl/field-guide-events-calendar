@@ -11,7 +11,8 @@
     "test:coverage": "vitest run --coverage",
     "start": "wp-env start",
     "wp-env": "wp-env",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/field-guide-events-calendar vendor/bin/phpunit --coverage-html coverage/php"
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/field-guide-events-calendar vendor/bin/phpunit --coverage-html coverage/php",
+    "plugin:check": "wp-env run tests-cli -- wp plugin check field-guide-events-calendar --exclude-directories=tests,coverage,bin --ignore-codes=hidden_files"
   },
   "keywords": [],
   "author": "",

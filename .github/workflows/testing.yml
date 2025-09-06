@@ -40,7 +40,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Start wp-env
-        run: npm start
+        env:
+          TERM: dumb
+          NO_COLOR: 1
+          CI: true
+        run: npm start -- --debug
       - name: Test
         run: npm run test:php
       - name: Debug wp-env directories (after)

@@ -5,6 +5,8 @@ Tested up to: 6.8
 Requires at least: 6.0
 License: GPLv2 or later
 
+A plugin to display a filterable calendar of events with initial support for Neon CRM.
+
 == Description ==
 
 A plugin to display a filterable calendar of events with initial support for Neon CRM.
@@ -26,6 +28,13 @@ Additional attributes are available:
 Install the plugin and configure the Org ID and Api Key in Settings > Field Guide Events Calendar.
 
 Information about the Org ID and Api Key are available on [Neon's developer site](https://developer.neoncrm.com/api/getting-started/api-keys/).
+
+== External services ==
+
+This plugin connects to an API to obtain events; it's needed to show the
+events on the calendar every time the included shortcode is loaded. It does not collect any user information. Site administrators supply an organization id
+and an api key to authenticate with the API. This service is provided by "Neon CRM": [terms of service](https://neonone.com/product-terms/)
+[privacy policy](https://neonone.com/privacypolicy/)
 
 == Changelog ==
 

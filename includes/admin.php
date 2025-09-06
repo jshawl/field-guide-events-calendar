@@ -13,7 +13,7 @@ function field_guide_events_calendar_register_settings_link($links)
             "options-general.php?page=field_guide_events_calendar-settings",
         ) .
         '">' .
-        __("Settings", "field_guide_events_calendar") .
+        __("Settings", "field-guide-events-calendar") .
         "</a>";
     return $links;
 }
@@ -42,7 +42,7 @@ function field_guide_events_calendar_settings_init()
 
     add_settings_field(
         "neon_crm_org_id",
-        __("Org ID", "field_guide_events_calendar"),
+        __("Org ID", "field-guide-events-calendar"),
         "field_guide_events_calendar_text_input",
         "field_guide_events_calendar",
         "field_guide_events_calendar_section",
@@ -53,7 +53,7 @@ function field_guide_events_calendar_settings_init()
 
     add_settings_field(
         "neon_crm_api_key",
-        __("API Key", "field_guide_events_calendar"),
+        __("API Key", "field-guide-events-calendar"),
         "field_guide_events_calendar_text_input",
         "field_guide_events_calendar",
         "field_guide_events_calendar_section",
@@ -62,7 +62,7 @@ function field_guide_events_calendar_settings_init()
             "type" => "password",
             "description" => __(
                 "Enter your Neon CRM API key. Leave blank to keep the current key.",
-                "field_guide_events_calendar",
+                "field-guide-events-calendar",
             ),
         ],
     );
@@ -98,7 +98,7 @@ function field_guide_events_calendar_settings_header($args)
 	<p id="<?php echo esc_attr($args["id"]); ?>">
 		<a href="https://developer.neoncrm.com/api/getting-started/api-keys/" target="_blank" rel="noopener noreferrer"><?php esc_html_e(
       "View Neon API Keys Documentation",
-      "field_guide_events_calendar",
+      "field-guide-events-calendar",
   ); ?></a>
 	</p>
 	<?php
@@ -138,7 +138,7 @@ function field_guide_events_calendar_text_input($args)
              /* translators: %s is the masked API key (asterisks + last 4 chars) */
              esc_html__(
                  "Current key: %s — leave blank to keep existing key.",
-                 "field_guide_events_calendar",
+                 "field-guide-events-calendar",
              ),
              esc_html($masked),
          ) .
@@ -157,7 +157,7 @@ function field_guide_events_calendar_settings_html()
 			<?php
    settings_fields("field_guide_events_calendar");
    do_settings_sections("field_guide_events_calendar");
-   submit_button(__("Save Settings", "field_guide_events_calendar"));?>
+   submit_button(__("Save Settings", "field-guide-events-calendar"));?>
 		</form>
 	</div>
 	<?php
@@ -168,9 +168,9 @@ function field_guide_events_calendar_options_page()
     add_options_page(
         __(
             "Field Guide Events Calendar Settings",
-            "field_guide_events_calendar",
+            "field-guide-events-calendar",
         ),
-        __("Field Guide Events Calendar", "field_guide_events_calendar"),
+        __("Field Guide Events Calendar", "field-guide-events-calendar"),
         "manage_options",
         "field_guide_events_calendar-settings",
         "field_guide_events_calendar_settings_html",

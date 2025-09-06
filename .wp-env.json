@@ -1,6 +1,9 @@
 {
   "core": null,
-  "plugins": ["."],
+  "plugins": [
+    ".",
+    "https://downloads.wordpress.org/plugin/plugin-check.latest-stable.zip"
+  ],
   "lifecycleScripts": {
     "afterStart": "./bin/setup-php.sh"
   }

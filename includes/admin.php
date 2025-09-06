@@ -75,10 +75,19 @@ function field_guide_events_calendar_options_scripts($hook)
         return;
     }
 
+    $style_options = field_guide_events_calendar_script_options(
+        "assets/css/admin.css",
+    );
+    wp_enqueue_style(
+        "field-guide-events-calendar-admin",
+        $style_options["url"],
+        [],
+        $style_options["version"],
+    );
+
     $script_options = field_guide_events_calendar_script_options(
         "assets/js/admin.js",
     );
-
     wp_enqueue_script(
         "field-guide-events-calendar-admin",
         $script_options["url"],

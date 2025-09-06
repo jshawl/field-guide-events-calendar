@@ -20,6 +20,14 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
+      - name: Debug wp-env directories (before)
+        run: |
+          echo "=== Home directory ==="
+          ls -la ~/ | grep wp-env || echo "No ~/.wp-env found"
+          echo "=== Project directory ==="
+          ls -la ./ | grep wp-env || echo "No .wp-env found"
+          echo "=== Docker images ==="
+          docker images | grep -E "(wordpress|mysql|phpmyadmin)" || echo "No relevant images"
       - name: Cache wp-env
         uses: actions/cache@v4
         with:
@@ -35,6 +43,14 @@ jobs:
         run: npm start
       - name: Test
         run: npm run test:php
+      - name: Debug wp-env directories (after)
+        run: |
+          echo "=== Home directory ==="
+          ls -la ~/ | grep wp-env || echo "No ~/.wp-env found"
+          echo "=== Project directory ==="
+          ls -la ./ | grep wp-env || echo "No .wp-env found"
+          echo "=== Docker containers ==="
+          docker ps -a
 
   vitest:
     name: JavaScript tests

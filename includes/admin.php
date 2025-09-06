@@ -69,6 +69,30 @@ function field_guide_events_calendar_settings_init()
 }
 add_action("admin_init", "field_guide_events_calendar_settings_init");
 
+function field_guide_events_calendar_options_scripts($hook)
+{
+    if ($hook !== "settings_page_field_guide_events_calendar-settings") {
+        return;
+    }
+
+    $plugin_dir = FIELD_GUIDE_EVENTS_CALENDAR_DIR;
+    $plugin_url = FIELD_GUIDE_EVENTS_CALENDAR_URL;
+
+    $css_file = $plugin_dir . "assets/css/style.css";
+    $js_file = $plugin_dir . "assets/js/admin.js";
+    wp_enqueue_script(
+        "field-guide-events-calendar-admin",
+        $plugin_url . "assets/js/admin.js",
+        [],
+        file_exists($js_file) ? filemtime($js_file) : null,
+        true,
+    );
+}
+add_action(
+    "admin_enqueue_scripts",
+    "field_guide_events_calendar_options_scripts",
+);
+
 function field_guide_events_calendar_sanitize_options($input)
 {
     $options = get_option("field_guide_events_calendar_options", []);

@@ -1,6 +1,6 @@
 {
   "name": "field-guide-events-calendar",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "events calendar with filtering",
   "main": "index.js",
   "scripts": {

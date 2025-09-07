@@ -148,7 +148,7 @@ describe("plugin", () => {
     const model = {
       events: [{ campaignName: "Seminar" }],
       filter: "All",
-      loading: true,
+      loading: false,
       options: {
         filter_campaigns: "false",
       },

@@ -46,10 +46,10 @@ vi.stubGlobal("FullCalendar", {
 describe("plugin", () => {
   beforeEach(() => {
     document.body.innerHTML = `
-    <div class="field_guide_events_calendar" data-filter_campaigns="true">
-      <div class='campaigns'></div>
-      <div class='loading'></div>
-      <div id='calendar'></div>
+    <div class="field_guide_events_calendar_container" data-filter_campaigns="true">
+      <div class='field_guide_events_calendar_campaigns'></div>
+      <div class='field_guide_events_calendar_loading'></div>
+      <div class='field_guide_events_calendar_calendar'></div>
     </div>
   `;
   });
@@ -183,7 +183,7 @@ describe("plugin", () => {
 
     it("toggles the loading image", () => {
       const loadingEl = document.querySelector(
-        ".field_guide_events_calendar .loading",
+        ".field_guide_events_calendar_loading",
       );
       view({ ...model, loading: true }, dispatch);
       expect(loadingEl.style.display).toBe("block");

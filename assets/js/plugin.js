@@ -7,12 +7,12 @@ const initialModel = {
 
 export const elements = {
   calendar: () =>
-    document.querySelector(".field_guide_events_calendar #calendar"),
+    document.querySelector(".field_guide_events_calendar_calendar"),
   campaigns: () =>
-    document.querySelector(".field_guide_events_calendar .campaigns"),
-  container: () => document.querySelector(".field_guide_events_calendar"),
-  loading: () =>
-    document.querySelector(".field_guide_events_calendar .loading"),
+    document.querySelector(".field_guide_events_calendar_campaigns"),
+  container: () =>
+    document.querySelector(".field_guide_events_calendar_container"),
+  loading: () => document.querySelector(".field_guide_events_calendar_loading"),
 };
 
 let currentModel = { ...initialModel };
@@ -169,7 +169,7 @@ const getCalendarOptions = (dispatch) => ({
   datesSet: (info) => {
     dispatch({ info, type: "DATES_SET" });
   },
-  eventClassNames: ["field_guide_events_calendar-event"],
+  eventClassNames: ["field_guide_events_calendar_event"],
   eventClick: (info) => dispatch({ id: info.event.id, type: "ON_EVENT_CLICK" }),
   headerToolbar: {
     left: "title",

@@ -96,7 +96,7 @@ describe("plugin", () => {
     });
 
     it("DATES_SET", () => {
-      const [_, cmd] = update(
+      const [_model, cmd] = update(
         {
           info: {
             endStr: "2020-01-02",

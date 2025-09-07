@@ -104,7 +104,7 @@ export const update = (msg, model) => {
 export const view = (model, dispatch) => {
   const { events, filter, loading, options } = model;
   renderLoading({ loading });
-  renderCalendar({ events, filter });
+  renderCalendar({ events, filter, loading });
   if (options.filter_campaigns === "true") {
     renderCampaignFilters({ dispatch, events, filter });
   }
@@ -122,9 +122,12 @@ const renderLoading = ({ loading }) => {
   }
 };
 
-const renderCalendar = ({ events, filter }) => {
+const renderCalendar = ({ events, filter, loading }) => {
   const calendar = getCalendar();
   calendar?.removeAllEvents();
+  if (loading) {
+    return;
+  }
   events
     .filter((event) => ["All", event.campaignName].includes(filter))
     .map((event) =>

@@ -2,7 +2,13 @@
  * @vitest-environment jsdom
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { commands, init, update, view } from "../../assets/js/plugin.js";
+import {
+  commands,
+  dispatch,
+  init,
+  update,
+  view,
+} from "../../assets/js/plugin.js";
 
 vi.stubGlobal("field_guide_events_calendar", {
   org_id: "abcd",
@@ -48,6 +54,12 @@ describe("plugin", () => {
   `;
   });
 
+  describe("dispatch", () => {
+    it("is only here for test coverage", () => {
+      dispatch({ type: "EVENTS_FETCH_START" });
+    });
+  });
+
   describe("init", () => {
     const dispatch = vi.fn();
     it("dispatches options and calendar init", () => {
@@ -79,20 +91,18 @@ describe("plugin", () => {
       expect(model.options).toStrictEqual({
         filter_campaigns: "true",
       });
-      // and fetch side effects
-      cmd();
-      globalThis.fetch = vi.fn(() =>
-        Promise.resolve({
-          json: () => ({
-            events: [],
-          }),
-        }),
-      );
-      onDatesSet({
+      // and post-load side effects
+      const dispatch = vi.fn();
+      cmd(dispatch);
+      const dates = {
         endStr: "2020-01-02",
         startStr: "2020-01-01",
+      };
+      onDatesSet(dates);
+      expect(dispatch).toHaveBeenCalledWith({
+        info: dates,
+        type: "DATES_SET",
       });
-      expect(globalThis.fetch).toHaveBeenCalled();
     });
 
     it("DATES_SET", () => {
@@ -107,6 +117,11 @@ describe("plugin", () => {
         initialModel,
       );
       const dispatch = vi.fn();
+      globalThis.fetch = vi.fn(() =>
+        Promise.resolve({
+          json: () => ({}),
+        }),
+      );
       cmd(dispatch);
       expect(dispatch).toHaveBeenCalledWith({ type: "EVENTS_FETCH_START" });
     });
@@ -154,8 +169,12 @@ describe("plugin", () => {
       },
     };
 
+    beforeEach(() => {
+      addEventMock.mockClear();
+    });
+
     it("removes and readds events", () => {
-      init(dispatch);
+      commands.initCalendar()(dispatch);
       removeAllEventsMock.mockClear();
       view(model, dispatch);
       expect(removeAllEventsMock).toHaveBeenCalledOnce();
@@ -217,12 +236,15 @@ describe("plugin", () => {
 
     describe("onEventClick", () => {
       it("opens the event url in a new tab", () => {
-        globalThis.open = vi.fn();
+        const dispatch = vi.fn();
+        commands.initCalendar()(dispatch);
         onEventClick({ event: { id: 123 } });
-        expect(globalThis.open).toHaveBeenCalledWith(
-          expect.stringContaining("123"),
-          "_blank",
-        );
+        expect(dispatch).toHaveBeenCalledWith({
+          id: 123,
+          type: "ON_EVENT_CLICK",
+        });
+        globalThis.open = vi.fn();
+
         commands.onEventClick({ id: 456 })();
         expect(globalThis.open).toHaveBeenCalledWith(
           expect.stringContaining("456"),

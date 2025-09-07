@@ -1,2 +1,2 @@
-import { main } from "./calendar.js";
-main();
+import { dispatch, init } from "./plugin.js";
+init(dispatch);

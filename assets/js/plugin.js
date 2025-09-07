@@ -45,8 +45,11 @@ export const commands = {
       const { events } = await response.json();
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
-  initCalendar: () => () => {
-    _calendar = new FullCalendar.Calendar(elements.calendar(), calendarOptions);
+  initCalendar: () => (dispatch) => {
+    _calendar = new FullCalendar.Calendar(
+      elements.calendar(),
+      getCalendarOptions(dispatch),
+    );
     _calendar.render();
   },
   noop: () => () => {},
@@ -162,7 +165,7 @@ const renderCampaignFilters = ({ dispatch, events, filter }) => {
 };
 
 const getCalendar = () => _calendar;
-const calendarOptions = {
+const getCalendarOptions = (dispatch) => ({
   datesSet: (info) => {
     dispatch({ info, type: "DATES_SET" });
   },
@@ -174,7 +177,7 @@ const calendarOptions = {
   },
   height: "auto",
   initialView: "dayGridMonth",
-};
+});
 
 export const getCampaignNames = (events) => [
   "All",

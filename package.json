@@ -7,7 +7,7 @@
     "format": "prettier --write .",
     "lint": "oxlint",
     "test": "npm run test:js && npm run test:php",
-    "test:js": "vitest run",
+    "test:js": "vitest run --sequence.shuffle",
     "test:coverage": "vitest run --coverage",
     "start": "wp-env start",
     "wp-env": "wp-env",

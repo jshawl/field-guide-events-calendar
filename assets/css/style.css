@@ -1,17 +1,16 @@
-.field_guide_events_calendar {
-  padding: 10px;
+.field_guide_events_calendar_container {
   line-height: 1;
   position: relative;
 }
 
-.field_guide_events_calendar .campaigns {
+.field_guide_events_calendar_campaigns {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.field_guide_events_calendar .campaigns label {
+.field_guide_events_calendar_campaigns label {
   padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -22,21 +21,21 @@
   font-weight: normal;
 }
 
-.field_guide_events_calendar .campaigns label:hover {
+.field_guide_events_calendar_campaigns label:hover {
   background: #eee;
 }
 
-.field_guide_events_calendar .campaigns input[type="radio"] {
+.field_guide_events_calendar_campaigns input[type="radio"] {
   display: none;
 }
 
-.field_guide_events_calendar .campaigns :checked + label {
+.field_guide_events_calendar_campaigns :checked + label {
   background: #75a548;
   color: #fff;
 }
 
-.field_guide_events_calendar-event,
-.field_guide_events_calendar-event:hover {
+.field_guide_events_calendar_event,
+.field_guide_events_calendar_event:hover {
   cursor: pointer;
   white-space: normal;
   display: block;
@@ -45,31 +44,7 @@
   padding: 0.25rem;
 }
 
-.field_guide_events_calendar-event > div {
-  display: inline-block;
-}
-
-.field_guide_events_calendar-event .fc-event-title {
-  font-weight: normal;
-}
-
-.field_guide_events_calendar-event .fc-daygrid-event-dot {
-  display: none;
-}
-
-.field_guide_events_calendar .fc .fc-button-primary {
-  background: #eee;
-  color: #000;
-  border: none;
-  outline: none;
-}
-.field_guide_events_calendar .fc .fc-button-primary:hover,
-.field_guide_events_calendar .fc .fc-button-primary:active {
-  background: #ddd;
-  color: #000;
-}
-
-.field_guide_events_calendar .loading {
+.field_guide_events_calendar_loading {
   height: 128px;
   width: 128px;
   background-image: url(../img/loader-new.gif);
@@ -79,4 +54,24 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
+}
+
+.field_guide_events_calendar_event .fc-event-title {
+  font-weight: normal;
+}
+
+.field_guide_events_calendar_event .fc-daygrid-event-dot {
+  display: none;
+}
+
+.field_guide_events_calendar_container .fc .fc-button-primary {
+  background: #eee;
+  color: #000;
+  border: none;
+  outline: none;
+}
+.field_guide_events_calendar_container .fc .fc-button-primary:hover,
+.field_guide_events_calendar_container .fc .fc-button-primary:active {
+  background: #ddd;
+  color: #000;
 }

@@ -72,13 +72,15 @@ describe("plugin", () => {
     });
 
     it("INIT", () => {
-      const [model] = update(
+      const [model, cmd] = update(
         { options: { filter_campaigns: "true" }, type: "INIT" },
         initialModel,
       );
       expect(model.options).toStrictEqual({
         filter_campaigns: "true",
       });
+      // and fetch side effects
+      cmd();
       globalThis.fetch = vi.fn(() =>
         Promise.resolve({
           json: () => ({
@@ -86,7 +88,6 @@ describe("plugin", () => {
           }),
         }),
       );
-      // and fetch
       onDatesSet({
         endStr: "2020-01-02",
         startStr: "2020-01-01",

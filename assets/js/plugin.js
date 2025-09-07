@@ -23,17 +23,14 @@ export const dispatch = (action) => {
   command(dispatch);
   view(currentModel, dispatch);
 };
-
-// eslint-disable-next-line unicorn/no-null
-let _calendar = null;
 export const init = (dispatch) => {
   const el = elements.container();
   const options = { ...el.dataset };
-  _calendar = new FullCalendar.Calendar(elements.calendar(), calendarOptions);
-  _calendar.render();
   dispatch({ options, type: "INIT" });
 };
 
+// eslint-disable-next-line unicorn/no-null
+let _calendar = null;
 export const commands = {
   fetchEvents:
     ({ start, end }) =>
@@ -47,6 +44,10 @@ export const commands = {
       const { events } = await response.json();
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
+  initCalendar: () => () => {
+    _calendar = new FullCalendar.Calendar(elements.calendar(), calendarOptions);
+    _calendar.render();
+  },
   noop: () => () => {},
   onEventClick:
     ({ id }) =>
@@ -59,7 +60,7 @@ export const commands = {
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      return [{ ...model, options: msg.options }, commands.noop()];
+      return [{ ...model, options: msg.options }, commands.initCalendar()];
     }
 
     case "DATES_SET": {
@@ -77,7 +78,7 @@ export const update = (msg, model) => {
         options: model.options,
       });
       let { filter } = model;
-      if (!getCampaignNames(events).includes(model.filter)) {
+      if (!getCampaignNames(events).includes(filter)) {
         filter = "All";
       }
       return [{ ...model, events, filter, loading: false }, commands.noop()];

@@ -31,7 +31,7 @@ class EnqueueTest extends WP_UnitTestCase
         $output = do_shortcode("[field_guide_events_calendar]");
         $this->assertNotEmpty($output);
         $this->assertStringContainsString(
-            '<div class="field_guide_events_calendar"',
+            '<div class="field_guide_events_calendar_container"',
             $output,
         );
     }

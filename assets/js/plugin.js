@@ -18,18 +18,14 @@ export const elements = {
 let currentModel = { ...initialModel };
 
 export const dispatch = (action) => {
-  currentModel = update(action, currentModel);
-  if (Array.isArray(currentModel)) {
-    const [newModel, command] = currentModel;
-    currentModel = newModel;
-    if (command) {
-      command(dispatch);
-    }
-  }
+  const [newModel, command] = update(action, currentModel);
+  currentModel = newModel;
+  command(dispatch);
   view(currentModel, dispatch);
 };
 
-let _calendar = {};
+// eslint-disable-next-line unicorn/no-null
+let _calendar = null;
 export const init = (dispatch) => {
   const el = elements.container();
   const options = { ...el.dataset };
@@ -51,6 +47,7 @@ export const commands = {
       const { events } = await response.json();
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
+  noop: () => () => {},
   onEventClick:
     ({ id }) =>
     (_dispatch) => {
@@ -62,7 +59,7 @@ export const commands = {
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      return { ...model, options: msg.options };
+      return [{ ...model, options: msg.options }, commands.noop()];
     }
 
     case "DATES_SET": {
@@ -83,12 +80,12 @@ export const update = (msg, model) => {
       if (!getCampaignNames(events).includes(model.filter)) {
         filter = "All";
       }
-      return { ...model, events, filter, loading: false };
+      return [{ ...model, events, filter, loading: false }, commands.noop()];
     }
 
     case "CAMPAIGN_FILTER_CHANGED": {
       const { filter } = msg;
-      return { ...model, filter };
+      return [{ ...model, filter }, commands.noop()];
     }
 
     case "ON_EVENT_CLICK": {
@@ -107,7 +104,7 @@ export const view = (model, dispatch) => {
   model.events
     .filter((event) => ["All", event.campaignName].includes(model.filter))
     .map((event) =>
-      calendar.addEvent({
+      calendar?.addEvent({
         ...event,
         allDay: event.startDate !== event.endDate,
       }),

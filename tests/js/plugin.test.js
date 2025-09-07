@@ -72,7 +72,7 @@ describe("plugin", () => {
     });
 
     it("INIT", () => {
-      const model = update(
+      const [model] = update(
         { options: { filter_campaigns: "true" }, type: "INIT" },
         initialModel,
       );
@@ -95,7 +95,7 @@ describe("plugin", () => {
     });
 
     it("DATES_SET", () => {
-      const model = update(
+      const [model, command] = update(
         {
           info: {
             endStr: "2020-01-02",
@@ -105,12 +105,12 @@ describe("plugin", () => {
         },
         initialModel,
       );
-      expect(model[0].loading).toBe(true);
-      expect(model[1]).toBeInstanceOf(Function);
+      expect(model.loading).toBe(true);
+      expect(command).toBeInstanceOf(Function);
     });
 
     it("EVENTS_FETCHED", () => {
-      const model = update(
+      const [model] = update(
         { events: [{}], type: "EVENTS_FETCHED" },
         initialModel,
       );
@@ -118,7 +118,7 @@ describe("plugin", () => {
     });
 
     it("CAMPAIGN_FILTER_CHANGED", () => {
-      const model = update(
+      const [model] = update(
         { filter: "Not All", type: "CAMPAIGN_FILTER_CHANGED" },
         initialModel,
       );

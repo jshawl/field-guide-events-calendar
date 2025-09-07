@@ -2,19 +2,12 @@ const initialModel = {
   events: [],
   filter: "All",
   loading: true,
-  loadingEl: document.querySelector(".field_guide_events_calendar .loading"),
   options: {},
 };
 
 let currentModel = { ...initialModel };
 
-export const init = () => {
-  const container = document.querySelector(".field_guide_events_calendar");
-  dispatch({ options: container.dataset, type: "OPTIONS_SET" });
-  dispatch({ el: container.querySelector("#calendar"), type: "INIT_CALENDAR" });
-};
-
-const dispatch = (action) => {
+export const dispatch = (action) => {
   currentModel = update(action, currentModel);
   if (Array.isArray(currentModel)) {
     const [newModel, command] = currentModel;
@@ -26,7 +19,11 @@ const dispatch = (action) => {
   view(currentModel, dispatch);
 };
 
-const commands = {
+export const init = (dispatch) => {
+  dispatch({ type: "INIT" });
+};
+
+export const commands = {
   fetchEvents: async ({ start, end, dispatch }) => {
     const url = new URL(`${field_guide_events_calendar.rest_url}/neon/events`);
     url.searchParams.append("start", start);
@@ -41,16 +38,17 @@ const commands = {
   },
 };
 
-const update = (msg, model) => {
+export const update = (msg, model) => {
   switch (msg.type) {
-    case "OPTIONS_SET": {
-      return { ...model, options: msg.options };
-    }
-
-    case "INIT_CALENDAR": {
-      const calendar = new FullCalendar.Calendar(msg.el, calendarOptions);
+    case "INIT": {
+      const el = document.querySelector(".field_guide_events_calendar");
+      const options = { ...el.dataset };
+      const calendar = new FullCalendar.Calendar(el, calendarOptions);
       calendar.render();
-      return { ...model, calendar };
+      const loadingEl = document.querySelector(
+        ".field_guide_events_calendar .loading",
+      );
+      return { ...model, calendar, loadingEl, options };
     }
 
     case "DATES_SET": {
@@ -85,7 +83,7 @@ const update = (msg, model) => {
   }
 };
 
-const view = (model, dispatch) => {
+export const view = (model, dispatch) => {
   model.calendar?.removeAllEvents();
   model.events
     .filter((event) => ["All", event.campaignName].includes(model.filter))
@@ -95,10 +93,13 @@ const view = (model, dispatch) => {
         allDay: event.startDate !== event.endDate,
       }),
     );
-  if (model.loading) {
-    model.loadingEl.style.display = "block";
-  } else {
-    model.loadingEl.style.display = "none";
+
+  if (model.loadingEl) {
+    if (model.loading) {
+      model.loadingEl.style.display = "block";
+    } else {
+      model.loadingEl.style.display = "none";
+    }
   }
 
   if (model.options.filter_campaigns !== "true") {
@@ -132,7 +133,9 @@ const view = (model, dispatch) => {
 // -------
 
 const calendarOptions = {
-  datesSet: (info) => dispatch({ info, type: "DATES_SET" }),
+  datesSet: (info) => {
+    dispatch({ info, type: "DATES_SET" });
+  },
   eventClassNames: ["field_guide_events_calendar-event"],
   eventClick: (info) => dispatch({ id: info.event.id, type: "ON_EVENT_CLICK" }),
   headerToolbar: {

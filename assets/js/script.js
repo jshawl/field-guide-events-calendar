@@ -1,2 +1,2 @@
-import { init } from "./plugin.js";
-init();
+import { dispatch, init } from "./plugin.js";
+init(dispatch);

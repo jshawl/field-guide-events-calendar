@@ -23,17 +23,14 @@ export const dispatch = (action) => {
   command(dispatch);
   view(currentModel, dispatch);
 };
-
-// eslint-disable-next-line unicorn/no-null
-let _calendar = null;
 export const init = (dispatch) => {
   const el = elements.container();
   const options = { ...el.dataset };
-  _calendar = new FullCalendar.Calendar(elements.calendar(), calendarOptions);
-  _calendar.render();
   dispatch({ options, type: "INIT" });
 };
 
+// eslint-disable-next-line unicorn/no-null
+let _calendar = null;
 export const commands = {
   fetchEvents:
     ({ start, end }) =>
@@ -47,6 +44,10 @@ export const commands = {
       const { events } = await response.json();
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
+  initCalendar: () => () => {
+    _calendar = new FullCalendar.Calendar(elements.calendar(), calendarOptions);
+    _calendar.render();
+  },
   noop: () => () => {},
   onEventClick:
     ({ id }) =>
@@ -59,7 +60,7 @@ export const commands = {
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      return [{ ...model, options: msg.options }, commands.noop()];
+      return [{ ...model, options: msg.options }, commands.initCalendar()];
     }
 
     case "DATES_SET": {
@@ -77,7 +78,7 @@ export const update = (msg, model) => {
         options: model.options,
       });
       let { filter } = model;
-      if (!getCampaignNames(events).includes(model.filter)) {
+      if (!getCampaignNames(events).includes(filter)) {
         filter = "All";
       }
       return [{ ...model, events, filter, loading: false }, commands.noop()];
@@ -99,34 +100,47 @@ export const update = (msg, model) => {
 };
 
 export const view = (model, dispatch) => {
+  const { events, filter, loading, options } = model;
+  renderLoading({ loading });
+  renderCalendar({ events, filter });
+  if (options.filter_campaigns === "true") {
+    renderCampaignFilters({ dispatch, events, filter });
+  }
+};
+
+// Helpers
+// -------
+
+const renderLoading = ({ loading }) => {
+  const loadingEl = elements.loading();
+  if (loading) {
+    loadingEl.style.display = "block";
+  } else {
+    loadingEl.style.display = "none";
+  }
+};
+
+const renderCalendar = ({ events, filter }) => {
   const calendar = getCalendar();
   calendar?.removeAllEvents();
-  model.events
-    .filter((event) => ["All", event.campaignName].includes(model.filter))
+  events
+    .filter((event) => ["All", event.campaignName].includes(filter))
     .map((event) =>
       calendar?.addEvent({
         ...event,
         allDay: event.startDate !== event.endDate,
       }),
     );
+};
 
-  const loadingEl = elements.loading();
-  if (model.loading) {
-    loadingEl.style.display = "block";
-  } else {
-    loadingEl.style.display = "none";
-  }
-
-  if (model.options.filter_campaigns !== "true") {
-    return;
-  }
-  const campaignNames = getCampaignNames(model.events);
+const renderCampaignFilters = ({ dispatch, events, filter }) => {
+  const campaignNames = getCampaignNames(events);
   const container = elements.campaigns();
   container.innerHTML = "";
   campaignNames.forEach((campaignName) => {
     const div = document.createElement("div");
     let checkedAttribute = "";
-    if (campaignName === model.filter) {
+    if (campaignName === filter) {
       checkedAttribute = "checked='true'";
     }
     div.innerHTML = `
@@ -141,9 +155,6 @@ export const view = (model, dispatch) => {
     container.append(div);
   });
 };
-
-// Helpers
-// -------
 
 const getCalendar = () => _calendar;
 const calendarOptions = {

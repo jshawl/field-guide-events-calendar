@@ -99,34 +99,47 @@ export const update = (msg, model) => {
 };
 
 export const view = (model, dispatch) => {
+  const { events, filter, loading, options } = model;
+  renderLoading({ loading });
+  renderCalendar({ events, filter });
+  if (options.filter_campaigns === "true") {
+    renderCampaignFilters({ dispatch, events, filter });
+  }
+};
+
+// Helpers
+// -------
+
+const renderLoading = ({ loading }) => {
+  const loadingEl = elements.loading();
+  if (loading) {
+    loadingEl.style.display = "block";
+  } else {
+    loadingEl.style.display = "none";
+  }
+};
+
+const renderCalendar = ({ events, filter }) => {
   const calendar = getCalendar();
   calendar?.removeAllEvents();
-  model.events
-    .filter((event) => ["All", event.campaignName].includes(model.filter))
+  events
+    .filter((event) => ["All", event.campaignName].includes(filter))
     .map((event) =>
       calendar?.addEvent({
         ...event,
         allDay: event.startDate !== event.endDate,
       }),
     );
+};
 
-  const loadingEl = elements.loading();
-  if (model.loading) {
-    loadingEl.style.display = "block";
-  } else {
-    loadingEl.style.display = "none";
-  }
-
-  if (model.options.filter_campaigns !== "true") {
-    return;
-  }
-  const campaignNames = getCampaignNames(model.events);
+const renderCampaignFilters = ({ dispatch, events, filter }) => {
+  const campaignNames = getCampaignNames(events);
   const container = elements.campaigns();
   container.innerHTML = "";
   campaignNames.forEach((campaignName) => {
     const div = document.createElement("div");
     let checkedAttribute = "";
-    if (campaignName === model.filter) {
+    if (campaignName === filter) {
       checkedAttribute = "checked='true'";
     }
     div.innerHTML = `
@@ -141,9 +154,6 @@ export const view = (model, dispatch) => {
     container.append(div);
   });
 };
-
-// Helpers
-// -------
 
 const getCalendar = () => _calendar;
 const calendarOptions = {

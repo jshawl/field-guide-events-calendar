@@ -1,4 +1,4 @@
-const model = {
+const initialModel = {
   events: [],
   filter: "All",
   loading: true,
@@ -6,7 +6,13 @@ const model = {
   options: {},
 };
 
-let currentModel = { ...model };
+let currentModel = { ...initialModel };
+
+export const init = () => {
+  const container = document.querySelector(".field_guide_events_calendar");
+  dispatch({ type: "OPTIONS_SET", options: container.dataset });
+  dispatch({ type: "INIT_CALENDAR", el: container.querySelector("#calendar") });
+};
 
 const dispatch = (action) => {
   currentModel = update(action, currentModel);
@@ -94,39 +100,32 @@ const view = (model, dispatch) => {
   } else {
     model.loadingEl.style.display = "none";
   }
-  if (model.options.filter_campaigns === "true") {
-    const campaignNames = getCampaignNames(model.events);
-    const container = document.querySelector(
-      ".field_guide_events_calendar .campaigns",
-    );
-    container.innerHTML = "";
-    campaignNames.forEach((campaignName) => {
-      const div = document.createElement("div");
-      let checkedAttribute = "";
-      if (campaignName === model.filter) {
-        checkedAttribute = "checked='true'";
-      }
-      div.innerHTML = `
+
+  if (model.options.filter_campaigns !== "true") {
+    return;
+  }
+  const campaignNames = getCampaignNames(model.events);
+  const container = document.querySelector(
+    ".field_guide_events_calendar .campaigns",
+  );
+  container.innerHTML = "";
+  campaignNames.forEach((campaignName) => {
+    const div = document.createElement("div");
+    let checkedAttribute = "";
+    if (campaignName === model.filter) {
+      checkedAttribute = "checked='true'";
+    }
+    div.innerHTML = `
             <input id="field_guide_events_calendar_campaign_name_${campaignName}" type="radio" name="field_guide_events_calendar_campaign_name" value="${campaignName}" ${checkedAttribute}/>
             <label for="field_guide_events_calendar_campaign_name_${campaignName}">
               ${campaignName}
             </label>
           `;
-      div.addEventListener("change", (e) => {
-        const filter = e.target.value;
-        dispatch({ type: "CAMPAIGN_FILTER_CHANGED", filter });
-      });
-      container.append(div);
-    });
-  }
-};
-
-export const init = () => {
-  const container = document.querySelector(".field_guide_events_calendar");
-  const options = container.dataset;
-  dispatch({ type: "OPTIONS_SET", options });
-  const calendarEl = container.querySelector("#calendar");
-  dispatch({ type: "INIT_CALENDAR", el: calendarEl });
+    div.addEventListener("change", (e) =>
+      dispatch({ type: "CAMPAIGN_FILTER_CHANGED", filter: e.target.value }),
+    );
+    container.append(div);
+  });
 };
 
 // Helpers

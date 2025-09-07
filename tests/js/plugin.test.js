@@ -117,6 +117,11 @@ describe("plugin", () => {
         initialModel,
       );
       const dispatch = vi.fn();
+      globalThis.fetch = vi.fn(() =>
+        Promise.resolve({
+          json: () => ({}),
+        }),
+      );
       cmd(dispatch);
       expect(dispatch).toHaveBeenCalledWith({ type: "EVENTS_FETCH_START" });
     });

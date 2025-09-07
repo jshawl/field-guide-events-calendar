@@ -64,7 +64,7 @@ const update = (msg, model) => {
         events: msg.events,
         options: model.options,
       });
-      if (getCampaignNames(events).includes(model.filter)) {
+      if (!getCampaignNames(events).includes(model.filter)) {
         model.filter = "All";
       }
       return { ...model, events, loading: false };

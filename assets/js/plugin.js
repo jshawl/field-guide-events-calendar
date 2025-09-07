@@ -23,42 +23,46 @@ export const dispatch = (action) => {
     const [newModel, command] = currentModel;
     currentModel = newModel;
     if (command) {
-      command({ ...currentModel, dispatch });
+      command(dispatch);
     }
   }
   view(currentModel, dispatch);
 };
 
+let _calendar = {};
 export const init = (dispatch) => {
   const el = elements.container();
   const options = { ...el.dataset };
-  const calendar = new FullCalendar.Calendar(
-    elements.calendar(),
-    calendarOptions,
-  );
-  calendar.render();
-  dispatch({ calendar, options, type: "INIT" });
+  _calendar = new FullCalendar.Calendar(elements.calendar(), calendarOptions);
+  _calendar.render();
+  dispatch({ options, type: "INIT" });
 };
 
 export const commands = {
-  fetchEvents: async ({ start, end, dispatch }) => {
-    const url = new URL(`${field_guide_events_calendar.rest_url}/neon/events`);
-    url.searchParams.append("start", start);
-    url.searchParams.append("end", end);
-    const response = await fetch(url.toString());
-    const { events } = await response.json();
-    dispatch({ events, type: "EVENTS_FETCHED" });
-  },
-  onEventClick: ({ id }) => {
-    const url = `https://${field_guide_events_calendar.org_id}.app.neoncrm.com/np/clients/${field_guide_events_calendar.org_id}/event.jsp?event=${id}`;
-    window.open(url, "_blank");
-  },
+  fetchEvents:
+    ({ start, end }) =>
+    async (dispatch) => {
+      const url = new URL(
+        `${field_guide_events_calendar.rest_url}/neon/events`,
+      );
+      url.searchParams.append("start", start);
+      url.searchParams.append("end", end);
+      const response = await fetch(url.toString());
+      const { events } = await response.json();
+      dispatch({ events, type: "EVENTS_FETCHED" });
+    },
+  onEventClick:
+    ({ id }) =>
+    (_dispatch) => {
+      const url = `https://${field_guide_events_calendar.org_id}.app.neoncrm.com/np/clients/${field_guide_events_calendar.org_id}/event.jsp?event=${id}`;
+      window.open(url, "_blank");
+    },
 };
 
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      return { ...model, calendar: msg.calendar, options: msg.options };
+      return { ...model, options: msg.options };
     }
 
     case "DATES_SET": {
@@ -66,7 +70,7 @@ export const update = (msg, model) => {
       const end = msg.info.endStr.slice(0, 10);
       return [
         { ...model, end, loading: true, start },
-        () => commands.fetchEvents({ dispatch, end, start }),
+        commands.fetchEvents({ end, start }),
       ];
     }
 
@@ -75,10 +79,11 @@ export const update = (msg, model) => {
         events: msg.events,
         options: model.options,
       });
+      let { filter } = model;
       if (!getCampaignNames(events).includes(model.filter)) {
-        model.filter = "All";
+        filter = "All";
       }
-      return { ...model, events, loading: false };
+      return { ...model, events, filter, loading: false };
     }
 
     case "CAMPAIGN_FILTER_CHANGED": {
@@ -87,7 +92,7 @@ export const update = (msg, model) => {
     }
 
     case "ON_EVENT_CLICK": {
-      return [model, () => commands.onEventClick({ id: msg.id })];
+      return [model, commands.onEventClick({ id: msg.id })];
     }
 
     default: {
@@ -97,11 +102,12 @@ export const update = (msg, model) => {
 };
 
 export const view = (model, dispatch) => {
-  model.calendar?.removeAllEvents();
+  const calendar = getCalendar();
+  calendar?.removeAllEvents();
   model.events
     .filter((event) => ["All", event.campaignName].includes(model.filter))
     .map((event) =>
-      model.calendar.addEvent({
+      calendar.addEvent({
         ...event,
         allDay: event.startDate !== event.endDate,
       }),
@@ -142,6 +148,7 @@ export const view = (model, dispatch) => {
 // Helpers
 // -------
 
+const getCalendar = () => _calendar;
 const calendarOptions = {
   datesSet: (info) => {
     dispatch({ info, type: "DATES_SET" });

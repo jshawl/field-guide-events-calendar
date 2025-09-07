@@ -53,7 +53,6 @@ describe("plugin", () => {
     it("dispatches options and calendar init", () => {
       init(dispatch);
       expect(dispatch).toHaveBeenCalledWith({
-        calendar: expect.anything(),
         options: {
           filter_campaigns: "true",
         },
@@ -140,7 +139,6 @@ describe("plugin", () => {
   describe("view", () => {
     const dispatch = vi.fn();
     const model = {
-      calendar: new FullCalendar.Calendar(undefined, {}),
       events: [{ campaignName: "Seminar" }],
       filter: "All",
       loading: true,
@@ -150,6 +148,8 @@ describe("plugin", () => {
     };
 
     it("removes and readds events", () => {
+      init(dispatch);
+      removeAllEventsMock.mockClear();
       view(model, dispatch);
       expect(removeAllEventsMock).toHaveBeenCalledOnce();
       expect(addEventMock).toHaveBeenCalledOnce();
@@ -200,7 +200,7 @@ describe("plugin", () => {
           }),
         );
         const dispatch = vi.fn();
-        await commands.fetchEvents({ dispatch, end, options, start });
+        await commands.fetchEvents({ end, options, start })(dispatch);
         expect(dispatch).toHaveBeenCalledWith({
           type: "EVENTS_FETCHED",
           ...response,
@@ -216,7 +216,7 @@ describe("plugin", () => {
           expect.stringContaining("123"),
           "_blank",
         );
-        commands.onEventClick({ id: 456 });
+        commands.onEventClick({ id: 456 })();
         expect(globalThis.open).toHaveBeenCalledWith(
           expect.stringContaining("456"),
           "_blank",

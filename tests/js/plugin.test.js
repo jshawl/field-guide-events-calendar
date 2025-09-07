@@ -96,7 +96,7 @@ describe("plugin", () => {
     });
 
     it("DATES_SET", () => {
-      const [model, command] = update(
+      const [_, cmd] = update(
         {
           info: {
             endStr: "2020-01-02",
@@ -106,8 +106,14 @@ describe("plugin", () => {
         },
         initialModel,
       );
+      const dispatch = vi.fn();
+      cmd(dispatch);
+      expect(dispatch).toHaveBeenCalledWith({ type: "EVENTS_FETCH_START" });
+    });
+
+    it("EVENTS_FETCH_START", () => {
+      const [model] = update({ type: "EVENTS_FETCH_START" });
       expect(model.loading).toBe(true);
-      expect(command).toBeInstanceOf(Function);
     });
 
     it("EVENTS_FETCHED", () => {

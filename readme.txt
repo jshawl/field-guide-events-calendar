@@ -1,6 +1,6 @@
 === Field Guide Events Calendar ===
 Contributors: jshawl
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 Tested up to: 6.8
 Requires at least: 6.0
 License: GPLv2 or later
@@ -37,6 +37,10 @@ and an api key to authenticate with the API. This service is provided by "Neon C
 [privacy policy](https://neonone.com/privacypolicy/)
 
 == Changelog ==
+
+= [1.3.0] 2025-09-07 =
+
+* Preserve campaign filter on date change
 
 = [1.2.0] 2025-09-06 =
 

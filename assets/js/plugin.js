@@ -35,6 +35,7 @@ export const commands = {
   fetchEvents:
     ({ start, end }) =>
     async (dispatch) => {
+      dispatch({ type: "EVENTS_FETCH_START" });
       const url = new URL(
         `${field_guide_events_calendar.rest_url}/neon/events`,
       );
@@ -66,10 +67,11 @@ export const update = (msg, model) => {
     case "DATES_SET": {
       const start = msg.info.startStr.slice(0, 10);
       const end = msg.info.endStr.slice(0, 10);
-      return [
-        { ...model, end, loading: true, start },
-        commands.fetchEvents({ end, start }),
-      ];
+      return [model, commands.fetchEvents({ end, start })];
+    }
+
+    case "EVENTS_FETCH_START": {
+      return [{ ...model, loading: true }, commands.noop()];
     }
 
     case "EVENTS_FETCHED": {

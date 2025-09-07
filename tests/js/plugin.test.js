@@ -54,6 +54,10 @@ describe("plugin", () => {
       init(dispatch);
       expect(dispatch).toHaveBeenCalledWith({
         type: "INIT",
+        options: {
+          filter_campaigns: "true",
+        },
+        calendar: expect.anything(),
       });
     });
   });
@@ -62,7 +66,6 @@ describe("plugin", () => {
     let initialModel = {};
     beforeEach(() => {
       initialModel = {
-        loadingEl: document.createElement("div"),
         options: {
           multi_day_events: "false",
         },
@@ -70,7 +73,10 @@ describe("plugin", () => {
     });
 
     it("INIT", () => {
-      const model = update({ type: "INIT" }, initialModel);
+      const model = update(
+        { type: "INIT", options: { filter_campaigns: "true" } },
+        initialModel,
+      );
       expect(model.options).toStrictEqual({
         filter_campaigns: "true",
       });
@@ -133,13 +139,11 @@ describe("plugin", () => {
 
   describe("view", () => {
     const dispatch = vi.fn();
-    const loadingEl = document.createElement("div");
     const model = {
       calendar: new FullCalendar.Calendar(undefined, {}),
       events: [{ campaignName: "Seminar" }],
       filter: "All",
       loading: true,
-      loadingEl,
       options: {
         filter_campaigns: "false",
       },
@@ -152,6 +156,9 @@ describe("plugin", () => {
     });
 
     it("toggles the loading image", () => {
+      const loadingEl = document.querySelector(
+        ".field_guide_events_calendar .loading",
+      );
       view({ ...model, loading: true }, dispatch);
       expect(loadingEl.style.display).toBe("block");
       view({ ...model, loading: false }, dispatch);

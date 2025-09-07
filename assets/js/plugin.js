@@ -20,7 +20,12 @@ export const dispatch = (action) => {
 };
 
 export const init = (dispatch) => {
-  dispatch({ type: "INIT" });
+  const el = document.querySelector(".field_guide_events_calendar");
+  const options = { ...el.dataset };
+  const calendarEl = el.querySelector("#calendar");
+  const calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
+  calendar.render();
+  dispatch({ type: "INIT", options, calendar });
 };
 
 export const commands = {
@@ -41,15 +46,7 @@ export const commands = {
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      const el = document.querySelector(".field_guide_events_calendar");
-      const options = { ...el.dataset };
-      const calendarEl = el.querySelector("#calendar");
-      const calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
-      calendar.render();
-      const loadingEl = document.querySelector(
-        ".field_guide_events_calendar .loading",
-      );
-      return { ...model, calendar, loadingEl, options };
+      return { ...model, options: msg.options, calendar: msg.calendar };
     }
 
     case "DATES_SET": {
@@ -95,12 +92,13 @@ export const view = (model, dispatch) => {
       }),
     );
 
-  if (model.loadingEl) {
-    if (model.loading) {
-      model.loadingEl.style.display = "block";
-    } else {
-      model.loadingEl.style.display = "none";
-    }
+  const loadingEl = document.querySelector(
+    ".field_guide_events_calendar .loading",
+  );
+  if (model.loading) {
+    loadingEl.style.display = "block";
+  } else {
+    loadingEl.style.display = "none";
   }
 
   if (model.options.filter_campaigns !== "true") {

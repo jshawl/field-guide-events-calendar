@@ -43,7 +43,8 @@ export const update = (msg, model) => {
     case "INIT": {
       const el = document.querySelector(".field_guide_events_calendar");
       const options = { ...el.dataset };
-      const calendar = new FullCalendar.Calendar(el, calendarOptions);
+      const calendarEl = el.querySelector("#calendar");
+      const calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
       calendar.render();
       const loadingEl = document.querySelector(
         ".field_guide_events_calendar .loading",

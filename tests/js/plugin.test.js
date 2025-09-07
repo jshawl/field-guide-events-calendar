@@ -144,6 +144,7 @@ describe("plugin", () => {
         filter_campaigns: "false",
       },
     };
+
     it("removes and readds events", () => {
       view(model, dispatch);
       expect(removeAllEventsMock).toHaveBeenCalledOnce();

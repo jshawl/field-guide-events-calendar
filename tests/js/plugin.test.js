@@ -53,11 +53,11 @@ describe("plugin", () => {
     it("dispatches options and calendar init", () => {
       init(dispatch);
       expect(dispatch).toHaveBeenCalledWith({
-        type: "INIT",
+        calendar: expect.anything(),
         options: {
           filter_campaigns: "true",
         },
-        calendar: expect.anything(),
+        type: "INIT",
       });
     });
   });
@@ -74,7 +74,7 @@ describe("plugin", () => {
 
     it("INIT", () => {
       const model = update(
-        { type: "INIT", options: { filter_campaigns: "true" } },
+        { options: { filter_campaigns: "true" }, type: "INIT" },
         initialModel,
       );
       expect(model.options).toStrictEqual({

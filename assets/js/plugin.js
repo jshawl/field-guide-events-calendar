@@ -5,6 +5,16 @@ const initialModel = {
   options: {},
 };
 
+export const elements = {
+  calendar: () =>
+    document.querySelector(".field_guide_events_calendar #calendar"),
+  campaigns: () =>
+    document.querySelector(".field_guide_events_calendar .campaigns"),
+  container: () => document.querySelector(".field_guide_events_calendar"),
+  loading: () =>
+    document.querySelector(".field_guide_events_calendar .loading"),
+};
+
 let currentModel = { ...initialModel };
 
 export const dispatch = (action) => {
@@ -20,12 +30,14 @@ export const dispatch = (action) => {
 };
 
 export const init = (dispatch) => {
-  const el = document.querySelector(".field_guide_events_calendar");
+  const el = elements.container();
   const options = { ...el.dataset };
-  const calendarEl = el.querySelector("#calendar");
-  const calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
+  const calendar = new FullCalendar.Calendar(
+    elements.calendar(),
+    calendarOptions,
+  );
   calendar.render();
-  dispatch({ type: "INIT", options, calendar });
+  dispatch({ calendar, options, type: "INIT" });
 };
 
 export const commands = {
@@ -46,13 +58,16 @@ export const commands = {
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      return { ...model, options: msg.options, calendar: msg.calendar };
+      return { ...model, calendar: msg.calendar, options: msg.options };
     }
 
     case "DATES_SET": {
       const start = msg.info.startStr.slice(0, 10);
       const end = msg.info.endStr.slice(0, 10);
-      return [{ ...model, end, loading: true, start }, commands.fetchEvents];
+      return [
+        { ...model, end, loading: true, start },
+        () => commands.fetchEvents({ dispatch, end, start }),
+      ];
     }
 
     case "EVENTS_FETCHED": {
@@ -92,9 +107,7 @@ export const view = (model, dispatch) => {
       }),
     );
 
-  const loadingEl = document.querySelector(
-    ".field_guide_events_calendar .loading",
-  );
+  const loadingEl = elements.loading();
   if (model.loading) {
     loadingEl.style.display = "block";
   } else {
@@ -105,9 +118,7 @@ export const view = (model, dispatch) => {
     return;
   }
   const campaignNames = getCampaignNames(model.events);
-  const container = document.querySelector(
-    ".field_guide_events_calendar .campaigns",
-  );
+  const container = elements.campaigns();
   container.innerHTML = "";
   campaignNames.forEach((campaignName) => {
     const div = document.createElement("div");

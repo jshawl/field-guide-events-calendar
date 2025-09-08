@@ -19,6 +19,7 @@ function field_guide_events_calendar_register_assets()
         [],
         file_exists($css_file) ? filemtime($css_file) : null,
     );
+    wp_enqueue_style("field_guide_events_calendar");
 
     // Register FullCalendar first (no deps), load in footer.
     wp_register_script(
@@ -28,6 +29,7 @@ function field_guide_events_calendar_register_assets()
         "6.1.19", // version
         true, // in_footer
     );
+    wp_enqueue_script("field_guide_events_calendar-fullcalendar");
 
     $data = [
         "org_id" => field_guide_events_calendar_get_option(
@@ -52,6 +54,7 @@ function field_guide_events_calendar_register_assets()
         file_exists($js_file) ? filemtime($js_file) : null, // version
         true, // in_footer
     );
+    wp_enqueue_script("field_guide_events_calendar");
 }
 add_action("wp_enqueue_scripts", "field_guide_events_calendar_register_assets");
 
@@ -81,11 +84,10 @@ function field_guide_events_calendar_shortcode($atts)
     $default_atts = [
         "filter_campaigns" => "false",
         "multi_day_events" => "true",
+        "campaign_color" => "#75a548",
+        "campaign_background_color" => "#75a548",
     ];
     $atts = shortcode_atts($default_atts, $atts, "field_guide_events_calendar");
-    wp_enqueue_style("field_guide_events_calendar");
-    wp_enqueue_script("field_guide_events_calendar");
-    wp_enqueue_script("field_guide_events_calendar-fullcalendar");
 
     return field_guide_events_calendar_render_template(
         "templates/calendar.php",

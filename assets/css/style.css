@@ -14,7 +14,7 @@
   padding: 0.5rem;
   border-radius: 0.5rem;
   cursor: pointer;
-  color: #75a548;
+  color: var(--campaign_color);
   border: none;
   background: none;
   display: inline-block;
@@ -30,7 +30,7 @@
 }
 
 .field_guide_events_calendar_campaigns :checked + label {
-  background: #75a548;
+  background: var(--campaign_background_color);
   color: #fff;
 }
 

@@ -10,12 +10,6 @@ import {
   view,
 } from "../../assets/js/plugin.js";
 
-vi.stubGlobal("field_guide_events_calendar", {
-  org_id: "abcd",
-  rest_url:
-    "http://localhost:8888/index.php?rest_route=/field_guide_events_calendar/v1",
-});
-
 const addEventMock = vi.fn();
 const calendarRenderMock = vi.fn();
 const removeAllEventsMock = vi.fn();
@@ -79,6 +73,7 @@ describe("plugin", () => {
       initialModel = {
         options: {
           multi_day_events: "false",
+          rest_url: "https://example.com",
         },
       };
     });
@@ -218,7 +213,7 @@ describe("plugin", () => {
       it("dispatches EVENTS_FETCHED", async () => {
         const start = "2020-01-01";
         const end = "2020-01-02";
-        const options = {};
+        const restUrl = "https://example.com";
         const response = { events: [] };
         globalThis.fetch = vi.fn(() =>
           Promise.resolve({
@@ -226,7 +221,7 @@ describe("plugin", () => {
           }),
         );
         const dispatch = vi.fn();
-        await commands.fetchEvents({ end, options, start })(dispatch);
+        await commands.fetchEvents({ end, restUrl, start })(dispatch);
         expect(dispatch).toHaveBeenCalledWith({
           type: "EVENTS_FETCHED",
           ...response,
@@ -245,7 +240,7 @@ describe("plugin", () => {
         });
         globalThis.open = vi.fn();
 
-        commands.onEventClick({ id: 456 })();
+        commands.onEventClick({ id: 456, orgId: "abc" })();
         expect(globalThis.open).toHaveBeenCalledWith(
           expect.stringContaining("456"),
           "_blank",

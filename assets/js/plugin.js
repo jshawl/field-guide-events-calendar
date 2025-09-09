@@ -33,12 +33,10 @@ export const init = (dispatch) => {
 let _calendar = null;
 export const commands = {
   fetchEvents:
-    ({ start, end }) =>
+    ({ end, restUrl, start }) =>
     async (dispatch) => {
       dispatch({ type: "EVENTS_FETCH_START" });
-      const url = new URL(
-        `${field_guide_events_calendar.rest_url}/neon/events`,
-      );
+      const url = new URL(`${restUrl}/neon/events`);
       url.searchParams.append("start", start);
       url.searchParams.append("end", end);
       const response = await fetch(url.toString());
@@ -54,9 +52,9 @@ export const commands = {
   },
   noop: () => () => {},
   onEventClick:
-    ({ id }) =>
+    ({ id, orgId }) =>
     (_dispatch) => {
-      const url = `https://${field_guide_events_calendar.org_id}.app.neoncrm.com/np/clients/${field_guide_events_calendar.org_id}/event.jsp?event=${id}`;
+      const url = `https://${orgId}.app.neoncrm.com/np/clients/${orgId}/event.jsp?event=${id}`;
       window.open(url, "_blank");
     },
 };
@@ -70,7 +68,8 @@ export const update = (msg, model) => {
     case "DATES_SET": {
       const start = msg.info.startStr.slice(0, 10);
       const end = msg.info.endStr.slice(0, 10);
-      return [model, commands.fetchEvents({ end, start })];
+      const restUrl = model.options.rest_url;
+      return [model, commands.fetchEvents({ end, restUrl, start })];
     }
 
     case "EVENTS_FETCH_START": {
@@ -95,7 +94,10 @@ export const update = (msg, model) => {
     }
 
     case "ON_EVENT_CLICK": {
-      return [model, commands.onEventClick({ id: msg.id })];
+      return [
+        model,
+        commands.onEventClick({ id: msg.id, orgId: model.options.org_id }),
+      ];
     }
 
     default: {

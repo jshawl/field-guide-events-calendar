@@ -29,21 +29,6 @@ function field_guide_events_calendar_register_assets()
         true, // in_footer
     );
 
-    $data = [
-        "org_id" => field_guide_events_calendar_get_option(
-            "neon_crm_org_id",
-            "",
-        ),
-        "rest_url" => esc_url_raw(rest_url("field_guide_events_calendar/v1")),
-    ];
-    // Ensure the module can read the data via the global window object.
-    $js = "window.field_guide_events_calendar = " . wp_json_encode($data) . ";";
-    wp_add_inline_script(
-        "field_guide_events_calendar-fullcalendar",
-        $js,
-        "after",
-    );
-
     // Register plugin script and declare it depends on FullCalendar so FullCalendar loads first.
     wp_register_script(
         "field_guide_events_calendar",
@@ -104,7 +89,8 @@ function add_type_attribute($tag, $handle, $src)
         return $tag;
     }
     // change the script tag by adding type="module" and return it.
-    $tag = '<script type="module" src="' . esc_url($src) . '"></script>';
+    $tag = str_replace("<script ", '<script type="module" ', $tag);
+
     return $tag;
 }
 add_filter("script_loader_tag", "add_type_attribute", 10, 3);

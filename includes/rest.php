@@ -84,12 +84,23 @@ function field_guide_events_calendar_rest_neon_events(WP_REST_Request $request)
     ];
     $start_date = $request->get_param("start");
     $end_date = $request->get_param("end");
-    $params = [
-        "startDateAfter=" . rawurlencode($start_date),
-        "startDateBefore=" . rawurlencode($end_date),
-        "pageSize=200",
-        "publishedEvent=true",
-    ];
+    $current_page = $request->get_param("currentPage");
+    $page_size = $request->get_param("pageSize");
+    $params = ["publishedEvent=true"];
+    if (!empty($start_date)) {
+        $params[] = "startDateAfter=" . rawurlencode($start_date);
+    }
+    if (!empty($end_date)) {
+        $params[] = "startDateBefore=" . rawurlencode($end_date);
+    }
+    if (!empty($current_page)) {
+        $params[] = "currentPage=" . rawurlencode($current_page);
+    }
+    if (!empty($page_size)) {
+        $params[] = "pageSize=" . rawurlencode($page_size);
+    } else {
+        $params[] = "pageSize=200";
+    }
     $neon_events_url = $base . "?" . implode("&", $params);
     $events = field_guide_events_calendar_get_from_cache(
         "listEvents",

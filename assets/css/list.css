@@ -1,0 +1,92 @@
+.field_guide_events_list_container {
+  position: relative;
+}
+
+.field_guide_events_list_header {
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.field_guide_events_list_header h2 {
+  padding: 0.5rem 0;
+  display: inline-block;
+  margin: 0;
+  border-bottom: 1px solid #75a548;
+  transform: translateY(1px);
+}
+
+.field_guide_events_list_event:nth-of-type(2n - 1) {
+  background: #fafafa;
+}
+
+.field_guide_events_list_loading {
+  height: 128px;
+  width: 128px;
+  background-image: url(../img/loader-new.gif);
+  background-repeat: no-repeat;
+  position: absolute;
+  top: 150%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  z-index: 2;
+}
+
+.field_guide_events_list_event {
+  display: flex;
+  padding: 1rem;
+  gap: 1rem;
+  margin-bottom: 2px;
+  text-decoration: none;
+}
+
+.field_guide_events_list_event:hover .field_guide_events_list_event_cta,
+.field_guide_events_list_event_date {
+  background: #75a548;
+  color: #fff;
+}
+
+.field_guide_events_list_event_date {
+  border-radius: 50%;
+  width: 5rem;
+  height: 5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.field_guide_events_list_event_date_day {
+  font-size: 24px;
+}
+
+.field_guide_events_list_event_date_month_year {
+  font-size: 11px;
+}
+
+.field_guide_events_list_event_campaign_name {
+  color: #999;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.field_guide_events_list_event_name {
+  margin: 0;
+  font-size: 14px;
+}
+
+.field_guide_events_list_event_details {
+  flex: 1;
+}
+
+.field_guide_events_list_event_cta {
+  background-color: #e8e8e8;
+  margin: -1rem -1rem -1rem 0;
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  font-size: 24px;
+  transition: all 0.2s ease;
+}

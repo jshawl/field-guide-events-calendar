@@ -1,40 +1,45 @@
 <?php
 defined("ABSPATH") || exit();
 
-/**
- * Register assets and provide a shortcode that enqueues them.
- */
-
-function field_guide_events_calendar_register_assets()
+function field_guide_events_asset_atts($path)
 {
     $plugin_dir = FIELD_GUIDE_EVENTS_CALENDAR_DIR;
     $plugin_url = FIELD_GUIDE_EVENTS_CALENDAR_URL;
+    $file = $plugin_dir . $path;
+    return [
+        "url" => $plugin_url . $path,
+        "version" => file_exists($file) ? filemtime($file) : null,
+    ];
+}
 
-    $css_file = $plugin_dir . "assets/css/style.css";
-    $js_file = $plugin_dir . "assets/js/script.js";
+function field_guide_events_calendar_register_assets()
+{
+    $css_atts = field_guide_events_asset_atts("assets/css/style.css");
 
     wp_register_style(
         "field_guide_events_calendar",
-        $plugin_url . "assets/css/style.css",
+        $css_atts["url"],
         [],
-        file_exists($css_file) ? filemtime($css_file) : null,
+        $css_atts["version"],
     );
 
     // Register FullCalendar first (no deps), load in footer.
+    $fc_atts = field_guide_events_asset_atts("assets/js/full-calendar.min.js");
     wp_register_script(
         "field_guide_events_calendar-fullcalendar",
-        $plugin_url . "assets/js/full-calendar.min.js",
+        $fc_atts["url"],
         [], // deps
         "6.1.19", // version
         true, // in_footer
     );
 
     // Register plugin script and declare it depends on FullCalendar so FullCalendar loads first.
+    $js_atts = field_guide_events_asset_atts("assets/js/calendar.js");
     wp_register_script(
         "field_guide_events_calendar",
-        $plugin_url . "assets/js/script.js",
+        $js_atts["url"],
         ["field_guide_events_calendar-fullcalendar"], // deps
-        file_exists($js_file) ? filemtime($js_file) : null, // version
+        $js_atts["version"], // version
         true, // in_footer
     );
 }
@@ -82,10 +87,42 @@ add_shortcode(
     "field_guide_events_calendar_shortcode",
 );
 
+function field_guide_events_list_shortcode($atts)
+{
+    $api_key = field_guide_events_calendar_get_option("neon_crm_api_key", "");
+    $org_id = field_guide_events_calendar_get_option("neon_crm_org_id", "");
+    if (empty($api_key) || empty($org_id)) {
+        return field_guide_events_calendar_render_template(
+            "templates/configuration-error.php",
+        );
+    }
+    $js_atts = field_guide_events_asset_atts("assets/js/list.js");
+    wp_enqueue_script(
+        "field_guide_events_list",
+        $js_atts["url"],
+        [], // deps
+        $js_atts["version"], // version
+        true, // in_footer
+    );
+    $css_atts = field_guide_events_asset_atts("assets/css/list.css");
+    wp_enqueue_style(
+        "field_guide_events_list",
+        $css_atts["url"],
+        [], // deps
+        $css_atts["version"], // version
+    );
+    return field_guide_events_calendar_render_template(
+        "templates/list.php",
+        $atts,
+    );
+}
+add_shortcode("field_guide_events_list", "field_guide_events_list_shortcode");
+
 function add_type_attribute($tag, $handle, $src)
 {
+    $modules = ["field_guide_events_calendar", "field_guide_events_list"];
     // if not your script, do nothing and return original $tag
-    if ("field_guide_events_calendar" !== $handle) {
+    if (in_array($handle, $modules) === false) {
         return $tag;
     }
     // change the script tag by adding type="module" and return it.

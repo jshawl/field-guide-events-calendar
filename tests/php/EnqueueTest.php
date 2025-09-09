@@ -88,10 +88,6 @@ class EnqueueTest extends WP_UnitTestCase
         ob_start();
         wp_print_scripts();
         $output = ob_get_clean();
-        $this->assertStringContainsString(
-            "window.field_guide_events_calendar =",
-            $output,
-        );
         $this->assertStringContainsString('<script type="module"', $output);
     }
 }

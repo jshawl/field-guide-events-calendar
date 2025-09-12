@@ -15,8 +15,10 @@ const initialModel = {
 
 export const init = (dispatch) => {
   const el = elements.container();
-  const options = { ...el.dataset };
-  dispatch({ options, type: "INIT" });
+  if (el instanceof HTMLElement) {
+    const options = { ...el.dataset };
+    dispatch({ options, type: "INIT" });
+  }
 };
 
 // UPDATE
@@ -35,6 +37,14 @@ const filterAndSortEvents = ({ campaign, events, direction }) => {
 };
 
 export const commands = {
+  /**
+   *
+   * @param options {Object}
+   * @param options.direction {"Future" | "Past"}
+   * @param options.rest_url {String}
+   * @param [options.totalPages] {number}
+   * @returns
+   */
   fetchEvents: ({ direction, rest_url, totalPages }) => ({
     name: "FETCH_EVENTS",
     run: async (dispatch) => {
@@ -46,7 +56,7 @@ export const commands = {
       if (direction === "Past") {
         now.setDate(now.getDate() - 1);
         url.searchParams.append("end", yyyyMmDd(now));
-        url.searchParams.append("currentPage", totalPages - 1);
+        url.searchParams.append("currentPage", `${totalPages - 1}`);
       }
       try {
         const response = await fetch(url.toString());
@@ -67,7 +77,7 @@ export const commands = {
       const start = yyyyMmDd(new Date());
       const url = new URL(`${rest_url}/neon/events`);
       url.searchParams.append("end", start);
-      url.searchParams.append("pageSize", 1);
+      url.searchParams.append("pageSize", "1");
       try {
         const response = await fetch(url.toString());
         const {

@@ -13,8 +13,10 @@ const initialModel = {
 
 export const init = (dispatch) => {
   const el = elements.container();
-  const options = { ...el.dataset };
-  dispatch({ options, type: "INIT" });
+  if (el instanceof HTMLElement) {
+    const options = { ...el.dataset };
+    dispatch({ options, type: "INIT" });
+  }
 };
 
 // UPDATE
@@ -145,6 +147,9 @@ export const view = (model) => {
 
 const renderLoading = ({ loading }) => {
   const loadingEl = elements.loading();
+  if (!(loadingEl instanceof HTMLElement)) {
+    return;
+  }
   if (loading) {
     loadingEl.style.display = "block";
   } else {

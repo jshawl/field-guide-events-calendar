@@ -4,11 +4,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   commands,
-  dispatch,
+  elements,
   init,
+  subscriptions,
   update,
   view,
-} from "../../assets/js/plugin.js";
+} from "../../assets/js/calendar.js";
 
 const addEventMock = vi.fn();
 const calendarRenderMock = vi.fn();
@@ -37,7 +38,7 @@ vi.stubGlobal("FullCalendar", {
   },
 });
 
-describe("plugin", () => {
+describe("calendar", () => {
   beforeEach(() => {
     document.body.innerHTML = `
     <div class="field_guide_events_calendar_container" data-filter_campaigns="true">
@@ -46,12 +47,6 @@ describe("plugin", () => {
       <div class='field_guide_events_calendar_calendar'></div>
     </div>
   `;
-  });
-
-  describe("dispatch", () => {
-    it("is only here for test coverage", () => {
-      dispatch({ type: "EVENTS_FETCH_START" });
-    });
   });
 
   describe("init", () => {
@@ -88,7 +83,7 @@ describe("plugin", () => {
       });
       // and post-load side effects
       const dispatch = vi.fn();
-      cmd(dispatch);
+      cmd.run(dispatch);
       const dates = {
         endStr: "2020-01-02",
         startStr: "2020-01-01",
@@ -101,7 +96,7 @@ describe("plugin", () => {
     });
 
     it("DATES_SET", () => {
-      const [_model, cmd] = update(
+      const [model, cmd] = update(
         {
           info: {
             endStr: "2020-01-02",
@@ -111,19 +106,8 @@ describe("plugin", () => {
         },
         initialModel,
       );
-      const dispatch = vi.fn();
-      globalThis.fetch = vi.fn(() =>
-        Promise.resolve({
-          json: () => ({}),
-        }),
-      );
-      cmd(dispatch);
-      expect(dispatch).toHaveBeenCalledWith({ type: "EVENTS_FETCH_START" });
-    });
-
-    it("EVENTS_FETCH_START", () => {
-      const [model] = update({ type: "EVENTS_FETCH_START" });
       expect(model.loading).toBe(true);
+      expect(cmd.name).toBe("FETCH_EVENTS");
     });
 
     it("EVENTS_FETCHED", () => {
@@ -145,7 +129,7 @@ describe("plugin", () => {
     it("ON_EVENT_CLICK", () => {
       const model = update({ id: 123, type: "ON_EVENT_CLICK" }, initialModel);
       expect(model[0]).toStrictEqual(initialModel);
-      expect(model[1]).toBeInstanceOf(Function);
+      expect(model[1].run).toBeInstanceOf(Function);
     });
 
     it("throws on unhandled messages", () => {
@@ -169,7 +153,7 @@ describe("plugin", () => {
     });
 
     it("removes and readds events", () => {
-      commands.initCalendar()(dispatch);
+      commands.initCalendar().run(dispatch);
       removeAllEventsMock.mockClear();
       view(model, dispatch);
       expect(removeAllEventsMock).toHaveBeenCalledOnce();
@@ -200,11 +184,6 @@ describe("plugin", () => {
       const selector = "[type='radio'][value='All'][checked='true']";
       const selected = document.querySelector(selector);
       expect(selected).toBeTruthy();
-      selected.dispatchEvent(new Event("change", { bubbles: true }));
-      expect(dispatch).toHaveBeenCalledWith({
-        filter: "All",
-        type: "CAMPAIGN_FILTER_CHANGED",
-      });
     });
   });
 
@@ -221,7 +200,7 @@ describe("plugin", () => {
           }),
         );
         const dispatch = vi.fn();
-        await commands.fetchEvents({ end, restUrl, start })(dispatch);
+        await commands.fetchEvents({ end, restUrl, start }).run(dispatch);
         expect(dispatch).toHaveBeenCalledWith({
           type: "EVENTS_FETCHED",
           ...response,
@@ -229,10 +208,17 @@ describe("plugin", () => {
       });
     });
 
+    describe("none", () => {
+      it("does nothing", () => {
+        const cmd = commands.none();
+        expect(() => cmd.run()).not.toThrowError();
+      });
+    });
+
     describe("onEventClick", () => {
       it("opens the event url in a new tab", () => {
         const dispatch = vi.fn();
-        commands.initCalendar()(dispatch);
+        commands.initCalendar().run(dispatch);
         onEventClick({ event: { id: 123 } });
         expect(dispatch).toHaveBeenCalledWith({
           id: 123,
@@ -240,11 +226,30 @@ describe("plugin", () => {
         });
         globalThis.open = vi.fn();
 
-        commands.onEventClick({ id: 456, orgId: "abc" })();
+        commands.onEventClick({ id: 456, orgId: "abc" }).run();
         expect(globalThis.open).toHaveBeenCalledWith(
           expect.stringContaining("456"),
           "_blank",
         );
+      });
+    });
+    it("none", () => {
+      expect(() => commands.none()).not.toThrowError();
+    });
+  });
+
+  describe("subscriptions", () => {
+    it("sets up campaign button event listeners", () => {
+      const input = document.createElement("input");
+      input.setAttribute("type", "radio");
+      input.setAttribute("value", "My Campaign");
+      elements.container().append(input);
+      const dispatch = vi.fn();
+      subscriptions().map((subscription) => subscription.start(dispatch));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      expect(dispatch).toHaveBeenCalledWith({
+        filter: "My Campaign",
+        type: "CAMPAIGN_FILTER_CHANGED",
       });
     });
   });

@@ -1,41 +1,30 @@
+import { createApp } from "./tea.js";
+
+// MODEL
+
 const initialModel = {
   events: [],
   filter: "All",
-  loading: true,
+  loading: false,
   options: {},
 };
 
-export const elements = {
-  calendar: () =>
-    document.querySelector(".field_guide_events_calendar_calendar"),
-  campaigns: () =>
-    document.querySelector(".field_guide_events_calendar_campaigns"),
-  container: () =>
-    document.querySelector(".field_guide_events_calendar_container"),
-  loading: () => document.querySelector(".field_guide_events_calendar_loading"),
-};
+// INIT
 
-let currentModel = { ...initialModel };
-
-export const dispatch = (action) => {
-  const [newModel, command] = update(action, currentModel);
-  currentModel = newModel;
-  command(dispatch);
-  view(currentModel, dispatch);
-};
 export const init = (dispatch) => {
   const el = elements.container();
   const options = { ...el.dataset };
   dispatch({ options, type: "INIT" });
 };
 
+// UPDATE
+
 // eslint-disable-next-line unicorn/no-null
 let _calendar = null;
 export const commands = {
-  fetchEvents:
-    ({ end, restUrl, start }) =>
-    async (dispatch) => {
-      dispatch({ type: "EVENTS_FETCH_START" });
+  fetchEvents: ({ end, restUrl, start }) => ({
+    name: "FETCH_EVENTS",
+    run: async (dispatch) => {
       const url = new URL(`${restUrl}/neon/events`);
       url.searchParams.append("start", start);
       url.searchParams.append("end", end);
@@ -43,20 +32,25 @@ export const commands = {
       const { events } = await response.json();
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
-  initCalendar: () => (dispatch) => {
-    _calendar = new FullCalendar.Calendar(
-      elements.calendar(),
-      getCalendarOptions(dispatch),
-    );
-    _calendar.render();
-  },
-  noop: () => () => {},
-  onEventClick:
-    ({ id, orgId }) =>
-    (_dispatch) => {
+  }),
+  initCalendar: () => ({
+    name: "INIT_CALENDAR",
+    run: (dispatch) => {
+      _calendar = new FullCalendar.Calendar(
+        elements.calendar(),
+        getCalendarOptions(dispatch),
+      );
+      _calendar.render();
+    },
+  }),
+  none: () => ({ run: () => {} }),
+  onEventClick: ({ id, orgId }) => ({
+    name: "ON_EVENT_CLICK",
+    run: (_dispatch) => {
       const url = `https://${orgId}.app.neoncrm.com/np/clients/${orgId}/event.jsp?event=${id}`;
       window.open(url, "_blank");
     },
+  }),
 };
 
 export const update = (msg, model) => {
@@ -69,11 +63,10 @@ export const update = (msg, model) => {
       const start = msg.info.startStr.slice(0, 10);
       const end = msg.info.endStr.slice(0, 10);
       const restUrl = model.options.rest_url;
-      return [model, commands.fetchEvents({ end, restUrl, start })];
-    }
-
-    case "EVENTS_FETCH_START": {
-      return [{ ...model, loading: true }, commands.noop()];
+      return [
+        { ...model, loading: true },
+        commands.fetchEvents({ end, restUrl, start }),
+      ];
     }
 
     case "EVENTS_FETCHED": {
@@ -85,12 +78,12 @@ export const update = (msg, model) => {
       if (!getCampaignNames(events).includes(filter)) {
         filter = "All";
       }
-      return [{ ...model, events, filter, loading: false }, commands.noop()];
+      return [{ ...model, events, filter, loading: false }, commands.none()];
     }
 
     case "CAMPAIGN_FILTER_CHANGED": {
       const { filter } = msg;
-      return [{ ...model, filter }, commands.noop()];
+      return [{ ...model, filter }, commands.none()];
     }
 
     case "ON_EVENT_CLICK": {
@@ -106,17 +99,49 @@ export const update = (msg, model) => {
   }
 };
 
-export const view = (model, dispatch) => {
+// SUBSCRIPTIONS
+
+export const subscriptions = () => [
+  {
+    key: "addCampaignEventListeners",
+    start(dispatch) {
+      const el = elements.container();
+      const handler = (event) => {
+        const btn = event.target.closest("[type='radio']");
+        if (!btn) {
+          return;
+        }
+        dispatch({
+          filter: event.target.value,
+          type: "CAMPAIGN_FILTER_CHANGED",
+        });
+      };
+      el.addEventListener("change", handler);
+      this.stop = () => el.removeEventListener("change", handler);
+    },
+  },
+];
+
+// VIEW
+
+export const elements = {
+  calendar: () =>
+    document.querySelector(".field_guide_events_calendar_calendar"),
+  campaigns: () =>
+    document.querySelector(".field_guide_events_calendar_campaigns"),
+  container: () =>
+    document.querySelector(".field_guide_events_calendar_container"),
+  loading: () => document.querySelector(".field_guide_events_calendar_loading"),
+};
+
+export const view = (model) => {
   const { events, filter, loading, options } = model;
   renderLoading({ loading });
   renderCalendar({ events, filter, loading });
   if (options.filter_campaigns === "true") {
-    renderCampaignFilters({ dispatch, events, filter });
+    renderCampaignFilters({ events, filter });
   }
 };
-
-// Helpers
-// -------
 
 const renderLoading = ({ loading }) => {
   const loadingEl = elements.loading();
@@ -143,7 +168,7 @@ const renderCalendar = ({ events, filter, loading }) => {
     );
 };
 
-const renderCampaignFilters = ({ dispatch, events, filter }) => {
+const renderCampaignFilters = ({ events, filter }) => {
   const campaignNames = getCampaignNames(events);
   const container = elements.campaigns();
   container.innerHTML = "";
@@ -159,9 +184,6 @@ const renderCampaignFilters = ({ dispatch, events, filter }) => {
               ${campaignName}
             </label>
           `;
-    div.addEventListener("change", (event) =>
-      dispatch({ filter: event.target.value, type: "CAMPAIGN_FILTER_CHANGED" }),
-    );
     container.append(div);
   });
 };
@@ -212,3 +234,10 @@ export const formatEvents = ({ events, options }) =>
       title: event.name,
     };
   });
+
+// MAIN
+
+if (!("process" in globalThis)) {
+  const app = createApp({ init, initialModel, subscriptions, update, view });
+  app.start();
+}

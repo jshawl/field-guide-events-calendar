@@ -208,7 +208,7 @@ const renderHeader = ({ direction }) => {
   return `
         <div class="field_guide_events_list_header">
             <h2>${direction} Events</h2>
-            <button class="field_guide_events_list_change_direction" data-direction="${nextDirection}">
+            <button class="field_guide_events_list_change_direction btn btn-default btn-sm" data-direction="${nextDirection}">
                 ${nextDirection}
             </button>
         </div>

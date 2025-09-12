@@ -21,7 +21,7 @@ export const createApp = ({
     }
     currentModel = newModel;
     command.run(dispatch);
-    view(currentModel, dispatch);
+    view(currentModel);
     refreshSubscriptions(currentModel);
   };
 

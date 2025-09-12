@@ -38,7 +38,6 @@ export const commands = {
   fetchEvents: ({ direction, rest_url, totalPages }) => ({
     name: "FETCH_EVENTS",
     run: async (dispatch) => {
-      dispatch({ type: "EVENTS_FETCH_START" });
       const now = new Date();
       const url = new URL(`${rest_url}/neon/events`);
       if (direction === "Future") {
@@ -92,14 +91,8 @@ export const update = (msg, model) => {
       const { rest_url } = msg.options;
       const { direction } = model;
       return [
-        { ...model, options: msg.options },
+        { ...model, loading: true, options: msg.options },
         commands.fetchEvents({ direction, rest_url }),
-      ];
-    }
-    case "EVENTS_FETCH_START": {
-      return [
-        { ...model, error: false, events: [], loading: true },
-        commands.none(),
       ];
     }
     case "EVENTS_FETCHED": {

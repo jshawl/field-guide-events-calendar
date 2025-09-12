@@ -48,11 +48,7 @@ describe("list", () => {
         const dispatch = vi.fn();
         const direction = "Future";
         const cmd = commands.fetchEvents({ direction, rest_url });
-
         await cmd.run(dispatch);
-        expect(dispatch).toHaveBeenCalledWith({
-          type: "EVENTS_FETCH_START",
-        });
         expect(dispatch).toHaveBeenCalledWith({
           events: [],
           type: "EVENTS_FETCHED",
@@ -69,9 +65,6 @@ describe("list", () => {
         });
 
         await cmd.run(dispatch);
-        expect(dispatch).toHaveBeenCalledWith({
-          type: "EVENTS_FETCH_START",
-        });
         expect(dispatch).toHaveBeenCalledWith({
           events: [],
           type: "EVENTS_FETCHED",
@@ -170,12 +163,8 @@ describe("list", () => {
       const options = { rest_url: "https://example2.com" };
       const [model, cmd] = update({ options, type: "INIT" }, initialModel);
       expect(model.options.rest_url).toBe("https://example2.com");
+      expect(model.loading).toBe(true);
       expect(cmd.name).toBe("FETCH_EVENTS");
-    });
-
-    it("EVENTS_FETCH_START", () => {
-      const [model] = update({ type: "EVENTS_FETCH_START" }, initialModel);
-      expect(model.events.length).toBe(0);
     });
 
     describe("EVENTS_FETCHED", () => {
@@ -208,6 +197,7 @@ describe("list", () => {
             startDate: "2025-02-01",
           },
         ]);
+        expect(model.loading).toBe(false);
         const [pastModel] = update(
           {
             events,

@@ -5,7 +5,7 @@ import { createApp } from "./tea.js";
 const initialModel = {
   events: [],
   filter: "All",
-  loading: true,
+  loading: false,
   options: {},
 };
 

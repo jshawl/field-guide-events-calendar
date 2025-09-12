@@ -6,7 +6,7 @@ const initialModel = {
   direction: "Future",
   error: false,
   events: [],
-  loading: true,
+  loading: false,
   options: {},
   totalPages: 0,
 };

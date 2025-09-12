@@ -50,20 +50,23 @@
 
 .field_guide_events_list_event_date {
   border-radius: 50%;
-  width: 5rem;
-  height: 5rem;
+  width: 4.25rem;
+  height: 4.25rem;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  font-family: Roboto, sans-serif;
 }
 
 .field_guide_events_list_event_date_day {
   font-size: 24px;
+  line-height: 1.1;
 }
 
 .field_guide_events_list_event_date_month_year {
   font-size: 11px;
+  text-transform: uppercase;
 }
 
 .field_guide_events_list_event_campaign_name {
@@ -87,6 +90,7 @@
   display: flex;
   align-items: center;
   padding: 1.5rem;
-  font-size: 24px;
+  font-size: 32px;
+  color: rgb(102, 102, 102);
   transition: all 0.2s ease;
 }

@@ -41,10 +41,10 @@ export const commands = {
       const now = new Date();
       const url = new URL(`${rest_url}/neon/events`);
       if (direction === "Future") {
+        now.setDate(now.getDate() + 1);
         url.searchParams.append("start", yyyyMmDd(now));
       }
       if (direction === "Past") {
-        now.setDate(now.getDate() - 1);
         url.searchParams.append("end", yyyyMmDd(now));
         url.searchParams.append("currentPage", totalPages - 1);
       }

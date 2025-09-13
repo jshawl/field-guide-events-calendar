@@ -268,7 +268,7 @@ const renderError = ({ direction, error }) => {
   }
   return `<div>
       Something went wrong.
-      ${renderFetchEventsButton({ direction, text: "Try again" })}
+      ${renderFetchEventsButton({ direction, text: "Reload" })}
     </div>`;
 };
 

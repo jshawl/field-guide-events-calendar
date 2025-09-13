@@ -139,7 +139,6 @@ export const commands = {
 };
 
 /** @type {Tea.UpdateFn<Model>} */
-// eslint-disable-next-line max-lines-per-function
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
@@ -232,9 +231,10 @@ export const subscriptions = () => [
       }
       /** @type EventListener */
       const handler = (event) => {
-        const target = /** @type HTMLElement*/ (event.target);
+        const { target } = event;
+        const input = /** @type {HTMLInputElement} */ (target);
         const btn = /** @type HTMLElement */ (
-          target.closest("[data-direction]")
+          input.closest("[data-direction]")
         );
         if (!btn) {
           return;

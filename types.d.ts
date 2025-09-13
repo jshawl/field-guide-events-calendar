@@ -30,9 +30,9 @@ declare global {
 
     type InitFn = (dispatch: DispatchFn) => void;
 
-    type Model<T extends Options = {}> = T;
+    type Model<T extends Options = Options> = T;
 
-    type Msg<T = {}> = { type: string } & T;
+    type Msg<T = Options> = { type: string } & T;
 
     type Options = Record<string, unknown>;
 

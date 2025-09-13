@@ -121,7 +121,6 @@ export const update = (msg, model) => {
       });
       formattedEvents[0].id;
       let { filter } = model;
-      const fes = formattedEvents;
       if (!getCampaignNames(formattedEvents).includes(filter)) {
         filter = "All";
       }
@@ -162,14 +161,14 @@ export const subscriptions = () => [
       }
       /** @type EventListener */
       const handler = (event) => {
-        const target = /** @type HTMLInputElement*/ (event.target);
-
-        const btn = /** @type HTMLElement */ (target.closest("[type='radio']"));
+        const { target } = event;
+        const input = /** @type {HTMLInputElement} */ (target);
+        const btn = /** @type HTMLElement */ (input.closest("[type='radio']"));
         if (!btn) {
           return;
         }
         dispatch({
-          filter: target.value,
+          filter: input.value,
           type: "CAMPAIGN_FILTER_CHANGED",
         });
       };
@@ -333,8 +332,8 @@ export const formatEvents = ({ events, options }) =>
       id,
       name,
       start,
-      startTime: event.startTime,
       startDate,
+      startTime: event.startTime,
       title: event.name,
     };
   });

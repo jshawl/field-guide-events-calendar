@@ -4,7 +4,13 @@ export const createApp = ({
   subscriptions,
   update,
   view,
-}) => {
+} = {}) => {
+  if (typeof initialModel !== "object") {
+    throw new Error("[tea] missing required property initialModel");
+  }
+  if (typeof init !== "function") {
+    throw new Error("[tea] init is not a function");
+  }
   const initialModelKeys = Object.keys(initialModel);
   let currentModel = initialModel;
   let activeSubs = [];

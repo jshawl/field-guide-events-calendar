@@ -4,7 +4,7 @@ import { createApp } from "./tea.js";
 /**
  * @typedef {Tea.Model<{
  *  error: boolean;
- *  events: Neon.Event[];
+ *  events: FullCalendar.Event[];
  *  filter: string;
  *  loading: boolean;
  *  options: {
@@ -105,7 +105,7 @@ export const update = (msg, model) => {
     }
 
     case "EVENTS_FETCHED": {
-      const { events } = /** @type {Tea.Msg<Pick<Model, 'events'>>}*/ (msg);
+      const { events } = /** @type {Tea.Msg<{events: Neon.Event[]}>}*/ (msg);
       const formattedEvents = formatEvents({
         events,
         options: model.options,
@@ -209,7 +209,7 @@ const renderLoading = ({ loading }) => {
 
 /**
  *
- * @param {Pick<Model, 'loading' | 'events' | 'filter'>} options
+ * @param {{events: FullCalendar.Event[]} & Pick<Model, 'loading' | 'filter'>} options
  * @returns
  */
 const renderCalendar = ({ events, filter, loading }) => {
@@ -220,12 +220,10 @@ const renderCalendar = ({ events, filter, loading }) => {
   }
   events
     .filter((event) => ["All", event.campaignName].includes(filter))
-    .map((event) =>
-      calendar?.addEvent({
-        ...event,
-        allDay: event.startDate !== event.endDate,
-      }),
-    );
+    .map((event) => {
+      const { allDay, end, id, start, title } = event;
+      calendar?.addEvent({ allDay, end, id, start, title });
+    });
 };
 
 /**
@@ -285,7 +283,7 @@ const getCalendarOptions = (dispatch) => ({
 
 /**
  *
- * @param {Neon.Event[]} events
+ * @param {FullCalendar.Event[]} events
  * @returns
  */
 export const getCampaignNames = (events) => [
@@ -302,8 +300,8 @@ export const getCampaignNames = (events) => [
 
 /**
  * formatEvents
- * @param {Pick<Model,'events' | 'options'>} options
- * @returns {Neon.Event[]}
+ * @param {{events: Neon.Event[]} & Pick<Model, 'options'>} options
+ * @returns {FullCalendar.Event[]}
  */
 export const formatEvents = ({ events, options }) =>
   events.map((event) => {
@@ -315,16 +313,12 @@ export const formatEvents = ({ events, options }) =>
     const start = new Date(`${startDate}T${startTime}`);
     const end = new Date(`${endDate}T${endTime}`);
     return {
+      allDay: event.startDate != event.endDate,
       campaignName: event.campaignName,
       end,
-      endDate,
-      endTime,
-      id,
-      name,
+      id: String(id),
       start,
-      startDate,
-      startTime: event.startTime,
-      title: event.name,
+      title: name,
     };
   });
 

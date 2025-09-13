@@ -5,5 +5,5 @@
     "noEmit": true,
     "strict": true
   },
-  "include": ["assets/js/*.js", "types.d.ts"]
+  "include": ["assets/js/*.js", "types/*.d.ts"]
 }

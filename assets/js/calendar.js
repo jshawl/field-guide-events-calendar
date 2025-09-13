@@ -2,18 +2,9 @@ import { createApp } from "./tea.js";
 
 // MODEL
 /**
- * @typedef {Object} Event
- * @property {string} campaignName
- * @property {number} id
- * @property {string} name
- * @property {string} startDate
- * @property {string} startTime
- * @property {string} endDate
- * @property {string} endTime
- *
  * @typedef {Tea.Model<{
  *  error: boolean;
- *  events: Event[];
+ *  events: Neon.Event[];
  *  filter: string;
  *  loading: boolean;
  *  options: {
@@ -135,7 +126,7 @@ export const update = (msg, model) => {
     }
 
     case "ON_EVENT_CLICK": {
-      const { id } = /** @type {Tea.Msg<Pick<Event, 'id'>>} */ (msg);
+      const { id } = /** @type {Tea.Msg<Pick<Neon.Event, 'id'>>} */ (msg);
       return [
         model,
         commands.onEventClick({ id, orgId: model.options.org_id }),
@@ -280,7 +271,7 @@ const getCalendarOptions = (dispatch) => ({
   eventClassNames: ["field_guide_events_calendar_event"],
   /**
    *
-   * @param {{event: Event}} info
+   * @param {{event: Neon.Event}} info
    * @returns
    */
   eventClick: (info) => dispatch({ id: info.event.id, type: "ON_EVENT_CLICK" }),
@@ -294,7 +285,7 @@ const getCalendarOptions = (dispatch) => ({
 
 /**
  *
- * @param {Event[]} events
+ * @param {Neon.Event[]} events
  * @returns
  */
 export const getCampaignNames = (events) => [
@@ -312,7 +303,7 @@ export const getCampaignNames = (events) => [
 /**
  * formatEvents
  * @param {Pick<Model,'events' | 'options'>} options
- * @returns {Event[]}
+ * @returns {Neon.Event[]}
  */
 export const formatEvents = ({ events, options }) =>
   events.map((event) => {

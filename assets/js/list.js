@@ -5,7 +5,7 @@ import { createApp } from "./tea.js";
  * @typedef {Tea.Model<{
  *  direction: "Past" | "Future";
  *  error: boolean;
- *  events: Event[];
+ *  events: Neon.Event[];
  *  loading: boolean;
  *  options: {
  *   campaign: string;
@@ -49,16 +49,10 @@ export const init = (dispatch) => {
 const yyyyMmDd = (date) => date.toISOString().slice(0, 10);
 
 /**
- * @typedef {Object} Event
- * @property {string} campaignName
- * @property {number} id
- * @property {string} name
- * @property {string} startDate
- * @property {string} startTime
  *
  * @param {Object} options
  * @param {string} options.campaign
- * @param {Event[]} options.events
+ * @param {Neon.Event[]} options.events
  * @param {Model["direction"]} options.direction
  * @returns
  */
@@ -152,7 +146,9 @@ export const update = (msg, model) => {
     }
     case "EVENTS_FETCHED": {
       const { events, totalPages } =
-        /** @type {Tea.Msg<{events: Event[], totalPages: number}>} */ (msg);
+        /** @type {Tea.Msg<{events: Neon.Event[], totalPages: number}>} */ (
+          msg
+        );
       const { campaign } = model.options;
       const { direction } = model;
       const filteredEvents = filterAndSortEvents({
@@ -294,7 +290,7 @@ const renderHeader = ({ direction }) => {
 
 /**
  *
- * @param {Event} event
+ * @param {Neon.Event} event
  * @returns
  */
 const formatEventDate = (event) => {

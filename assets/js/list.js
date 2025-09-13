@@ -194,7 +194,7 @@ export const view = (model) => {
   const { direction, error, loading } = model;
   elements.container().innerHTML = `
     ${renderHeader({ direction })}
-    ${renderError({ error })}
+    ${renderError({ direction, error })}
     ${renderEvents(model)}
     ${renderLoading({ loading })}
   `;
@@ -257,11 +257,16 @@ const renderLoading = ({ loading }) => {
   return `<div class="field_guide_events_list_loading"></div>`;
 };
 
-const renderError = ({ error }) => {
+const renderError = ({ direction, error }) => {
   if (!error) {
     return "";
   }
-  return `<div>Something went wrong.</div>`;
+  return `<div>
+    Something went wrong.
+      <button class="field_guide_events_list_change_direction btn btn-default btn-sm" data-direction="${direction}">
+                Try again
+            </button>
+            </div>`;
 };
 
 // MAIN

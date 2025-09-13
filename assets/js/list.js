@@ -194,11 +194,18 @@ export const view = (model) => {
   const { direction, error, loading } = model;
   elements.container().innerHTML = `
     ${renderHeader({ direction })}
-    ${renderError({ error })}
+    ${renderError({ direction, error })}
     ${renderEvents(model)}
     ${renderLoading({ loading })}
   `;
 };
+
+const renderFetchEventsButton = ({ direction, text = direction }) => `<button
+    class="field_guide_events_list_change_direction btn btn-default btn-sm"
+    data-direction="${direction}"
+  >
+    ${text}
+  </button>`;
 
 const renderHeader = ({ direction }) => {
   let nextDirection = "Past";
@@ -208,9 +215,7 @@ const renderHeader = ({ direction }) => {
   return `
         <div class="field_guide_events_list_header">
             <h2>${direction} Events</h2>
-            <button class="field_guide_events_list_change_direction btn btn-default btn-sm" data-direction="${nextDirection}">
-                ${nextDirection}
-            </button>
+            ${renderFetchEventsButton({ direction: nextDirection })}
         </div>
     `;
 };
@@ -257,11 +262,14 @@ const renderLoading = ({ loading }) => {
   return `<div class="field_guide_events_list_loading"></div>`;
 };
 
-const renderError = ({ error }) => {
+const renderError = ({ direction, error }) => {
   if (!error) {
     return "";
   }
-  return `<div>Something went wrong.</div>`;
+  return `<div>
+      Something went wrong.
+      ${renderFetchEventsButton({ direction, text: "Try again" })}
+    </div>`;
 };
 
 // MAIN

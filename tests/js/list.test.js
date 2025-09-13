@@ -276,6 +276,7 @@ describe("list", () => {
     it("shows errors", () => {
       view({ ...initialModel, error: true, events: [], loading: false });
       expect(document.body.innerHTML).toContain("Something went wrong.");
+      expect(document.body.innerHTML).toContain("Try again");
     });
 
     it("shows no events", () => {

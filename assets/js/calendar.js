@@ -1,27 +1,58 @@
 import { createApp } from "./tea.js";
 
 // MODEL
-
+/**
+ * @typedef {Tea.Model<{
+ *  error: boolean;
+ *  events: FullCalendar.Event[];
+ *  filter: string;
+ *  loading: boolean;
+ *  options: {
+ *    filter_campaigns: "true" | "false";
+ *    multi_day_events: "true" | "false";
+ *    org_id: string;
+ *    rest_url: string;
+ *  };
+ * }>} Model
+ * @type {Model}
+ */
 const initialModel = {
+  error: false,
   events: [],
   filter: "All",
   loading: false,
-  options: {},
+  options: {
+    filter_campaigns: "false",
+    multi_day_events: "true",
+    org_id: "",
+    rest_url: "",
+  },
 };
 
 // INIT
-
+/** @type {Tea.InitFn} */
 export const init = (dispatch) => {
   const el = elements.container();
-  const options = { ...el.dataset };
-  dispatch({ options, type: "INIT" });
+  if (el instanceof HTMLElement) {
+    const options = { ...el.dataset };
+    dispatch({ options, type: "INIT" });
+  }
 };
 
 // UPDATE
 
 // eslint-disable-next-line unicorn/no-null
-let _calendar = null;
+let _calendar = /** @type {FullCalendar.Calendar | null} */ (null);
 export const commands = {
+  /**
+   *
+   * @param {{
+   *  end: string
+   *  restUrl: string
+   *  start: string
+   * }} options
+   * @returns {Tea.Cmd}
+   */
   fetchEvents: ({ end, restUrl, start }) => ({
     name: "FETCH_EVENTS",
     run: async (dispatch) => {
@@ -33,17 +64,31 @@ export const commands = {
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
   }),
+  /**
+   *
+   * @returns {Tea.Cmd}
+   */
   initCalendar: () => ({
     name: "INIT_CALENDAR",
     run: (dispatch) => {
-      _calendar = new FullCalendar.Calendar(
-        elements.calendar(),
-        getCalendarOptions(dispatch),
-      );
+      const el = elements.calendar();
+      if (!el) {
+        return;
+      }
+      _calendar = new FullCalendar.Calendar(el, getCalendarOptions(dispatch));
       _calendar.render();
     },
   }),
-  none: () => ({ run: () => {} }),
+  /**
+   *
+   * @returns {Tea.Cmd}
+   */
+  none: () => ({ name: "NONE", run: () => {} }),
+  /**
+   *
+   * @param {{id: number, orgId: string}} options
+   * @returns {Tea.Cmd}
+   */
   onEventClick: ({ id, orgId }) => ({
     name: "ON_EVENT_CLICK",
     run: (_dispatch) => {
@@ -53,15 +98,18 @@ export const commands = {
   }),
 };
 
+/** @type {Tea.UpdateFn<Model>} */
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      return [{ ...model, options: msg.options }, commands.initCalendar()];
+      const { options } = msg;
+      return [{ ...model, options }, commands.initCalendar()];
     }
 
     case "DATES_SET": {
-      const start = msg.info.startStr.slice(0, 10);
-      const end = msg.info.endStr.slice(0, 10);
+      const { info } = msg;
+      const start = info.startStr.slice(0, 10);
+      const end = info.endStr.slice(0, 10);
       const restUrl = model.options.rest_url;
       return [
         { ...model, loading: true },
@@ -70,15 +118,19 @@ export const update = (msg, model) => {
     }
 
     case "EVENTS_FETCHED": {
-      const events = formatEvents({
-        events: msg.events,
+      const { events } = msg;
+      const formattedEvents = formatEvents({
+        events,
         options: model.options,
       });
       let { filter } = model;
-      if (!getCampaignNames(events).includes(filter)) {
+      if (!getCampaignNames(formattedEvents).includes(filter)) {
         filter = "All";
       }
-      return [{ ...model, events, filter, loading: false }, commands.none()];
+      return [
+        { ...model, events: formattedEvents, filter, loading: false },
+        commands.none(),
+      ];
     }
 
     case "CAMPAIGN_FILTER_CHANGED": {
@@ -87,9 +139,10 @@ export const update = (msg, model) => {
     }
 
     case "ON_EVENT_CLICK": {
+      const { id } = msg;
       return [
         model,
-        commands.onEventClick({ id: msg.id, orgId: model.options.org_id }),
+        commands.onEventClick({ id, orgId: model.options.org_id }),
       ];
     }
 
@@ -100,19 +153,25 @@ export const update = (msg, model) => {
 };
 
 // SUBSCRIPTIONS
-
+/** @type {Tea.SubscriptionsFn} */
 export const subscriptions = () => [
   {
     key: "addCampaignEventListeners",
     start(dispatch) {
       const el = elements.container();
+      if (!el) {
+        return;
+      }
+      /** @type EventListener */
       const handler = (event) => {
-        const btn = event.target.closest("[type='radio']");
+        const { target } = event;
+        const input = /** @type {HTMLInputElement} */ (target);
+        const btn = /** @type HTMLElement */ (input.closest("[type='radio']"));
         if (!btn) {
           return;
         }
         dispatch({
-          filter: event.target.value,
+          filter: input.value,
           type: "CAMPAIGN_FILTER_CHANGED",
         });
       };
@@ -134,6 +193,7 @@ export const elements = {
   loading: () => document.querySelector(".field_guide_events_calendar_loading"),
 };
 
+/** @type {Tea.ViewFn<Model>} */
 export const view = (model) => {
   const { events, filter, loading, options } = model;
   renderLoading({ loading });
@@ -143,8 +203,16 @@ export const view = (model) => {
   }
 };
 
+/**
+ *
+ * @param {Pick<Model, 'loading'>} options
+ * @returns
+ */
 const renderLoading = ({ loading }) => {
   const loadingEl = elements.loading();
+  if (!(loadingEl instanceof HTMLElement)) {
+    return;
+  }
   if (loading) {
     loadingEl.style.display = "block";
   } else {
@@ -152,6 +220,11 @@ const renderLoading = ({ loading }) => {
   }
 };
 
+/**
+ *
+ * @param {{events: FullCalendar.Event[]} & Pick<Model, 'loading' | 'filter'>} options
+ * @returns
+ */
 const renderCalendar = ({ events, filter, loading }) => {
   const calendar = getCalendar();
   calendar?.removeAllEvents();
@@ -160,17 +233,23 @@ const renderCalendar = ({ events, filter, loading }) => {
   }
   events
     .filter((event) => ["All", event.campaignName].includes(filter))
-    .map((event) =>
-      calendar?.addEvent({
-        ...event,
-        allDay: event.startDate !== event.endDate,
-      }),
-    );
+    .forEach((event) => {
+      const { allDay, end, id, start, title } = event;
+      calendar?.addEvent({ allDay, end, id, start, title });
+    });
 };
 
+/**
+ *
+ * @param {Pick<Model, 'events' | 'filter'>} options
+ * @returns
+ */
 const renderCampaignFilters = ({ events, filter }) => {
   const campaignNames = getCampaignNames(events);
   const container = elements.campaigns();
+  if (!container) {
+    return;
+  }
   container.innerHTML = "";
   campaignNames.forEach((campaignName) => {
     const div = document.createElement("div");
@@ -189,11 +268,23 @@ const renderCampaignFilters = ({ events, filter }) => {
 };
 
 const getCalendar = () => _calendar;
+/**
+ * @param {Tea.DispatchFn} dispatch
+ */
 const getCalendarOptions = (dispatch) => ({
+  /**
+   *
+   * @param {unknown} info
+   */
   datesSet: (info) => {
     dispatch({ info, type: "DATES_SET" });
   },
   eventClassNames: ["field_guide_events_calendar_event"],
+  /**
+   *
+   * @param {{event: Neon.Event}} info
+   * @returns
+   */
   eventClick: (info) => dispatch({ id: info.event.id, type: "ON_EVENT_CLICK" }),
   headerToolbar: {
     left: "title",
@@ -203,6 +294,11 @@ const getCalendarOptions = (dispatch) => ({
   initialView: "dayGridMonth",
 });
 
+/**
+ *
+ * @param {FullCalendar.Event[]} events
+ * @returns
+ */
 export const getCampaignNames = (events) => [
   "All",
   ...Object.keys(
@@ -211,13 +307,18 @@ export const getCampaignNames = (events) => [
         camps[ev.campaignName] = true;
       }
       return camps; // 🏕️
-    }, {}),
+    }, /** @type {Record<string, boolean>} */ ({})),
   ).sort(),
 ];
 
+/**
+ * formatEvents
+ * @param {{events: Neon.Event[]} & Pick<Model, 'options'>} options
+ * @returns {FullCalendar.Event[]}
+ */
 export const formatEvents = ({ events, options }) =>
   events.map((event) => {
-    const { endTime, startDate, startTime } = event;
+    const { endTime, id, name, startDate, startTime } = event;
     let { endDate } = event;
     if (options.multi_day_events === "false") {
       endDate = startDate;
@@ -225,13 +326,12 @@ export const formatEvents = ({ events, options }) =>
     const start = new Date(`${startDate}T${startTime}`);
     const end = new Date(`${endDate}T${endTime}`);
     return {
+      allDay: event.startDate !== event.endDate,
       campaignName: event.campaignName,
       end,
-      endDate,
-      id: event.id,
+      id: String(id),
       start,
-      startDate,
-      title: event.name,
+      title: name,
     };
   });
 

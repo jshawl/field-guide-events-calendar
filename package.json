@@ -12,7 +12,8 @@
     "start": "wp-env start",
     "wp-env": "wp-env",
     "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/field-guide-events-calendar vendor/bin/phpunit --coverage-html coverage/php",
-    "plugin:check": "wp-env run tests-cli -- wp plugin check field-guide-events-calendar --exclude-directories=tests,coverage,bin --ignore-codes=hidden_files"
+    "plugin:check": "wp-env run tests-cli -- wp plugin check field-guide-events-calendar --exclude-directories=tests,coverage,bin --ignore-codes=hidden_files",
+    "typecheck": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +30,7 @@
     "jsdom": "^26.1.0",
     "oxlint": "^1.14.0",
     "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }
 }

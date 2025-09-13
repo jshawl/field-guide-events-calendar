@@ -1,3 +1,4 @@
+/** @type {Tea.CreateAppFn} */
 export const createApp = ({
   init,
   initialModel,
@@ -7,9 +8,10 @@ export const createApp = ({
 }) => {
   const initialModelKeys = Object.keys(initialModel);
   let currentModel = initialModel;
-  let activeSubs = [];
-  const dispatch = (action) => {
-    const [newModel, command] = update(action, currentModel);
+  let activeSubs = /**@type {Tea.Subscription[]}*/ ([]);
+  /** @type {Tea.DispatchFn} */
+  const dispatch = (msg) => {
+    const [newModel, command] = update(msg, currentModel);
     const newModelKeys = Object.keys(newModel);
     const diff = newModelKeys.filter(
       (newModelKey) => !initialModelKeys.includes(newModelKey),
@@ -25,13 +27,16 @@ export const createApp = ({
     refreshSubscriptions(currentModel);
   };
 
+  /**
+   * @param {Tea.Model} model
+   */
   const refreshSubscriptions = (model) => {
     const newSubs = subscriptions(model);
 
     // stop removed subs
     activeSubs
       .filter((old) => !newSubs.some((newer) => newer.key === old.key))
-      .forEach((sub) => sub.stop());
+      .forEach((sub) => sub.stop?.());
 
     // start added subs
     newSubs

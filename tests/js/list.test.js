@@ -242,7 +242,7 @@ describe("list", () => {
         { error: 22, type: "EVENTS_FETCH_ERROR" },
         initialModel,
       );
-      expect(model.error).toBe(22);
+      expect(model.error).toBe(true);
       expect(model.loading).toBe(false);
       expect(model.events.length).toBe(0);
       expect(cmd.name).toBe("NONE");

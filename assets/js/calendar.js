@@ -33,7 +33,7 @@ export const commands = {
         const response = await fetch(url.toString());
         const data = await response.json();
         if (!Array.isArray(data.events)) {
-          throw new Error(JSON.stringify(data));
+          throw new TypeError(JSON.stringify(data));
         }
         dispatch({ events: data.events, type: "EVENTS_FETCHED" });
       } catch (error) {
@@ -150,7 +150,7 @@ export const elements = {
 };
 
 export const view = (model) => {
-  const { error, events, filter, loading, options } = model;
+  const { events, filter, loading, options } = model;
   renderLoading({ loading });
   renderCalendar({ events, filter, loading });
   if (options.filter_campaigns === "true") {

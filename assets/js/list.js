@@ -52,7 +52,7 @@ export const commands = {
         const response = await fetch(url.toString());
         const data = await response.json();
         if (!Array.isArray(data.events)) {
-          throw new Error(JSON.stringify(data));
+          throw new TypeError(JSON.stringify(data));
         }
         const { events, pagination } = data;
         dispatch({

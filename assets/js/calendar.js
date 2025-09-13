@@ -1,8 +1,19 @@
 import { createApp } from "./tea.js";
 
 // MODEL
-
+/**
+ * @typedef {Tea.Model<{
+ *  error: boolean;
+ *  events: Event[];
+ *  filter: string;
+ *  loading: boolean;
+ *  options: {
+ *  };
+ * }>} Model
+ * @type {Model}
+ */
 const initialModel = {
+  error: false,
   events: [],
   filter: "All",
   loading: false,

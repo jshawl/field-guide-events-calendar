@@ -1,18 +1,36 @@
 import { createApp } from "./tea.js";
 
 // MODEL
-
+/**
+ * @typedef {Tea.Model<{
+ *  direction: "Past" | "Future";
+ *  error: boolean;
+ *  events: Event[];
+ *  loading: boolean;
+ *  options: {
+ *   campaign: string;
+ *   org_id: string;
+ *   rest_url: string;
+ *  };
+ *  totalPages: number;
+ * }>} Model
+ * @type {Model}
+ */
 const initialModel = {
   direction: "Future",
   error: false,
   events: [],
   loading: false,
-  options: {},
+  options: {
+    campaign: "",
+    org_id: "",
+    rest_url: "",
+  },
   totalPages: 0,
 };
 
 // INIT
-
+/** @type {Tea.InitFn} */
 export const init = (dispatch) => {
   const el = elements.container();
   if (el instanceof HTMLElement) {
@@ -23,8 +41,27 @@ export const init = (dispatch) => {
 
 // UPDATE
 
+/**
+ *
+ * @param {Date} date
+ * @returns {string}
+ */
 const yyyyMmDd = (date) => date.toISOString().slice(0, 10);
 
+/**
+ * @typedef {Object} Event
+ * @property {string} campaignName
+ * @property {number} id
+ * @property {string} name
+ * @property {string} startDate
+ * @property {string} startTime
+ *
+ * @param {Object} options
+ * @param {string} options.campaign
+ * @param {Event[]} options.events
+ * @param {Model["direction"]} options.direction
+ * @returns
+ */
 const filterAndSortEvents = ({ campaign, events, direction }) => {
   const regex = new RegExp(campaign, "i");
   let filteredEvents = events
@@ -37,14 +74,11 @@ const filterAndSortEvents = ({ campaign, events, direction }) => {
 };
 
 export const commands = {
-  /**
-   *
-   * @param options {Object}
-   * @param options.direction {"Future" | "Past"}
-   * @param options.rest_url {String}
-   * @param [options.totalPages] {number}
-   * @returns
-   */
+  /** @type {Tea.CmdFactory<{
+   *  direction: Model["direction"]
+   *  rest_url: string
+   *  totalPages?: number
+   * }>} */
   fetchEvents: ({ direction, rest_url, totalPages }) => ({
     name: "FETCH_EVENTS",
     run: async (dispatch) => {
@@ -56,7 +90,7 @@ export const commands = {
       if (direction === "Past") {
         now.setDate(now.getDate() - 1);
         url.searchParams.append("end", yyyyMmDd(now));
-        url.searchParams.append("currentPage", `${totalPages - 1}`);
+        url.searchParams.append("currentPage", `${Number(totalPages) - 1}`);
       }
       try {
         const response = await fetch(url.toString());
@@ -67,10 +101,15 @@ export const commands = {
           type: "EVENTS_FETCHED",
         });
       } catch (error) {
-        dispatch({ error: error.message, type: "EVENTS_FETCH_ERROR" });
+        let errorMessage = "Something went wrong.";
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        dispatch({ error: errorMessage, type: "EVENTS_FETCH_ERROR" });
       }
     },
   }),
+  /** @type {Tea.CmdFactory<{rest_url: string}>} */
   getTotalPages: ({ rest_url }) => ({
     name: "GET_TOTAL_PAGES",
     run: async (dispatch) => {
@@ -80,33 +119,41 @@ export const commands = {
       url.searchParams.append("pageSize", "1");
       try {
         const response = await fetch(url.toString());
-        const {
-          pagination: { totalResults },
-        } = await response.json();
+        const data = await response.json();
+        const { pagination } =
+          /** @type {{pagination: {totalResults: number}}} */ (data);
+        const { totalResults } = pagination;
         const MAX_PAGE_SIZE = 200;
         const totalPages = Math.ceil(totalResults / MAX_PAGE_SIZE);
         dispatch({ totalPages, type: "TOTAL_PAGES_FETCHED" });
       } catch (error) {
-        dispatch({ error: error.message, type: "EVENTS_FETCH_ERROR" });
+        let errorMessage = "Something went wrong.";
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        dispatch({ error: errorMessage, type: "EVENTS_FETCH_ERROR" });
       }
     },
   }),
   none: () => ({ name: "NONE", run: () => {} }),
 };
 
+/** @type {Tea.UpdateFn<Model>} */
 // eslint-disable-next-line max-lines-per-function
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      const { rest_url } = msg.options;
+      const { options } = /** @type {Tea.Msg<Pick<Model, 'options'>>} */ (msg);
+      const { rest_url } = options;
       const { direction } = model;
       return [
-        { ...model, loading: true, options: msg.options },
+        { ...model, loading: true, options: { ...options, rest_url } },
         commands.fetchEvents({ direction, rest_url }),
       ];
     }
     case "EVENTS_FETCHED": {
-      const { events, totalPages } = msg;
+      const { events, totalPages } =
+        /** @type {Tea.Msg<{events: Event[], totalPages: number}>} */ (msg);
       const { campaign } = model.options;
       const { direction } = model;
       const filteredEvents = filterAndSortEvents({
@@ -126,10 +173,13 @@ export const update = (msg, model) => {
       ];
     }
     case "EVENTS_FETCH_ERROR": {
-      const { error } = msg;
+      const { error } = /** @type Tea.Msg<{error: Error}> */ (msg);
       // eslint-disable-next-line no-console
       console.error(error);
-      return [{ ...model, error, events: [], loading: false }, commands.none()];
+      return [
+        { ...model, error: true, events: [], loading: false },
+        commands.none(),
+      ];
     }
     case "DIRECTION_CHANGE_PAST": {
       const {
@@ -152,7 +202,7 @@ export const update = (msg, model) => {
       ];
     }
     case "TOTAL_PAGES_FETCHED": {
-      const { totalPages } = msg;
+      const { totalPages } = /** @type {Tea.Msg<{totalPages: number}>} */ (msg);
       const { direction } = model;
       const { rest_url } = model.options;
       return [
@@ -171,14 +221,21 @@ export const update = (msg, model) => {
 };
 
 // SUBSCRIPTIONS
-
+/** @type {Tea.SubscriptionsFn} */
 export const subscriptions = () => [
   {
     key: "directionToggle",
     start(dispatch) {
       const el = elements.container();
+      if (!el) {
+        return;
+      }
+      /** @type EventListener */
       const handler = (event) => {
-        const btn = event.target.closest("[data-direction]");
+        const target = /** @type HTMLElement*/ (event.target);
+        const btn = /** @type HTMLElement */ (
+          target.closest("[data-direction]")
+        );
         if (!btn) {
           return;
         }
@@ -200,9 +257,14 @@ const elements = {
   container: () => document.querySelector(".field_guide_events_list_container"),
 };
 
+/** @type {Tea.ViewFn<Model>} */
 export const view = (model) => {
   const { direction, error, loading } = model;
-  elements.container().innerHTML = `
+  const container = elements.container();
+  if (!container) {
+    return;
+  }
+  container.innerHTML = `
     ${renderHeader({ direction })}
     ${renderError({ error })}
     ${renderEvents(model)}
@@ -210,6 +272,11 @@ export const view = (model) => {
   `;
 };
 
+/**
+ *
+ * @param {Pick<Model, 'direction'>} options
+ * @returns {string}
+ */
 const renderHeader = ({ direction }) => {
   let nextDirection = "Past";
   if (direction === "Past") {
@@ -225,6 +292,11 @@ const renderHeader = ({ direction }) => {
     `;
 };
 
+/**
+ *
+ * @param {Event} event
+ * @returns
+ */
 const formatEventDate = (event) => {
   const startDate = new Date(`${event.startDate}T${event.startTime}`);
   return {
@@ -234,6 +306,10 @@ const formatEventDate = (event) => {
   };
 };
 
+/**
+ *
+ * @param {Model} model
+ */
 const renderEvents = (model) => {
   const { error, events, loading } = model;
   if (!loading && !error && events.length === 0) {
@@ -260,6 +336,11 @@ const renderEvents = (model) => {
     .join("")}</div>`;
 };
 
+/**
+ *
+ * @param {Pick<Model, 'loading'>} options
+ * @returns
+ */
 const renderLoading = ({ loading }) => {
   if (!loading) {
     return "";
@@ -267,6 +348,11 @@ const renderLoading = ({ loading }) => {
   return `<div class="field_guide_events_list_loading"></div>`;
 };
 
+/**
+ *
+ * @param {Pick<Model, 'error'>} options
+ * @returns {string}
+ */
 const renderError = ({ error }) => {
   if (!error) {
     return "";

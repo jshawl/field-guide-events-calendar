@@ -119,7 +119,6 @@ export const update = (msg, model) => {
         events,
         options: model.options,
       });
-      formattedEvents[0].id;
       let { filter } = model;
       if (!getCampaignNames(formattedEvents).includes(filter)) {
         filter = "All";

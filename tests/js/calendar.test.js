@@ -118,6 +118,18 @@ describe("calendar", () => {
       expect(model.loading).toBe(false);
     });
 
+    it("EVENTS_FETCH_ERROR", () => {
+      const consoleError = globalThis.console.error;
+      globalThis.console.error = vi.fn();
+      const [model] = update(
+        { error: new Error("some_error"), type: "EVENTS_FETCH_ERROR" },
+        initialModel,
+      );
+      globalThis.console.error = consoleError;
+      expect(model.error).toStrictEqual(new Error("some_error"));
+      expect(model.loading).toBe(false);
+    });
+
     it("CAMPAIGN_FILTER_CHANGED", () => {
       const [model] = update(
         { filter: "Not All", type: "CAMPAIGN_FILTER_CHANGED" },
@@ -193,7 +205,7 @@ describe("calendar", () => {
         const start = "2020-01-01";
         const end = "2020-01-02";
         const restUrl = "https://example.com";
-        const response = { events: [] };
+        const response = { events: [{}] };
         globalThis.fetch = vi.fn(() =>
           Promise.resolve({
             json: () => response,
@@ -205,6 +217,24 @@ describe("calendar", () => {
           type: "EVENTS_FETCHED",
           ...response,
         });
+      });
+      it("dispatches EVENTS_FETCH_ERROR", async () => {
+        const start = "2020-01-01";
+        const end = "2020-01-02";
+        const restUrl = "https://example.com";
+        const response = { code: "no events" };
+        globalThis.fetch = vi.fn(() =>
+          Promise.resolve({
+            json: () => response,
+          }),
+        );
+        const dispatch = vi.fn();
+        await commands.fetchEvents({ end, restUrl, start }).run(dispatch);
+        expect(dispatch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "EVENTS_FETCH_ERROR",
+          }),
+        );
       });
     });
 

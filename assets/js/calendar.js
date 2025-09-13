@@ -3,6 +3,7 @@ import { createApp } from "./tea.js";
 // MODEL
 
 const initialModel = {
+  error: false,
   events: [],
   filter: "All",
   loading: false,
@@ -28,9 +29,16 @@ export const commands = {
       const url = new URL(`${restUrl}/neon/events`);
       url.searchParams.append("start", start);
       url.searchParams.append("end", end);
-      const response = await fetch(url.toString());
-      const { events } = await response.json();
-      dispatch({ events, type: "EVENTS_FETCHED" });
+      try {
+        const response = await fetch(url.toString());
+        const data = await response.json();
+        if (!Array.isArray(data.events)) {
+          throw new Error(JSON.stringify(data));
+        }
+        dispatch({ events: data.events, type: "EVENTS_FETCHED" });
+      } catch (error) {
+        dispatch({ error: error.message, type: "EVENTS_FETCH_ERROR" });
+      }
     },
   }),
   initCalendar: () => ({
@@ -79,6 +87,13 @@ export const update = (msg, model) => {
         filter = "All";
       }
       return [{ ...model, events, filter, loading: false }, commands.none()];
+    }
+
+    case "EVENTS_FETCH_ERROR": {
+      const { error } = msg;
+      // eslint-disable-next-line no-console
+      console.error(error);
+      return [{ ...model, error, events: [], loading: false }, commands.none()];
     }
 
     case "CAMPAIGN_FILTER_CHANGED": {
@@ -135,7 +150,7 @@ export const elements = {
 };
 
 export const view = (model) => {
-  const { events, filter, loading, options } = model;
+  const { error, events, filter, loading, options } = model;
   renderLoading({ loading });
   renderCalendar({ events, filter, loading });
   if (options.filter_campaigns === "true") {

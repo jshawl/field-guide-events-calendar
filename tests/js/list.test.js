@@ -75,8 +75,12 @@ describe("list", () => {
       });
 
       it("dispatches errors", async () => {
-        const error = new Error("something went wrong");
-        globalThis.fetch = vi.fn(() => Promise.reject(error));
+        const response = { code: "some_error" };
+        globalThis.fetch = vi.fn(() =>
+          Promise.resolve({
+            json: () => response,
+          }),
+        );
         const dispatch = vi.fn();
         const direction = "Past";
         const cmd = commands.fetchEvents({
@@ -86,7 +90,7 @@ describe("list", () => {
         });
         await cmd.run(dispatch);
         expect(dispatch).toHaveBeenCalledWith({
-          error: error.message,
+          error: JSON.stringify(response),
           type: "EVENTS_FETCH_ERROR",
         });
       });
@@ -238,10 +242,13 @@ describe("list", () => {
     });
 
     it("EVENTS_FETCH_ERROR", () => {
+      const consoleError = globalThis.console.error;
+      globalThis.console.error = vi.fn();
       const [model, cmd] = update(
         { error: 22, type: "EVENTS_FETCH_ERROR" },
         initialModel,
       );
+      globalThis.console.error = consoleError;
       expect(model.error).toBe(22);
       expect(model.loading).toBe(false);
       expect(model.events.length).toBe(0);

@@ -200,6 +200,13 @@ export const view = (model) => {
   `;
 };
 
+const renderFetchEventsButton = ({ direction, text = direction }) => `<button
+    class="field_guide_events_list_change_direction btn btn-default btn-sm"
+    data-direction="${direction}"
+  >
+    ${text}
+  </button>`;
+
 const renderHeader = ({ direction }) => {
   let nextDirection = "Past";
   if (direction === "Past") {
@@ -208,9 +215,7 @@ const renderHeader = ({ direction }) => {
   return `
         <div class="field_guide_events_list_header">
             <h2>${direction} Events</h2>
-            <button class="field_guide_events_list_change_direction btn btn-default btn-sm" data-direction="${nextDirection}">
-                ${nextDirection}
-            </button>
+            ${renderFetchEventsButton({ direction: nextDirection })}
         </div>
     `;
 };
@@ -262,11 +267,9 @@ const renderError = ({ direction, error }) => {
     return "";
   }
   return `<div>
-    Something went wrong.
-      <button class="field_guide_events_list_change_direction btn btn-default btn-sm" data-direction="${direction}">
-                Try again
-            </button>
-            </div>`;
+      Something went wrong.
+      ${renderFetchEventsButton({ direction, text: "Try again" })}
+    </div>`;
 };
 
 // MAIN

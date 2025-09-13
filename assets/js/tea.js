@@ -6,10 +6,10 @@ export const createApp = ({
   view,
 } = {}) => {
   if (typeof initialModel !== "object") {
-    throw new Error("[tea] missing required property initialModel");
+    throw new TypeError("[tea] missing required property initialModel");
   }
   if (typeof init !== "function") {
-    throw new Error("[tea] init is not a function");
+    throw new TypeError("[tea] init is not a function");
   }
   const initialModelKeys = Object.keys(initialModel);
   let currentModel = initialModel;

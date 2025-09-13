@@ -8,14 +8,14 @@
   "rules": {
     "no-magic-numbers": ["off"],
     "no-console": ["error"],
-    "max-lines": ["off"]
+    "max-lines": ["off"],
+    "max-lines-per-function": ["off"]
   },
   "overrides": [
     {
       "files": ["tests/**/*.js"],
       "rules": {
-        "no-console": ["off"],
-        "max-lines-per-function": ["off"]
+        "no-console": ["off"]
       }
     }
   ]

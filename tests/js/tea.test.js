@@ -25,7 +25,7 @@ describe("createApp", () => {
     const subscriptions = vi.fn().mockImplementation(() => []);
     const update = vi.fn().mockImplementation(() => [{}, command]);
     const msg = { type: "TESTING" };
-    const init = vi.fn().mockImplementation((d) => d(msg));
+    const init = vi.fn().mockImplementation((dispatch) => dispatch(msg));
     const common = { init, initialModel, subscriptions, update, view };
 
     it("invokes init", () => {

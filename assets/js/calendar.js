@@ -44,11 +44,15 @@ export const init = (dispatch) => {
 // eslint-disable-next-line unicorn/no-null
 let _calendar = /** @type {FullCalendar.Calendar | null} */ (null);
 export const commands = {
-  /** @type {Tea.CmdFactory<{
+  /**
+   *
+   * @param {{
    *  end: string
    *  restUrl: string
    *  start: string
-   * }>} */
+   * }} options
+   * @returns {Tea.Cmd}
+   */
   fetchEvents: ({ end, restUrl, start }) => ({
     name: "FETCH_EVENTS",
     run: async (dispatch) => {
@@ -60,7 +64,10 @@ export const commands = {
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
   }),
-  /** @type {Tea.CmdFactory<unknown>} */
+  /**
+   *
+   * @returns {Tea.Cmd}
+   */
   initCalendar: () => ({
     name: "INIT_CALENDAR",
     run: (dispatch) => {
@@ -72,9 +79,16 @@ export const commands = {
       _calendar.render();
     },
   }),
-  /** @type {Tea.CmdFactory<unknown>} */
+  /**
+   *
+   * @returns {Tea.Cmd}
+   */
   none: () => ({ name: "NONE", run: () => {} }),
-  /** @type {Tea.CmdFactory<{id: number, orgId: string}>} */
+  /**
+   *
+   * @param {{id: number, orgId: string}} options
+   * @returns {Tea.Cmd}
+   */
   onEventClick: ({ id, orgId }) => ({
     name: "ON_EVENT_CLICK",
     run: (_dispatch) => {
@@ -88,13 +102,12 @@ export const commands = {
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      const { options } = /** @type {Tea.Msg<Pick<Model, 'options'>>}*/ (msg);
-      return [{ ...model, options }, commands.initCalendar({})];
+      const { options } = msg;
+      return [{ ...model, options }, commands.initCalendar()];
     }
 
     case "DATES_SET": {
-      const { info } =
-        /** @type {Tea.Msg<{info: {endStr: string; startStr: string}}>}*/ (msg);
+      const { info } = msg;
       const start = info.startStr.slice(0, 10);
       const end = info.endStr.slice(0, 10);
       const restUrl = model.options.rest_url;
@@ -105,7 +118,7 @@ export const update = (msg, model) => {
     }
 
     case "EVENTS_FETCHED": {
-      const { events } = /** @type {Tea.Msg<{events: Neon.Event[]}>}*/ (msg);
+      const { events } = msg;
       const formattedEvents = formatEvents({
         events,
         options: model.options,
@@ -116,17 +129,17 @@ export const update = (msg, model) => {
       }
       return [
         { ...model, events: formattedEvents, filter, loading: false },
-        commands.none({}),
+        commands.none(),
       ];
     }
 
     case "CAMPAIGN_FILTER_CHANGED": {
-      const { filter } = /** @type {Tea.Msg<Pick<Model, 'filter'>>} */ (msg);
-      return [{ ...model, filter }, commands.none({})];
+      const { filter } = msg;
+      return [{ ...model, filter }, commands.none()];
     }
 
     case "ON_EVENT_CLICK": {
-      const { id } = /** @type {Tea.Msg<Pick<Neon.Event, 'id'>>} */ (msg);
+      const { id } = msg;
       return [
         model,
         commands.onEventClick({ id, orgId: model.options.org_id }),
@@ -220,7 +233,7 @@ const renderCalendar = ({ events, filter, loading }) => {
   }
   events
     .filter((event) => ["All", event.campaignName].includes(filter))
-    .map((event) => {
+    .forEach((event) => {
       const { allDay, end, id, start, title } = event;
       calendar?.addEvent({ allDay, end, id, start, title });
     });
@@ -313,7 +326,7 @@ export const formatEvents = ({ events, options }) =>
     const start = new Date(`${startDate}T${startTime}`);
     const end = new Date(`${endDate}T${endTime}`);
     return {
-      allDay: event.startDate != event.endDate,
+      allDay: event.startDate !== event.endDate,
       campaignName: event.campaignName,
       end,
       id: String(id),

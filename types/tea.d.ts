@@ -1,8 +1,6 @@
 declare namespace Tea {
   type Cmd = { name: string; run: (dispatch: DispatchFn) => void };
 
-  type CmdFactory<T> = (options: T) => Cmd;
-
   type CreateAppFn = <T extends Options>({
     init,
     initialModel,
@@ -23,7 +21,7 @@ declare namespace Tea {
 
   type Model<T extends Options = Options> = T;
 
-  type Msg<T = Options> = { type: string } & T;
+  type Msg<T = any> = { type: string } & T;
 
   type Options = Record<string, unknown>;
 

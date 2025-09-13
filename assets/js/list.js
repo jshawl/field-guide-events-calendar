@@ -68,11 +68,15 @@ const filterAndSortEvents = ({ campaign, events, direction }) => {
 };
 
 export const commands = {
-  /** @type {Tea.CmdFactory<{
+  /**
+   *
+   * @param {{
    *  direction: Model["direction"]
    *  rest_url: string
    *  totalPages?: number
-   * }>} */
+   * }} options
+   * @returns {Tea.Cmd}
+   */
   fetchEvents: ({ direction, rest_url, totalPages }) => ({
     name: "FETCH_EVENTS",
     run: async (dispatch) => {
@@ -103,7 +107,11 @@ export const commands = {
       }
     },
   }),
-  /** @type {Tea.CmdFactory<{rest_url: string}>} */
+  /**
+   *
+   * @param {{rest_url: string}} options
+   * @returns {Tea.Cmd}
+   */
   getTotalPages: ({ rest_url }) => ({
     name: "GET_TOTAL_PAGES",
     run: async (dispatch) => {
@@ -136,7 +144,7 @@ export const commands = {
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      const { options } = /** @type {Tea.Msg<Pick<Model, 'options'>>} */ (msg);
+      const { options } = msg;
       const { rest_url } = options;
       const { direction } = model;
       return [
@@ -145,10 +153,7 @@ export const update = (msg, model) => {
       ];
     }
     case "EVENTS_FETCHED": {
-      const { events, totalPages } =
-        /** @type {Tea.Msg<{events: Neon.Event[], totalPages: number}>} */ (
-          msg
-        );
+      const { events, totalPages } = msg;
       const { campaign } = model.options;
       const { direction } = model;
       const filteredEvents = filterAndSortEvents({
@@ -168,7 +173,7 @@ export const update = (msg, model) => {
       ];
     }
     case "EVENTS_FETCH_ERROR": {
-      const { error } = /** @type Tea.Msg<{error: Error}> */ (msg);
+      const { error } = msg;
       // eslint-disable-next-line no-console
       console.error(error);
       return [
@@ -197,7 +202,7 @@ export const update = (msg, model) => {
       ];
     }
     case "TOTAL_PAGES_FETCHED": {
-      const { totalPages } = /** @type {Tea.Msg<{totalPages: number}>} */ (msg);
+      const { totalPages } = msg;
       const { direction } = model;
       const { rest_url } = model.options;
       return [

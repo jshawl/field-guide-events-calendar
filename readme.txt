@@ -15,6 +15,8 @@ A plugin to display a filterable calendar of events with initial support for Neo
 
 Add a short code to any page or post to display a calendar of upcoming events:
 
+= Event Calendar =
+
 `[field_guide_events_calendar]`
 
 Additional attributes are available:
@@ -22,6 +24,18 @@ Additional attributes are available:
   - filters events by campaign name
 - `multi_day_events="false"`
   - uses the start date only for dates that span multiple days
+
+= Event List =
+
+`[field_guide_events_list]`
+
+Additional attributes are available:
+- `campaign="campaign name here"`
+  - filters events by campaign name
+  - accepts a regular expression, e.g. `campaign="field trips(.*)"` will
+    match "Field Trips - Free" and "Field Trips - Paid"
+  - match is case insensitive
+
 
 == Installation ==
 

@@ -2,12 +2,25 @@ import { createApp } from "./tea.js";
 
 // MODEL
 /**
+ * @typedef {Object} Event
+ * @property {string} campaignName
+ * @property {number} id
+ * @property {string} name
+ * @property {string} startDate
+ * @property {string} startTime
+ * @property {string} endDate
+ * @property {string} endTime
+ *
  * @typedef {Tea.Model<{
  *  error: boolean;
  *  events: Event[];
  *  filter: string;
  *  loading: boolean;
  *  options: {
+ *    filter_campaigns: "true" | "false";
+ *    multi_day_events: "true" | "false";
+ *    org_id: string;
+ *    rest_url: string;
  *  };
  * }>} Model
  * @type {Model}
@@ -17,11 +30,16 @@ const initialModel = {
   events: [],
   filter: "All",
   loading: false,
-  options: {},
+  options: {
+    filter_campaigns: "false",
+    multi_day_events: "true",
+    org_id: "",
+    rest_url: "",
+  },
 };
 
 // INIT
-
+/** @type {Tea.InitFn} */
 export const init = (dispatch) => {
   const el = elements.container();
   if (el instanceof HTMLElement) {
@@ -33,8 +51,13 @@ export const init = (dispatch) => {
 // UPDATE
 
 // eslint-disable-next-line unicorn/no-null
-let _calendar = null;
+let _calendar = /** @type {FullCalendar.Calendar | null} */ (null);
 export const commands = {
+  /** @type {Tea.CmdFactory<{
+   *  end: string
+   *  restUrl: string
+   *  start: string
+   * }>} */
   fetchEvents: ({ end, restUrl, start }) => ({
     name: "FETCH_EVENTS",
     run: async (dispatch) => {
@@ -46,17 +69,21 @@ export const commands = {
       dispatch({ events, type: "EVENTS_FETCHED" });
     },
   }),
+  /** @type {Tea.CmdFactory<unknown>} */
   initCalendar: () => ({
     name: "INIT_CALENDAR",
     run: (dispatch) => {
-      _calendar = new FullCalendar.Calendar(
-        elements.calendar(),
-        getCalendarOptions(dispatch),
-      );
+      const el = elements.calendar();
+      if (!el) {
+        return;
+      }
+      _calendar = new FullCalendar.Calendar(el, getCalendarOptions(dispatch));
       _calendar.render();
     },
   }),
-  none: () => ({ run: () => {} }),
+  /** @type {Tea.CmdFactory<unknown>} */
+  none: () => ({ name: "NONE", run: () => {} }),
+  /** @type {Tea.CmdFactory<{id: number, orgId: string}>} */
   onEventClick: ({ id, orgId }) => ({
     name: "ON_EVENT_CLICK",
     run: (_dispatch) => {
@@ -66,15 +93,19 @@ export const commands = {
   }),
 };
 
+/** @type {Tea.UpdateFn<Model>} */
 export const update = (msg, model) => {
   switch (msg.type) {
     case "INIT": {
-      return [{ ...model, options: msg.options }, commands.initCalendar()];
+      const { options } = /** @type {Tea.Msg<Pick<Model, 'options'>>}*/ (msg);
+      return [{ ...model, options }, commands.initCalendar({})];
     }
 
     case "DATES_SET": {
-      const start = msg.info.startStr.slice(0, 10);
-      const end = msg.info.endStr.slice(0, 10);
+      const { info } =
+        /** @type {Tea.Msg<{info: {endStr: string; startStr: string}}>}*/ (msg);
+      const start = info.startStr.slice(0, 10);
+      const end = info.endStr.slice(0, 10);
       const restUrl = model.options.rest_url;
       return [
         { ...model, loading: true },
@@ -83,26 +114,33 @@ export const update = (msg, model) => {
     }
 
     case "EVENTS_FETCHED": {
-      const events = formatEvents({
-        events: msg.events,
+      const { events } = /** @type {Tea.Msg<Pick<Model, 'events'>>}*/ (msg);
+      const formattedEvents = formatEvents({
+        events,
         options: model.options,
       });
+      formattedEvents[0].id;
       let { filter } = model;
-      if (!getCampaignNames(events).includes(filter)) {
+      const fes = formattedEvents;
+      if (!getCampaignNames(formattedEvents).includes(filter)) {
         filter = "All";
       }
-      return [{ ...model, events, filter, loading: false }, commands.none()];
+      return [
+        { ...model, events: formattedEvents, filter, loading: false },
+        commands.none({}),
+      ];
     }
 
     case "CAMPAIGN_FILTER_CHANGED": {
-      const { filter } = msg;
-      return [{ ...model, filter }, commands.none()];
+      const { filter } = /** @type {Tea.Msg<Pick<Model, 'filter'>>} */ (msg);
+      return [{ ...model, filter }, commands.none({})];
     }
 
     case "ON_EVENT_CLICK": {
+      const { id } = /** @type {Tea.Msg<Pick<Event, 'id'>>} */ (msg);
       return [
         model,
-        commands.onEventClick({ id: msg.id, orgId: model.options.org_id }),
+        commands.onEventClick({ id, orgId: model.options.org_id }),
       ];
     }
 
@@ -113,19 +151,25 @@ export const update = (msg, model) => {
 };
 
 // SUBSCRIPTIONS
-
+/** @type {Tea.SubscriptionsFn} */
 export const subscriptions = () => [
   {
     key: "addCampaignEventListeners",
     start(dispatch) {
       const el = elements.container();
+      if (!el) {
+        return;
+      }
+      /** @type EventListener */
       const handler = (event) => {
-        const btn = event.target.closest("[type='radio']");
+        const target = /** @type HTMLInputElement*/ (event.target);
+
+        const btn = /** @type HTMLElement */ (target.closest("[type='radio']"));
         if (!btn) {
           return;
         }
         dispatch({
-          filter: event.target.value,
+          filter: target.value,
           type: "CAMPAIGN_FILTER_CHANGED",
         });
       };
@@ -147,6 +191,7 @@ export const elements = {
   loading: () => document.querySelector(".field_guide_events_calendar_loading"),
 };
 
+/** @type {Tea.ViewFn<Model>} */
 export const view = (model) => {
   const { events, filter, loading, options } = model;
   renderLoading({ loading });
@@ -156,6 +201,11 @@ export const view = (model) => {
   }
 };
 
+/**
+ *
+ * @param {Pick<Model, 'loading'>} options
+ * @returns
+ */
 const renderLoading = ({ loading }) => {
   const loadingEl = elements.loading();
   if (!(loadingEl instanceof HTMLElement)) {
@@ -168,6 +218,11 @@ const renderLoading = ({ loading }) => {
   }
 };
 
+/**
+ *
+ * @param {Pick<Model, 'loading' | 'events' | 'filter'>} options
+ * @returns
+ */
 const renderCalendar = ({ events, filter, loading }) => {
   const calendar = getCalendar();
   calendar?.removeAllEvents();
@@ -184,9 +239,17 @@ const renderCalendar = ({ events, filter, loading }) => {
     );
 };
 
+/**
+ *
+ * @param {Pick<Model, 'events' | 'filter'>} options
+ * @returns
+ */
 const renderCampaignFilters = ({ events, filter }) => {
   const campaignNames = getCampaignNames(events);
   const container = elements.campaigns();
+  if (!container) {
+    return;
+  }
   container.innerHTML = "";
   campaignNames.forEach((campaignName) => {
     const div = document.createElement("div");
@@ -205,11 +268,23 @@ const renderCampaignFilters = ({ events, filter }) => {
 };
 
 const getCalendar = () => _calendar;
+/**
+ * @param {Tea.DispatchFn} dispatch
+ */
 const getCalendarOptions = (dispatch) => ({
+  /**
+   *
+   * @param {unknown} info
+   */
   datesSet: (info) => {
     dispatch({ info, type: "DATES_SET" });
   },
   eventClassNames: ["field_guide_events_calendar_event"],
+  /**
+   *
+   * @param {{event: Event}} info
+   * @returns
+   */
   eventClick: (info) => dispatch({ id: info.event.id, type: "ON_EVENT_CLICK" }),
   headerToolbar: {
     left: "title",
@@ -219,6 +294,11 @@ const getCalendarOptions = (dispatch) => ({
   initialView: "dayGridMonth",
 });
 
+/**
+ *
+ * @param {Event[]} events
+ * @returns
+ */
 export const getCampaignNames = (events) => [
   "All",
   ...Object.keys(
@@ -227,13 +307,18 @@ export const getCampaignNames = (events) => [
         camps[ev.campaignName] = true;
       }
       return camps; // 🏕️
-    }, {}),
+    }, /** @type {Record<string, boolean>} */ ({})),
   ).sort(),
 ];
 
+/**
+ * formatEvents
+ * @param {Pick<Model,'events' | 'options'>} options
+ * @returns {Event[]}
+ */
 export const formatEvents = ({ events, options }) =>
   events.map((event) => {
-    const { endTime, startDate, startTime } = event;
+    const { endTime, id, name, startDate, startTime } = event;
     let { endDate } = event;
     if (options.multi_day_events === "false") {
       endDate = startDate;
@@ -244,8 +329,11 @@ export const formatEvents = ({ events, options }) =>
       campaignName: event.campaignName,
       end,
       endDate,
-      id: event.id,
+      endTime,
+      id,
+      name,
       start,
+      startTime: event.startTime,
       startDate,
       title: event.name,
     };

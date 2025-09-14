@@ -50,7 +50,11 @@ export const commands = {
       }
       try {
         const response = await fetch(url.toString());
-        const { events, pagination } = await response.json();
+        const data = await response.json();
+        if (!Array.isArray(data.events)) {
+          throw new TypeError(JSON.stringify(data));
+        }
+        const { events, pagination } = data;
         dispatch({
           events,
           totalPages: pagination.totalPages,

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Field Guide Events Calendar
 Description: Plugin to display a calendar of events from Neon CRM.
-Version: 1.3.0
+Version: 1.4.0
 Author: Jesse Shawl
 Author URI: https://jesse.sh/
 License: GPLv2 or later

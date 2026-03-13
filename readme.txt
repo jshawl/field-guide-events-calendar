@@ -1,7 +1,7 @@
 === Field Guide Events Calendar ===
 Contributors: jshawl
-Stable tag: 1.4.0
-Tested up to: 6.8
+Stable tag: 1.5.0
+Tested up to: 6.9.4
 Requires at least: 6.0
 License: GPLv2 or later
 
@@ -30,12 +30,15 @@ Additional attributes are available:
 `[field_guide_events_list]`
 
 Additional attributes are available:
-- `campaign="campaign name here"`
+- `campaignName="campaign name here"`
   - filters events by campaign name
-  - accepts a regular expression, e.g. `campaign="field trips(.*)"` will
+  - accepts a regular expression, e.g. `campaignName="field trips(.*)"` will
     match "Field Trips - Free" and "Field Trips - Paid"
   - match is case insensitive
-
+- `name="match event name here"`
+  - filters events by names matching the value
+- Any property of an event from https://developer.neoncrm.com/api-v2/#/Events/listUsingGET_2
+  - e.g. `description="partial description to match"`
 
 == Installation ==
 
@@ -51,6 +54,10 @@ and an api key to authenticate with the API. This service is provided by "Neon C
 [privacy policy](https://neonone.com/privacypolicy/)
 
 == Changelog ==
+
+= [1.5.0] 2026-03-12 =
+
+* Add ability to filter by any event attribute. See https://developer.neoncrm.com/api-v2/#/Events/listUsingGET_2 for a list of available properties.
 
 = [1.4.0] 2025-09-14 =
 

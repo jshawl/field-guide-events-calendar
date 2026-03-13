@@ -25,7 +25,7 @@ describe("list", () => {
       direction: "Future",
       events: [{}],
       options: {
-        campaign: "family fun",
+        campaignName: "family fun",
         rest_url: "https://example.com",
       },
     };

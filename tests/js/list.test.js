@@ -175,32 +175,30 @@ describe("list", () => {
       const events = [
         {
           campaignName: "family fun",
+          name: "golfing",
           startDate: "2025-02-01",
         },
         {
           campaignName: "family fun",
+          name: "fishing",
           startDate: "2025-01-01",
         },
         {
           campaignName: "not fun",
+          name: "chores",
+          startDate: "2025-03-01",
         },
       ];
 
-      it("filters campaign names and sorts ", () => {
+      it.each([
+        ["campaignName", "family fun"],
+        ["name", "ing"],
+      ])("filters campaign names and sorts ", (attribute, value) => {
         const [model] = update(
           { events, type: "EVENTS_FETCHED" },
-          initialModel,
+          { ...initialModel, options: { [attribute]: value } },
         );
-        expect(model.events).toStrictEqual([
-          {
-            campaignName: "family fun",
-            startDate: "2025-01-01",
-          },
-          {
-            campaignName: "family fun",
-            startDate: "2025-02-01",
-          },
-        ]);
+        expect(model.events).toStrictEqual(events.slice(0, 2).reverse());
         expect(model.loading).toBe(false);
         const [pastModel] = update(
           {

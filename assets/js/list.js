@@ -23,10 +23,26 @@ export const init = (dispatch) => {
 
 const yyyyMmDd = (date) => date.toISOString().slice(0, 10);
 
-const filterAndSortEvents = ({ campaign, events, direction }) => {
-  const regex = new RegExp(campaign, "i");
+const getRegexFilters = (filters) =>
+  Object.entries(filters).map(([attribute, value]) => {
+    // support older integrations that used campaign instead of campaignName
+    if (attribute === "campaign") {
+      attribute = "campaignName";
+    }
+    return [attribute, new RegExp(value, "i")];
+  });
+
+const filterAndSortEvents = ({ events, direction, filters }) => {
+  const regexFilters = getRegexFilters(filters);
   let filteredEvents = events
-    .filter(({ campaignName }) => regex.test(campaignName))
+    .filter((event) =>
+      regexFilters.every(([attribute, regex]) => {
+        if (attribute in event) {
+          return regex.test(event[attribute]);
+        }
+        return true;
+      }),
+    )
     .sort((eventA, eventB) => eventA.startDate.localeCompare(eventB.startDate));
   if (direction === "Past") {
     filteredEvents = filteredEvents.reverse();
@@ -101,12 +117,12 @@ export const update = (msg, model) => {
     }
     case "EVENTS_FETCHED": {
       const { events, totalPages } = msg;
-      const { campaign } = model.options;
+      const filters = model.options;
       const { direction } = model;
       const filteredEvents = filterAndSortEvents({
-        campaign,
         direction,
         events,
+        filters,
       });
       return [
         {

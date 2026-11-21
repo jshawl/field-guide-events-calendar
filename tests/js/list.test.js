@@ -10,6 +10,24 @@ import {
   view,
 } from "../../assets/js/list";
 
+const mockEvents = [
+  {
+    campaignName: "family fun",
+    name: "golfing",
+    startDate: "2025-02-01",
+  },
+  {
+    campaignName: "family fun",
+    name: "fishing",
+    startDate: "2025-01-01",
+  },
+  {
+    campaignName: "not fun",
+    name: "chores",
+    startDate: "2025-03-01",
+  },
+];
+
 describe("list", () => {
   let initialModel = {};
   beforeEach(() => {
@@ -172,37 +190,19 @@ describe("list", () => {
     });
 
     describe("EVENTS_FETCHED", () => {
-      const events = [
-        {
-          campaignName: "family fun",
-          name: "golfing",
-          startDate: "2025-02-01",
-        },
-        {
-          campaignName: "family fun",
-          name: "fishing",
-          startDate: "2025-01-01",
-        },
-        {
-          campaignName: "not fun",
-          name: "chores",
-          startDate: "2025-03-01",
-        },
-      ];
-
       it.each([
         ["campaignName", "family fun"],
         ["name", "ing"],
       ])("filters campaign names and sorts ", (attribute, value) => {
         const [model] = update(
-          { events, type: "EVENTS_FETCHED" },
+          { events: mockEvents, type: "EVENTS_FETCHED" },
           { ...initialModel, options: { [attribute]: value } },
         );
-        expect(model.events).toStrictEqual(events.slice(0, 2).reverse());
+        expect(model.events).toStrictEqual(mockEvents.slice(0, 2).reverse());
         expect(model.loading).toBe(false);
         const [pastModel] = update(
           {
-            events,
+            events: mockEvents,
             type: "EVENTS_FETCHED",
           },
           { ...initialModel, direction: "Past" },
@@ -293,5 +293,28 @@ describe("list", () => {
       view({ ...initialModel, error: false, events: [], loading: true });
       expect(document.body.innerHTML).toContain("loading");
     });
+
+    // This has to be implemented client-side because the API returns events
+    // unsorted. https://developer.neoncrm.com/api-v2/#/Events/listUsingGET_2
+    it("limits the number of events displayed", () => {
+      view({ ...initialModel, error: false, events: mockEvents, loading: false, options: {limit: 2} });
+      expect(document.querySelectorAll(".field_guide_events_list_event").length).toBe(2);
+    });
+
+    it("validates the limit option", () => {
+      const options = { ...initialModel, error: false, events: mockEvents, loading: false };
+
+      view({ ...options, options: {limit: undefined} });
+      expect(document.querySelectorAll(".field_guide_events_list_event").length).toBe(3)
+
+      view({ ...options, options: {limit: "4"} });
+      expect(document.querySelectorAll(".field_guide_events_list_event").length).toBe(3);
+
+      view({ ...options, options: {limit: "abc"} });
+      expect(document.querySelectorAll(".field_guide_events_list_event").length).toBe(3);
+
+      view({ ...options, options: {limit: -1} });
+      expect(document.querySelectorAll(".field_guide_events_list_event").length).toBe(3);
+    })
   });
 });

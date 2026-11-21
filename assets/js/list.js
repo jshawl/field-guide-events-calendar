@@ -13,6 +13,8 @@ const initialModel = {
 
 // INIT
 
+const MAX_PAGE_SIZE = 200;
+
 export const init = (dispatch) => {
   const el = elements.container();
   const options = { ...el.dataset };
@@ -93,7 +95,6 @@ export const commands = {
         const {
           pagination: { totalResults },
         } = await response.json();
-        const MAX_PAGE_SIZE = 200;
         const totalPages = Math.ceil(totalResults / MAX_PAGE_SIZE);
         dispatch({ totalPages, type: "TOTAL_PAGES_FETCHED" });
       } catch (error) {
@@ -249,12 +250,21 @@ const formatEventDate = (event) => {
   };
 };
 
+const parseLimit = (number) => {
+  const limit = parseInt(number, 10);
+  if(Number.isNaN(limit) || limit < 1) {
+    console.warn("field_guide_events_list shortcode's limit attribute must be a positive integer.");
+    return MAX_PAGE_SIZE;
+  }
+  return limit;
+}
+
 const renderEvents = (model) => {
   const { error, events, loading } = model;
   if (!loading && !error && events.length === 0) {
     return `<div>No events found.</div>`;
   }
-  return `<div>${events
+  return `<div>${events.slice(0, parseLimit(model.options.limit))
     .map((event) => {
       const { day, month, year } = formatEventDate(event);
       const orgId = model.options.org_id;

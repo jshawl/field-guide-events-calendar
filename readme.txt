@@ -1,7 +1,7 @@
 === Field Guide Events Calendar ===
 Contributors: jshawl
-Stable tag: 1.5.0
-Tested up to: 6.9.4
+Stable tag: 1.6.0
+Tested up to: 7.1.5
 Requires at least: 6.0
 License: GPLv2 or later
 
@@ -37,6 +37,8 @@ Additional attributes are available:
   - match is case insensitive
 - `name="match event name here"`
   - filters events by names matching the value
+- `limit="10"`
+  - limits the number of events displayed in the list
 - Any property of an event from https://developer.neoncrm.com/api-v2/#/Events/listUsingGET_2
   - e.g. `description="partial description to match"`
 
@@ -54,6 +56,10 @@ and an api key to authenticate with the API. This service is provided by "Neon C
 [privacy policy](https://neonone.com/privacypolicy/)
 
 == Changelog ==
+
+= [1.6.0] 2026-11-21 =
+
+* Add `limit` attribute to `[field_guide_events_list]` shortcode.
 
 = [1.5.0] 2026-03-12 =
 

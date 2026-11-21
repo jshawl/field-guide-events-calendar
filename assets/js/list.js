@@ -253,7 +253,6 @@ const formatEventDate = (event) => {
 const parseLimit = (number) => {
   const limit = parseInt(number, 10);
   if(Number.isNaN(limit) || limit < 1) {
-    console.warn("field_guide_events_list shortcode's limit attribute must be a positive integer.");
     return MAX_PAGE_SIZE;
   }
   return limit;
